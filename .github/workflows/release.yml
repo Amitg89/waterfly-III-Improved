@@ -116,17 +116,17 @@ jobs:
 
     steps:
       - name: Download arm64-v8a APK
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: app-arm64-v8a-release.apk
           path: ./artifacts
       - name: Download armeabi-v7a APK
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: app-armeabi-v7a-release.apk
           path: ./artifacts
       - name: Download x86_64 APK
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: app-x86_64-release.apk
           path: ./artifacts
@@ -146,17 +146,17 @@ jobs:
 
     steps:
       - name: Download App Bundle
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: app-release.aab
           path: ./artifacts
       - name: Download AAB debug symbols
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: aab-debug-symbols.zip
           path: ./artifacts
       - name: Download Proguard mapping
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: mapping.txt
           path: ./artifacts
