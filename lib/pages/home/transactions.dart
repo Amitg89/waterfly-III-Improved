@@ -250,11 +250,14 @@ class _HomeTransactionsState extends State<HomeTransactions>
           page: pageKey,
           limit: _numberOfPostsPerRequest,
           type: TransactionTypeFilter.all,
+          start:
+              context.read<SettingsProvider>().showFutureTXs
+                  ? null
+                  : DateFormat('yyyy-MM-dd', 'en_US').format(startDate),
           end:
               context.read<SettingsProvider>().showFutureTXs
                   ? null
                   : DateFormat('yyyy-MM-dd', 'en_US').format(now),
-          start: DateFormat('yyyy-MM-dd', 'en_US').format(startDate),
         );
       } else if (_filters.hasFilters) {
         String query = _filters.text ?? "";
