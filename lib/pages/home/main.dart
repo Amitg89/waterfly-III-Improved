@@ -148,6 +148,7 @@ class _HomeMainState extends State<HomeMain>
             'en_US',
           ).format(now.copyWith(month: now.month - 3)),
           end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+          period: V1ChartAccountOverviewGetPeriod.value_1d,
         );
     apiThrowErrorIfEmpty(respChartData, mounted ? context : null);
 
