@@ -1,5 +1,5 @@
 {
-  "@@locale": "pt",
+    "@@locale": "pt",
     "@@x-reference": true,
     "accountRoleAssetCashWallet": "Carteira de dinheiro",
     "@accountRoleAssetCashWallet": {
@@ -59,8 +59,16 @@
     "@billsChangeSortOrderTooltip": {
         "description": "Text for sort order change button tooltip"
     },
+    "formButtonRemove": "Excluir",
+    "@formButtonRemove": {
+        "description": "Button Label: Remove"
+    },
     "generalLiabilities": "Passivos",
     "@generalLiabilities": {
         "description": "Firefly Translation String: liabilities"
+    },
+    "generalReset": "Limpar",
+    "@generalReset": {
+        "description": "Reset something (i.e. set filters)"
     }
 }

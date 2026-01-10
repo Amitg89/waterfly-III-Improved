@@ -88,6 +88,7 @@ class _SummaryChartPopupState extends State<SummaryChartPopup> {
             'yyyy-MM-dd',
           ).format(now.copyWith(month: now.month - 36)),
           end: DateFormat('yyyy-MM-dd').format(now),
+          period: V1ChartAccountOverviewGetPeriod.value_1d,
         );
     apiThrowErrorIfEmpty(respChartData, mounted ? context : null);
 

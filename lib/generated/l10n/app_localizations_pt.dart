@@ -290,7 +290,7 @@ class SPt extends S {
   String get formButtonLogout => 'Logout';
 
   @override
-  String get formButtonRemove => 'Remove';
+  String get formButtonRemove => 'Excluir';
 
   @override
   String get formButtonResetLogin => 'Reset login';
@@ -379,7 +379,7 @@ class SPt extends S {
   String get generalReconcile => 'Reconciled';
 
   @override
-  String get generalReset => 'Reset';
+  String get generalReset => 'Limpar';
 
   @override
   String get generalSourceAccount => 'Source Account';

@@ -50,7 +50,7 @@ class NotificationListenerStatus {
 }
 
 final RegExp rFindMoney = RegExp(
-  r'(?:^|\s)(?<preCurrency>(?:[^\r\n\t\f\v 0-9]){0,3})\s*(?<amount>\d[.,\s\d]+(?:[.,]\d+)?)\s*(?<postCurrency>(?:[^\r\n\t\f\v 0-9]){0,3})(?:$|\s|\.|,)',
+  r'(?:^|[^\w])(?<preCurrency>(?:[^\r\n\t\f\v 0-9]){0,3})\s*(?<amount>\d[.,\s\d]+(?:[.,]\d+)?)\s*(?<postCurrency>(?:[^\r\n\t\f\v 0-9]){0,3})(?:$|\s|\.|,)',
 );
 
 Future<NotificationListenerStatus> nlStatus() async {
@@ -148,7 +148,7 @@ void nlCallback() {
         }
 
         // Check currency
-        if (currency != localCurrency) {
+        if (currency?.id != localCurrency.id) {
           throw Exception("Can't auto-add TX with foreign currency");
         }
 
@@ -287,6 +287,9 @@ Future<(CurrencyRead?, double)> parseNotificationText(
   if (matches.isNotEmpty) {
     final List<CurrencyRead> currencies =
         (await api.v1CurrenciesGet()).body!.data;
+    currencies.removeWhere(
+      (CurrencyRead currency) => currency.attributes.enabled != true,
+    );
     currencies.add(localCurrency);
 
     int bestMatchIndex = -1;
