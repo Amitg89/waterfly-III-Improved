@@ -1,0 +1,5 @@
+- Improved: Notification listener parsing
+- Improved: TX type can be changed
+- Fix: Chart Display for new Firefly versions
+- Dependency updates
+- Translation updates
