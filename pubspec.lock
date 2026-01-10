@@ -182,10 +182,10 @@ packages:
     dependency: transitive
     description:
       name: code_builder
-      sha256: "11654819532ba94c34de52ff5feb52bd81cba1de00ef2ed622fd50295f9d4243"
+      sha256: "6a6cab2ba4680d6423f34a9b972a4c9a94ebe1b62ecec4e1a1f2cba91fd1319d"
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.0"
+    version: "4.11.1"
   collection:
     dependency: "direct main"
     description:
@@ -286,10 +286,10 @@ packages:
     dependency: transitive
     description:
       name: equatable
-      sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
+      sha256: "3e0141505477fd8ad55d6eb4e7776d3fe8430be8e497ccb1521370c3f21a3e2b"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.7"
+    version: "2.0.8"
   fake_async:
     dependency: transitive
     description:
@@ -302,10 +302,10 @@ packages:
     dependency: transitive
     description:
       name: ffi
-      sha256: "289279317b4b16eb2bb7e271abccd4bf84ec9bdcbe999e278a94b804f5630418"
+      sha256: d07d37192dbf97461359c1518788f203b0c9102cfd2c35a716b823741219542c
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   file:
     dependency: transitive
     description:
@@ -1289,18 +1289,18 @@ packages:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_charts
-      sha256: "37d6803e01761ebc8e25d9c993ca0b59e00b53eebae45a77163cf54e96c6a3d1"
+      sha256: "2a0bf92a9d582b18fcdfaa794a130f83b596ffcb3efc758ee96191e7f91373b7"
       url: "https://pub.dev"
     source: hosted
-    version: "32.1.21"
+    version: "32.1.22"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "511d5740fe5321d38492d970a69042e7eb18ae8153c4a663da538a772c3d724e"
+      sha256: "7363e3a7489c71874c624945d8dcbbe1e2486bb7bce7ee5b7693f14c00581f52"
       url: "https://pub.dev"
     source: hosted
-    version: "32.1.21"
+    version: "32.1.22"
   term_glyph:
     dependency: transitive
     description:
@@ -1473,10 +1473,10 @@ packages:
     dependency: transitive
     description:
       name: watcher
-      sha256: f52385d4f73589977c80797e60fe51014f7f2b957b5e9a62c3f6ada439889249
+      sha256: "1398c9f081a753f9226febe8900fce8f7d0a67163334e1c94a2438339d79d635"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   weak_map:
     dependency: transitive
     description:
