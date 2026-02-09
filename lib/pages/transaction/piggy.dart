@@ -97,7 +97,7 @@ class _PiggyDialogState extends State<PiggyDialog> {
                   .v1AutocompletePiggyBanksGet(query: textEditingValue.text);
               apiThrowErrorIfEmpty(response, mounted ? context : null);
 
-              return response.body!;
+              return response.body ?? const <AutocompletePiggy>[];
             } catch (e, stackTrace) {
               log.severe(
                 "Error while fetching autocomplete from API",

@@ -144,16 +144,16 @@ class _BillsPageState extends State<BillsPage>
         );
       case BillsSort.frequency:
         billList.sort(
-          (BillRead a, BillRead b) =>
-              _billsSortOrder == SortingOrder.ascending
-                  ? Enum.compareByIndex(
-                    a.attributes.repeatFreq!,
-                    b.attributes.repeatFreq!,
-                  )
-                  : Enum.compareByIndex(
-                    b.attributes.repeatFreq!,
-                    a.attributes.repeatFreq!,
-                  ),
+          (BillRead a, BillRead b) {
+            final BillRepeatFrequency? fa = a.attributes.repeatFreq;
+            final BillRepeatFrequency? fb = b.attributes.repeatFreq;
+            if (fa == null && fb == null) return 0;
+            if (fa == null) return 1;
+            if (fb == null) return -1;
+            return _billsSortOrder == SortingOrder.ascending
+                ? Enum.compareByIndex(fa, fb)
+                : Enum.compareByIndex(fb, fa);
+          },
         );
     }
 

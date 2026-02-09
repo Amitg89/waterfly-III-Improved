@@ -51,6 +51,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
   late TimeZoneHandler _tzHandler;
 
   TransactionSum _txSum = TransactionSum();
+  TransactionSum? _rangeTotals;
 
   final TransactionFilters _filters = TransactionFilters();
   final ValueNotifier<bool> _tagsHidden = ValueNotifier<bool>(false);
@@ -61,6 +62,121 @@ class _HomeTransactionsState extends State<HomeTransactions>
   bool _isRevenueOrExpense(ShortAccountTypeProperty? type) {
     return type == ShortAccountTypeProperty.revenue ||
         type == ShortAccountTypeProperty.expense;
+  }
+
+  /// Returns (startDate, endDate) for the current transaction date filter.
+  /// Shared by _fetchPage and _fetchRangeTotals.
+  (DateTime, DateTime) _getTransactionDateRange() {
+    final DateTime now = _tzHandler.sNow().clearTime();
+    final SettingsProvider settings = context.read<SettingsProvider>();
+    late DateTime startDate;
+    late DateTime endDate;
+    switch (settings.transactionDateFilter) {
+      case TransactionDateFilter.currentMonth:
+        startDate = now.copyWith(day: 1);
+        endDate = now;
+        break;
+      case TransactionDateFilter.currentYear:
+        startDate = now.copyWith(month: 1, day: 1);
+        endDate = now;
+        break;
+      case TransactionDateFilter.last30Days:
+        startDate = now.subtract(const Duration(days: 30));
+        endDate = now;
+        break;
+      case TransactionDateFilter.lastYear:
+        startDate = now.copyWith(year: now.year - 1);
+        endDate = now;
+        break;
+      case TransactionDateFilter.custom:
+        startDate = settings.transactionDateRangeStart ??
+            now.subtract(const Duration(days: 30));
+        endDate = settings.transactionDateRangeEnd ?? now;
+        break;
+      case TransactionDateFilter.all:
+        startDate = DateTime.fromMillisecondsSinceEpoch(
+          365 * 24 * 60 * 60 * 1000,
+        );
+        endDate = now;
+        break;
+    }
+    return (startDate, endDate);
+  }
+
+  Future<void> _fetchRangeTotals() async {
+    if (context.read<SettingsProvider>().showFutureTXs) {
+      return;
+    }
+    final FireflyIii api = context.read<FireflyService>().api;
+    final CurrencyRead defaultCurrency =
+        context.read<FireflyService>().defaultCurrency;
+    final (DateTime startDate, DateTime endDate) = _getTransactionDateRange();
+    final String startStr = DateFormat('yyyy-MM-dd', 'en_US').format(startDate);
+    final String endStr = DateFormat('yyyy-MM-dd', 'en_US').format(endDate);
+    final List<int>? accounts = _filters.account != null
+        ? <int>[int.parse(_filters.account!.id)]
+        : null;
+    try {
+      final (
+        Response<InsightTotal> respExpense,
+        Response<InsightTotal> respIncome,
+        Response<InsightTotal> respTransfer,
+      ) = await (
+            api.v1InsightExpenseTotalGet(
+              start: startStr,
+              end: endStr,
+              accounts: accounts,
+            ),
+            api.v1InsightIncomeTotalGet(
+              start: startStr,
+              end: endStr,
+              accounts: accounts,
+            ),
+            api.v1InsightTransferTotalGet(
+              start: startStr,
+              end: endStr,
+              accounts: accounts,
+            ),
+          ).wait;
+      if (!mounted) return;
+      final double withdrawals = _sumInsightForCurrency(
+        respExpense.body,
+        defaultCurrency.id,
+      );
+      final double deposits = _sumInsightForCurrency(
+        respIncome.body,
+        defaultCurrency.id,
+      );
+      final double transfers = _sumInsightForCurrency(
+        respTransfer.body,
+        defaultCurrency.id,
+      );
+      if (mounted) {
+        setState(() {
+          _rangeTotals = TransactionSum()
+            ..withdrawals = withdrawals
+            ..deposits = deposits
+            ..transfers = transfers;
+        });
+      }
+    } catch (e, stackTrace) {
+      log.warning("_fetchRangeTotals()", e, stackTrace);
+      if (mounted) {
+        setState(() => _rangeTotals = null);
+      }
+    }
+  }
+
+  static double _sumInsightForCurrency(
+    List<InsightTotalEntry>? entries,
+    String currencyId,
+  ) {
+    if (entries == null || entries.isEmpty) return 0;
+    final InsightTotalEntry entry = entries.firstWhere(
+      (InsightTotalEntry e) => e.currencyId == currencyId,
+      orElse: () => entries.first,
+    );
+    return (entry.differenceFloat ?? 0).abs();
   }
 
   @override
@@ -159,8 +275,10 @@ class _HomeTransactionsState extends State<HomeTransactions>
                     _lastDate = null;
                     _txSum = TransactionSum();
                     setState(() {
+                      _rangeTotals = null;
                       _pagingState = _pagingState.reset();
                     });
+                    unawaited(_fetchRangeTotals());
                   },
                 ),
           ),
@@ -170,6 +288,10 @@ class _HomeTransactionsState extends State<HomeTransactions>
 
     _stock = context.read<FireflyService>().transStock!;
     _stock.addListener(notifRefresh);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_fetchRangeTotals());
+    });
   }
 
   @override
@@ -217,30 +339,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
         _filters.updateFilters();
       }
 
-      // Get start date
-      late DateTime startDate;
-      final DateTime now = _tzHandler.sNow().clearTime();
-      switch (context.read<SettingsProvider>().transactionDateFilter) {
-        case TransactionDateFilter.currentMonth:
-          startDate = now.copyWith(day: 1);
-          break;
-        case TransactionDateFilter.currentYear:
-          startDate = now.copyWith(month: 1, day: 1);
-          break;
-        case TransactionDateFilter.last30Days:
-          startDate = now.subtract(const Duration(days: 30));
-          break;
-        case TransactionDateFilter.lastYear:
-          startDate = now.copyWith(year: now.year - 1);
-          break;
-        default:
-          // Don't use 0 seconds, as DST & stuff might throw an error:
-          // "The start must be a date after 1970-01-02."
-          startDate = DateTime.fromMillisecondsSinceEpoch(
-            365 * 24 * 60 * 60 * 1000,
-          );
-          break;
-      }
+      final (DateTime startDate, DateTime endDate) = _getTransactionDateRange();
 
       // Faster than searching for an account, and also has cache (stock) behind
       // This search should never have additional filters!
@@ -257,7 +356,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
           end:
               context.read<SettingsProvider>().showFutureTXs
                   ? null
-                  : DateFormat('yyyy-MM-dd', 'en_US').format(now),
+                  : DateFormat('yyyy-MM-dd', 'en_US').format(endDate),
         );
       } else if (_filters.hasFilters) {
         String query = _filters.text ?? "";
@@ -293,7 +392,8 @@ class _HomeTransactionsState extends State<HomeTransactions>
         query =
             "date_after:${DateFormat('yyyy-MM-dd', 'en_US').format(startDate)} $query";
         if (!context.read<SettingsProvider>().showFutureTXs) {
-          query = "date_before:today $query";
+          query =
+              "date_before:${DateFormat('yyyy-MM-dd', 'en_US').format(endDate)} $query";
         }
         log.fine(() => "Search query: $query");
         transactionList = await stock.getSearch(
@@ -309,7 +409,7 @@ class _HomeTransactionsState extends State<HomeTransactions>
           end:
               context.read<SettingsProvider>().showFutureTXs
                   ? null
-                  : DateFormat('yyyy-MM-dd', 'en_US').format(now),
+                  : DateFormat('yyyy-MM-dd', 'en_US').format(endDate),
           start: DateFormat('yyyy-MM-dd', 'en_US').format(startDate),
         );
       }
@@ -401,151 +501,155 @@ class _HomeTransactionsState extends State<HomeTransactions>
   @override
   bool get wantKeepAlive => true;
 
+  Widget _buildSummaryTable(
+    BuildContext context,
+    CurrencyRead defaultCurrency,
+  ) {
+    final TransactionSum sum = _rangeTotals ?? _txSum;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Table(
+        columnWidths: const <int, TableColumnWidth>{
+          0: FlexColumnWidth(),
+          1: FlexColumnWidth(),
+          2: FlexColumnWidth(),
+        },
+        children: <TableRow>[
+          TableRow(
+            children: <Widget>[
+              Text(
+                S.of(context).transactionTypeDeposit,
+                style: Theme.of(context).textTheme.bodyLarge!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                S.of(context).transactionTypeWithdrawal,
+                style: Theme.of(context).textTheme.bodyLarge!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                S.of(context).transactionTypeTransfer,
+                style: Theme.of(context).textTheme.bodyLarge!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          TableRow(
+            children: <Widget>[
+              Text(
+                defaultCurrency.fmt(sum.deposits),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
+              ),
+              Text(
+                defaultCurrency.fmt(sum.withdrawals),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
+              ),
+              Text(
+                defaultCurrency.fmt(sum.transfers),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const TableRow(
+            children: <Widget>[
+              SizedBox(height: 8),
+              SizedBox.shrink(),
+              SizedBox.shrink(),
+            ],
+          ),
+          TableRow(
+            children: <Widget>[
+              const SizedBox.shrink(),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  "${S.of(context).generalSum}:  ",
+                  style: Theme.of(context).textTheme.bodyLarge!
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Text(
+                defaultCurrency.fmt(sum.total),
+                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                  color:
+                      sum.total < 0 ? Colors.red : Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     log.finest(() => "build()");
     super.build(context);
 
+    final CurrencyRead defaultCurrency =
+        context.read<FireflyService>().defaultCurrency;
+
     return RefreshIndicator(
       onRefresh:
-          () => Future<void>.sync(() {
+          () async {
             _rowsWithDate = <int>[];
             _lastDate = null;
             _txSum = TransactionSum();
             context.read<FireflyService>().transStock!.clear();
             setState(() {
+              _rangeTotals = null;
               _lastCalculatedBalance = null;
               _pagingState = _pagingState.reset();
             });
-          }),
-      child: PagedListView<int, TransactionRead>(
-        state: _pagingState,
-        fetchNextPage: _fetchPage,
-        builderDelegate: PagedChildBuilderDelegate<TransactionRead>(
-          animateTransitions: true,
-          transitionDuration: animDurationStandard,
-          invisibleItemsThreshold: 10,
-          itemBuilder: transactionRowBuilder,
-          noMoreItemsIndicatorBuilder: (BuildContext context) {
-            final CurrencyRead defaultCurrency =
-                context.read<FireflyService>().defaultCurrency;
-            return Padding(
-              padding: const EdgeInsetsGeometry.symmetric(horizontal: 8),
-              child: Column(
-                children: <Widget>[
-                  const Divider(),
-                  Table(
-                    //border: TableBorder.all(), // :DEBUG:
-                    columnWidths: const <int, TableColumnWidth>{
-                      0: FlexColumnWidth(),
-                      1: FlexColumnWidth(),
-                      2: FlexColumnWidth(),
-                    },
-                    children: <TableRow>[
-                      TableRow(
-                        children: <Widget>[
-                          Text(
-                            S.of(context).transactionTypeDeposit,
-                            style: Theme.of(context).textTheme.bodyLarge!
-                                .copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            S.of(context).transactionTypeWithdrawal,
-                            style: Theme.of(context).textTheme.bodyLarge!
-                                .copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            S.of(context).transactionTypeTransfer,
-                            style: Theme.of(context).textTheme.bodyLarge!
-                                .copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-
-                      TableRow(
-                        children: <Widget>[
-                          Text(
-                            defaultCurrency.fmt(_txSum.deposits),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyMedium!.copyWith(
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                              fontFeatures: const <FontFeature>[
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            defaultCurrency.fmt(_txSum.withdrawals),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyMedium!.copyWith(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                              fontFeatures: const <FontFeature>[
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            defaultCurrency.fmt(_txSum.transfers),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyMedium!.copyWith(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
-                              fontFeatures: const <FontFeature>[
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const TableRow(
-                        children: <Widget>[
-                          SizedBox(height: 8),
-                          SizedBox.shrink(),
-                          SizedBox.shrink(),
-                        ],
-                      ),
-                      TableRow(
-                        children: <Widget>[
-                          const SizedBox.shrink(),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              "${S.of(context).generalSum}:  ",
-                              style: Theme.of(context).textTheme.bodyLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Text(
-                            defaultCurrency.fmt(_txSum.total),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyLarge!.copyWith(
-                              color:
-                                  _txSum.total < 0 ? Colors.red : Colors.green,
-                              fontWeight: FontWeight.bold,
-                              fontFeatures: const <FontFeature>[
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  // Padding for FAB
-                  const SizedBox(height: 76),
-                ],
-              ),
-            );
+            await _fetchRangeTotals();
           },
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          _buildSummaryTable(context, defaultCurrency),
+          const Divider(height: 1),
+          Expanded(
+            child: PagedListView<int, TransactionRead>(
+              state: _pagingState,
+              fetchNextPage: _fetchPage,
+              builderDelegate: PagedChildBuilderDelegate<TransactionRead>(
+                animateTransitions: true,
+                transitionDuration: animDurationStandard,
+                invisibleItemsThreshold: 10,
+                itemBuilder: transactionRowBuilder,
+                noMoreItemsIndicatorBuilder: (BuildContext context) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 76),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
-      //itemExtent: 80,
     );
   }
 

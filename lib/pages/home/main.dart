@@ -6,6 +6,7 @@ import 'package:community_charts_flutter/community_charts_flutter.dart'
     as charts;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/timezone.dart';
@@ -21,10 +22,23 @@ import 'package:waterflyiii/pages/home/main/charts/netearnings.dart';
 import 'package:waterflyiii/pages/home/main/charts/networth.dart';
 import 'package:waterflyiii/pages/home/main/charts/summary.dart';
 import 'package:waterflyiii/pages/home/main/dashboard.dart';
+import 'package:waterflyiii/pages/home/main/dashboard_filter.dart';
 import 'package:waterflyiii/settings.dart';
 import 'package:waterflyiii/stock.dart';
 import 'package:waterflyiii/timezonehandler.dart';
 import 'package:waterflyiii/widgets/charts.dart';
+
+/// One row for the "Charges per card" card: account label and total charges in period.
+class _ChargePerCardRow {
+  const _ChargePerCardRow({
+    required this.label,
+    required this.amount,
+    required this.currency,
+  });
+  final String label;
+  final double amount;
+  final CurrencyRead currency;
+}
 
 class HomeMain extends StatefulWidget {
   const HomeMain({super.key});
@@ -50,6 +64,9 @@ class _HomeMainState extends State<HomeMain>
   List<ChartDataSet> overviewChartData = <ChartDataSet>[];
   final List<InsightGroupEntry> catChartData = <InsightGroupEntry>[];
   final List<InsightGroupEntry> tagChartData = <InsightGroupEntry>[];
+  List<_ChargePerCardRow> chargesPerCardData = <_ChargePerCardRow>[];
+  /// Labels hidden from the charges-per-card pie (toggled by tap).
+  final Set<String> _chargesPerCardHiddenLabels = <String>{};
   final Map<String, BudgetProperties> budgetInfos =
       <String, BudgetProperties>{};
   late TransStock _stock;
@@ -63,6 +80,20 @@ class _HomeMainState extends State<HomeMain>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PageActions>().set(widget.key!, <Widget>[
+        IconButton(
+          icon: const Icon(Icons.filter_list),
+          tooltip: S.of(context).homeMainFilterTitle,
+          onPressed: () async {
+            final bool? ok = await showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) =>
+                  const DashboardFilterDialog(),
+            );
+            if ((ok ?? false) && mounted) {
+              unawaited(_refreshStats());
+            }
+          },
+        ),
         IconButton(
           icon: const Icon(Icons.dashboard_customize_outlined),
           tooltip: S.of(context).homeMainDialogSettingsTitle,
@@ -87,6 +118,418 @@ class _HomeMainState extends State<HomeMain>
     super.dispose();
   }
 
+  List<int>? _dashboardAccountIdsInt() {
+    final List<String> ids =
+        context.read<SettingsProvider>().dashboardAccountIds;
+    if (ids.isEmpty) return null;
+    final List<int> result =
+        ids.map((String s) => int.tryParse(s)).whereType<int>().toList();
+    return result.isEmpty ? null : result;
+  }
+
+  /// Parses a date from chart entry key (e.g. "2026-01-10" or "2026-01-10T00:00:00.000Z").
+  /// Returns null if the key cannot be parsed.
+  static DateTime? _parseEntryDate(String key) {
+    final DateTime? d = DateTime.tryParse(key);
+    return d;
+  }
+
+  /// Returns the balance value from a chart entry (API may return string or num).
+  static double _entryValueToBalance(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0;
+  }
+
+  /// Returns true if [label] belongs to a selected account. The API may return
+  /// the account name alone or in the form "Account Name (currency symbol)".
+  static bool _isLabelForSelectedAccount(
+    String label,
+    Set<String> selectedNames,
+  ) {
+    if (selectedNames.contains(label)) return true;
+    for (final String name in selectedNames) {
+      if (label.startsWith('$name (')) return true;
+    }
+    return false;
+  }
+
+  Widget _buildAccountSummaryTable(List<ChartDataSet> data) {
+    return Table(
+      columnWidths: const <int, TableColumnWidth>{
+        0: FixedColumnWidth(24),
+        1: FlexColumnWidth(),
+        2: IntrinsicColumnWidth(),
+      },
+      children: <TableRow>[
+        TableRow(
+          children: <Widget>[
+            const SizedBox.shrink(),
+            Text(
+              S.of(context).generalAccount,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                S.of(context).generalBalance,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+          ],
+        ),
+        ...data.mapIndexed((int i, ChartDataSet e) {
+          final Map<String, dynamic> entries =
+              e.entries as Map<String, dynamic>;
+          // Use chronologically last date in range (map iteration order may vary).
+          double balance = 0;
+          if (entries.isNotEmpty) {
+            final MapEntry<String, dynamic> lastEntry = entries.entries
+                .reduce(
+                  (MapEntry<String, dynamic> a, MapEntry<String, dynamic> b) {
+                    final DateTime? da = _parseEntryDate(a.key);
+                    final DateTime? db = _parseEntryDate(b.key);
+                    if (da == null) return b;
+                    if (db == null) return a;
+                    return da.isAfter(db) ? a : b;
+                  },
+                );
+            balance = _entryValueToBalance(lastEntry.value);
+          }
+          final CurrencyRead currency = CurrencyRead(
+            id: e.currencyId ?? "0",
+            type: "currencies",
+            attributes: CurrencyProperties(
+              code: e.currencyCode ?? "",
+              name: "",
+              symbol: e.currencySymbol ?? "",
+              decimalPlaces: e.currencyDecimalPlaces,
+            ),
+          );
+          return TableRow(
+            children: <Widget>[
+              Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "⬤",
+                  style: TextStyle(
+                    color: charts.ColorUtil.toDartColor(
+                      possibleChartColors[i % possibleChartColors.length],
+                    ),
+                    textBaseline: TextBaseline.ideographic,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+              Text(e.label!),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  currency.fmt(balance),
+                  style: TextStyle(
+                    color:
+                        (balance < 0) ? Colors.red : Colors.green,
+                    fontWeight: FontWeight.bold,
+                    fontFeatures: const <FontFeature>[
+                      FontFeature.tabularFigures(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  /// Key so the "Charges per card" card refetches when dashboard range changes.
+  String _chargesPerCardKey() {
+    final SettingsProvider s = context.read<SettingsProvider>();
+    final (DateTime start, DateTime end) =
+        s.getDashboardDateRange(
+          context.read<FireflyService>().tzHandler.sNow().clearTime(),
+        );
+    return '${DateFormat('yyyy-MM-dd', 'en_US').format(start)}_'
+        '${DateFormat('yyyy-MM-dd', 'en_US').format(end)}';
+  }
+
+  /// Fetches total charges (withdrawals + outbound transfers) per account for the dashboard date range.
+  Future<bool> _fetchChargesPerCard() async {
+    final FireflyIii api = context.read<FireflyService>().api;
+    final TimeZoneHandler tzHandler = context.read<FireflyService>().tzHandler;
+    final SettingsProvider settings = context.read<SettingsProvider>();
+    final TransStock stock = context.read<FireflyService>().transStock!;
+
+    final DateTime now = tzHandler.sNow().clearTime();
+    final (DateTime start, DateTime end) =
+        settings.getDashboardDateRange(now);
+    final String startStr = DateFormat('yyyy-MM-dd', 'en_US').format(start);
+    final String endStr = DateFormat('yyyy-MM-dd', 'en_US').format(end);
+
+    final (
+      Response<AccountArray> respAssets,
+      Response<AccountArray> respLiabilities,
+    ) = await (
+      api.v1AccountsGet(type: AccountTypeFilter.asset),
+      api.v1AccountsGet(type: AccountTypeFilter.liabilities),
+    ).wait;
+    if (!mounted) return false;
+    apiThrowErrorIfEmpty(respAssets, context);
+    apiThrowErrorIfEmpty(respLiabilities, context);
+
+    final List<AccountRead> accounts = <AccountRead>[
+      ...?respAssets.body?.data,
+      ...?respLiabilities.body?.data,
+    ];
+
+    final List<_ChargePerCardRow> rows = <_ChargePerCardRow>[];
+    for (final AccountRead account in accounts) {
+      double totalCharges = 0;
+      int page = 1;
+      const int limit = 250;
+      List<TransactionRead> txList;
+      do {
+        txList = await stock.getAccount(
+          id: account.id,
+          page: page,
+          limit: limit,
+          start: startStr,
+          end: endStr,
+          type: TransactionTypeFilter.all,
+        );
+        if (!mounted) return false;
+        for (final TransactionRead tx in txList) {
+          for (final TransactionSplit split in tx.attributes.transactions) {
+            if (split.sourceId != account.id) continue;
+            final double amount = double.tryParse(split.amount) ?? 0;
+            if (split.type == TransactionTypeProperty.withdrawal) {
+              totalCharges += amount;
+            } else if (split.type == TransactionTypeProperty.transfer) {
+              totalCharges += amount;
+            }
+          }
+        }
+        page++;
+      } while (txList.length >= limit);
+
+      if (totalCharges > 0) {
+        final AccountProperties att = account.attributes;
+        final CurrencyRead currency = CurrencyRead(
+          id: att.currencyId ?? '0',
+          type: 'currencies',
+          attributes: CurrencyProperties(
+            code: att.currencyCode ?? '',
+            name: att.currencyName ?? '',
+            symbol: att.currencySymbol ?? '',
+            decimalPlaces: att.currencyDecimalPlaces,
+          ),
+        );
+        final String label = _cardLabelFromAccountName(att.name);
+        rows.add(_ChargePerCardRow(
+          label: label,
+          amount: totalCharges,
+          currency: currency,
+        ));
+      }
+    }
+
+    rows.sort((_ChargePerCardRow a, _ChargePerCardRow b) =>
+        b.amount.compareTo(a.amount));
+    if (mounted) {
+      chargesPerCardData = rows;
+      _chargesPerCardHiddenLabels.clear();
+    }
+    return true;
+  }
+
+  /// Prefer last 4 digits if name ends with 4 digits (e.g. "Card 7725" -> "7725"), else full name.
+  static String _cardLabelFromAccountName(String name) {
+    if (name.length >= 4) {
+      final String last4 = name.substring(name.length - 4);
+      if (RegExp(r'^\d{4}$').hasMatch(last4)) return last4;
+    }
+    return name;
+  }
+
+  Widget _buildChargesPerCardContent() {
+    if (chargesPerCardData.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          S.of(context).homeMainChartChargesPerCardEmpty,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
+
+    // Pie chart data (one slice per card; amounts may be in different currencies).
+    final List<LabelAmountChart> pieData = chargesPerCardData
+        .map((_ChargePerCardRow r) => LabelAmountChart(r.label, r.amount))
+        .toList();
+
+    // Visible slices: exclude hidden (tapped-away). If all hidden, show full pie and reset.
+    List<LabelAmountChart> pieDataVisible = pieData
+        .where((LabelAmountChart d) => !_chargesPerCardHiddenLabels.contains(d.label))
+        .toList();
+    if (pieDataVisible.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _chargesPerCardHiddenLabels.clear());
+      });
+      pieDataVisible = List<LabelAmountChart>.from(pieData);
+    }
+
+    // Totals per currency.
+    final Map<String, ({CurrencyRead currency, double sum})> totalsByCurrency =
+        <String, ({CurrencyRead currency, double sum})>{};
+    for (final _ChargePerCardRow row in chargesPerCardData) {
+      final String key = row.currency.id;
+      if (totalsByCurrency.containsKey(key)) {
+        final ({CurrencyRead currency, double sum}) t = totalsByCurrency[key]!;
+        totalsByCurrency[key] = (currency: t.currency, sum: t.sum + row.amount);
+      } else {
+        totalsByCurrency[key] = (currency: row.currency, sum: row.amount);
+      }
+    }
+    final List<({CurrencyRead currency, double sum})> totals =
+        totalsByCurrency.values.toList();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        SizedBox(
+          height: 240,
+          child: SfCircularChart(
+            legend: Legend(
+              isVisible: true,
+              position: LegendPosition.bottom,
+              overflowMode: LegendItemOverflowMode.wrap,
+              itemPadding: 4,
+              textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.normal,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            palette: possibleChartColorsDart,
+            series: <CircularSeries<LabelAmountChart, String>>[
+              PieSeries<LabelAmountChart, String>(
+                dataSource: pieDataVisible,
+                xValueMapper: (LabelAmountChart d, _) => d.label,
+                yValueMapper: (LabelAmountChart d, _) => d.amount,
+                dataLabelMapper: (LabelAmountChart d, _) => d.label,
+                dataLabelSettings: DataLabelSettings(
+                  isVisible: true,
+                  labelPosition: ChartDataLabelPosition.outside,
+                  textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.normal,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  connectorLineSettings: ConnectorLineSettings(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                onPointTap: (ChartPointDetails details) {
+                  if (details.pointIndex == null ||
+                      details.dataPoints == null ||
+                      details.pointIndex! >= pieDataVisible.length) {
+                    return;
+                  }
+                  final String tappedLabel = pieDataVisible[details.pointIndex!].label;
+                  setState(() {
+                    if (_chargesPerCardHiddenLabels.contains(tappedLabel)) {
+                      _chargesPerCardHiddenLabels.remove(tappedLabel);
+                    } else {
+                      _chargesPerCardHiddenLabels.add(tappedLabel);
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: IntrinsicColumnWidth(),
+              1: IntrinsicColumnWidth(),
+            },
+            children: <TableRow>[
+              ...chargesPerCardData.map((_ChargePerCardRow row) => TableRow(
+                children: <Widget>[
+                  Text(row.label),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      row.currency.fmt(row.amount),
+                      style: TextStyle(
+                        color: Colors.red.shade700,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: const <FontFeature>[
+                          FontFeature.tabularFigures(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )),
+              TableRow(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      S.of(context).homeMainChartChargesPerCardTotal,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: totals.length == 1
+                          ? Text(
+                              totals.first.currency.fmt(totals.first.sum),
+                              style: TextStyle(
+                                color: Colors.red.shade800,
+                                fontWeight: FontWeight.bold,
+                                fontFeatures: const <FontFeature>[
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: totals
+                                  .map(
+                                    (({CurrencyRead currency, double sum}) t) =>
+                                        Text(
+                                      t.currency.fmt(t.sum),
+                                      style: TextStyle(
+                                        color: Colors.red.shade800,
+                                        fontWeight: FontWeight.bold,
+                                        fontFeatures: const <FontFeature>[
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<bool> _fetchLastDays() async {
     if (lastDaysExpense.isNotEmpty && lastDaysIncome.isNotEmpty) {
       return true;
@@ -94,20 +537,24 @@ class _HomeMainState extends State<HomeMain>
 
     final FireflyIii api = context.read<FireflyService>().api;
     final TimeZoneHandler tzHandler = context.read<FireflyService>().tzHandler;
+    final SettingsProvider settings = context.read<SettingsProvider>();
 
     // Use noon due to daylight saving time
-    final TZDateTime now = tzHandler.sNow().setTimeOfDay(
+    final TZDateTime nowTz = tzHandler.sNow().setTimeOfDay(
       const TimeOfDay(hour: 12, minute: 0),
     );
+    final DateTime now = nowTz.toLocal();
+    final (DateTime start, DateTime end) =
+        settings.getDashboardDateRange(now);
+    final String startStr = DateFormat('yyyy-MM-dd', 'en_US').format(start);
+    final String endStr = DateFormat('yyyy-MM-dd', 'en_US').format(end);
 
     final Response<List<ChartDataSet>> respBalanceData = await api
         .v1ChartBalanceBalanceGet(
-          start: DateFormat(
-            'yyyy-MM-dd',
-            'en_US',
-          ).format(now.copyWith(day: now.day - 6)),
-          end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+          start: startStr,
+          end: endStr,
           period: V1ChartBalanceBalanceGetPeriod.value_1d,
+          accounts: _dashboardAccountIdsInt(),
         );
     apiThrowErrorIfEmpty(respBalanceData, mounted ? context : null);
 
@@ -138,21 +585,91 @@ class _HomeMainState extends State<HomeMain>
 
     final FireflyIii api = context.read<FireflyService>().api;
     final TimeZoneHandler tzHandler = context.read<FireflyService>().tzHandler;
+    final SettingsProvider settings = context.read<SettingsProvider>();
 
     final DateTime now = tzHandler.sNow().clearTime();
+    final (DateTime start, DateTime end) =
+        settings.getDashboardDateRange(now);
+    final String startStr = DateFormat('yyyy-MM-dd', 'en_US').format(start);
+    final String endStr = DateFormat('yyyy-MM-dd', 'en_US').format(end);
 
     final Response<ChartLine> respChartData = await api
         .v1ChartAccountOverviewGet(
-          start: DateFormat(
-            'yyyy-MM-dd',
-            'en_US',
-          ).format(now.copyWith(month: now.month - 3)),
-          end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+          start: startStr,
+          end: endStr,
           period: V1ChartAccountOverviewGetPeriod.value_1d,
         );
     apiThrowErrorIfEmpty(respChartData, mounted ? context : null);
 
-    overviewChartData = respChartData.body!;
+    List<ChartDataSet> overview = respChartData.body!;
+
+    // Restrict to dashboard date range (same as Accounts in range card).
+    final DateTime startDate = DateTime(start.year, start.month, start.day);
+    final DateTime endDate = DateTime(end.year, end.month, end.day);
+    final List<ChartDataSet> overviewInRange = <ChartDataSet>[];
+    for (final ChartDataSet e in overview) {
+      final Object? entriesRaw = e.entries;
+      if (entriesRaw == null) continue;
+      final Map<String, dynamic> raw =
+          Map<String, dynamic>.from(entriesRaw as Map<String, dynamic>);
+      final List<MapEntry<String, dynamic>> inRange = raw.entries
+          .where((MapEntry<String, dynamic> entry) {
+            final DateTime? d = _parseEntryDate(entry.key);
+            if (d == null) return false;
+            final DateTime dDate = DateTime(d.year, d.month, d.day);
+            return !dDate.isBefore(startDate) && !dDate.isAfter(endDate);
+          })
+          .toList()
+        ..sort(
+          (MapEntry<String, dynamic> a, MapEntry<String, dynamic> b) {
+            final DateTime? da = _parseEntryDate(a.key);
+            final DateTime? db = _parseEntryDate(b.key);
+            if (da == null && db == null) return 0;
+            if (da == null) return 1;
+            if (db == null) return -1;
+            return da.compareTo(db);
+          },
+        );
+      final Map<String, dynamic> filtered =
+          Map<String, dynamic>.fromEntries(inRange);
+      if (filtered.isNotEmpty) {
+        overviewInRange.add(e.copyWith(entries: filtered));
+      }
+    }
+    overviewChartData = overviewInRange.isNotEmpty ? overviewInRange : overview;
+
+    // When dashboard filter has selected accounts, restrict Account Summary to those only
+    final List<String> selectedIds = settings.dashboardAccountIds;
+    if (selectedIds.isNotEmpty) {
+      final (
+        Response<AccountArray> respAssets,
+        Response<AccountArray> respLiabilities,
+      ) = await (
+            api.v1AccountsGet(type: AccountTypeFilter.asset),
+            api.v1AccountsGet(type: AccountTypeFilter.liabilities),
+          ).wait;
+      if (mounted) {
+        apiThrowErrorIfEmpty(respAssets, context);
+        apiThrowErrorIfEmpty(respLiabilities, context);
+      }
+      final Set<String> selectedNames = <String>{};
+      final List<AccountRead> allAccounts = <AccountRead>[
+        ...?respAssets.body?.data,
+        ...?respLiabilities.body?.data,
+      ];
+      for (final AccountRead acc in allAccounts) {
+        if (selectedIds.contains(acc.id)) {
+          selectedNames.add(acc.attributes.name);
+        }
+      }
+      if (mounted && selectedNames.isNotEmpty) {
+        overviewChartData = overviewChartData
+            .where((ChartDataSet e) =>
+                e.label != null &&
+                _isLabelForSelectedAccount(e.label!, selectedNames))
+            .toList();
+      }
+    }
 
     return true;
   }
@@ -164,22 +681,33 @@ class _HomeMainState extends State<HomeMain>
 
     final FireflyIii api = context.read<FireflyService>().api;
     final TimeZoneHandler tzHandler = context.read<FireflyService>().tzHandler;
+    final SettingsProvider settings = context.read<SettingsProvider>();
 
     final DateTime now = tzHandler.sNow().clearTime();
+    final (DateTime rangeStart, DateTime rangeEnd) =
+        settings.getDashboardDateRange(now);
     final List<DateTime> lastMonths = <DateTime>[];
-    for (int i = 0; i < 3; i++) {
-      lastMonths.add(DateTime(now.year, now.month - i, (i == 0) ? now.day : 1));
+    for (int i = 0; i < 12; i++) {
+      final DateTime monthStart = DateTime(rangeEnd.year, rangeEnd.month - i, 1);
+      if (monthStart.isBefore(rangeStart)) break;
+      lastMonths.add(monthStart);
     }
+    if (lastMonths.isEmpty) {
+      lastMonths.add(DateTime(rangeEnd.year, rangeEnd.month, 1));
+    }
+
+    final List<int>? accountIds = _dashboardAccountIdsInt();
 
     for (DateTime e in lastMonths) {
       late DateTime start;
       late DateTime end;
+      final DateTime monthEnd = e.copyWith(month: e.month + 1, day: 0);
       if (e == lastMonths.first) {
-        start = e.copyWith(day: 1);
-        end = e;
+        start = e;
+        end = rangeEnd.isBefore(monthEnd) ? rangeEnd : monthEnd;
       } else {
         start = e;
-        end = e.copyWith(month: e.month + 1, day: 0);
+        end = monthEnd;
       }
       final (
         Response<InsightTotal> respInsightExpense,
@@ -188,10 +716,12 @@ class _HomeMainState extends State<HomeMain>
             api.v1InsightExpenseTotalGet(
               start: DateFormat('yyyy-MM-dd', 'en_US').format(start),
               end: DateFormat('yyyy-MM-dd', 'en_US').format(end),
+              accounts: accountIds,
             ),
             api.v1InsightIncomeTotalGet(
               start: DateFormat('yyyy-MM-dd', 'en_US').format(start),
               end: DateFormat('yyyy-MM-dd', 'en_US').format(end),
+              accounts: accountIds,
             ),
           ).wait;
       apiThrowErrorIfEmpty(respInsightExpense, mounted ? context : null);
@@ -238,8 +768,14 @@ class _HomeMainState extends State<HomeMain>
     final TimeZoneHandler tzHandler = context.read<FireflyService>().tzHandler;
     final CurrencyRead defaultCurrency =
         context.read<FireflyService>().defaultCurrency;
+    final SettingsProvider settings = context.read<SettingsProvider>();
 
     final DateTime now = tzHandler.sNow().clearTime();
+    final (DateTime start, DateTime end) =
+        settings.getDashboardDateRange(now);
+    final String startStr = DateFormat('yyyy-MM-dd', 'en_US').format(start);
+    final String endStr = DateFormat('yyyy-MM-dd', 'en_US').format(end);
+    final List<int>? accountIds = _dashboardAccountIdsInt();
 
     late final Response<InsightGroup> respIncomeData;
     late final Response<InsightGroup> respExpenseData;
@@ -247,36 +783,28 @@ class _HomeMainState extends State<HomeMain>
       (respIncomeData, respExpenseData) =
           await (
             api.v1InsightIncomeCategoryGet(
-              start: DateFormat(
-                'yyyy-MM-dd',
-                'en_US',
-              ).format(now.copyWith(day: 1)),
-              end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+              start: startStr,
+              end: endStr,
+              accounts: accountIds,
             ),
             api.v1InsightExpenseCategoryGet(
-              start: DateFormat(
-                'yyyy-MM-dd',
-                'en_US',
-              ).format(now.copyWith(day: 1)),
-              end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+              start: startStr,
+              end: endStr,
+              accounts: accountIds,
             ),
           ).wait;
     } else {
       (respIncomeData, respExpenseData) =
           await (
             api.v1InsightIncomeTagGet(
-              start: DateFormat(
-                'yyyy-MM-dd',
-                'en_US',
-              ).format(now.copyWith(day: 1)),
-              end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+              start: startStr,
+              end: endStr,
+              accounts: accountIds,
             ),
             api.v1InsightExpenseTagGet(
-              start: DateFormat(
-                'yyyy-MM-dd',
-                'en_US',
-              ).format(now.copyWith(day: 1)),
-              end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+              start: startStr,
+              end: endStr,
+              accounts: accountIds,
             ),
           ).wait;
     }
@@ -321,8 +849,13 @@ class _HomeMainState extends State<HomeMain>
   Future<List<BudgetLimitRead>> _fetchBudgets() async {
     final FireflyIii api = context.read<FireflyService>().api;
     final TimeZoneHandler tzHandler = context.read<FireflyService>().tzHandler;
+    final SettingsProvider settings = context.read<SettingsProvider>();
 
     final DateTime now = tzHandler.sNow().clearTime();
+    final (DateTime start, DateTime end) =
+        settings.getDashboardDateRange(now);
+    final String startStr = DateFormat('yyyy-MM-dd', 'en_US').format(start);
+    final String endStr = DateFormat('yyyy-MM-dd', 'en_US').format(end);
 
     final (
       Response<BudgetArray> respBudgetInfos,
@@ -330,11 +863,8 @@ class _HomeMainState extends State<HomeMain>
     ) = await (
           api.v1BudgetsGet(),
           api.v1BudgetLimitsGet(
-            start: DateFormat(
-              'yyyy-MM-dd',
-              'en_US',
-            ).format(now.copyWith(day: 1)),
-            end: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+            start: startStr,
+            end: endStr,
           ),
         ).wait;
     apiThrowErrorIfEmpty(respBudgetInfos, mounted ? context : null);
@@ -370,12 +900,15 @@ class _HomeMainState extends State<HomeMain>
   Future<List<BillRead>> _fetchBills() async {
     final FireflyIii api = context.read<FireflyService>().api;
     final TimeZoneHandler tzHandler = context.read<FireflyService>().tzHandler;
+    final SettingsProvider settings = context.read<SettingsProvider>();
 
     final DateTime now = tzHandler.sNow().clearTime();
-    final DateTime end = now.copyWith(day: now.day + 7);
+    final (DateTime _, DateTime rangeEnd) =
+        settings.getDashboardDateRange(now);
+    final DateTime end = rangeEnd.copyWith(day: rangeEnd.day + 7);
 
     final Response<BillArray> respBills = await api.v1BillsGet(
-      start: DateFormat('yyyy-MM-dd', 'en_US').format(now),
+      start: DateFormat('yyyy-MM-dd', 'en_US').format(rangeEnd),
       end: DateFormat('yyyy-MM-dd', 'en_US').format(end),
     );
     apiThrowErrorIfEmpty(respBills, mounted ? context : null);
@@ -399,22 +932,13 @@ class _HomeMainState extends State<HomeMain>
 
     final FireflyIii api = context.read<FireflyService>().api;
     final TimeZoneHandler tzHandler = context.read<FireflyService>().tzHandler;
+    final SettingsProvider settings = context.read<SettingsProvider>();
 
     final DateTime now = tzHandler.sNow().clearTime();
-    final DateTime end = now.copyWith(
-      month: now.month + 1,
-      day: 0,
-      hour: 23,
-      minute: 59,
-      second: 59,
-    );
-    final DateTime start = now.copyWith(
-      month: now.month - 11,
-      day: 1,
-      hour: 0,
-      minute: 0,
-      second: 0,
-    );
+    final (DateTime start, DateTime end) =
+        settings.getDashboardDateRange(now);
+    final String startStr = DateFormat('yyyy-MM-dd', 'en_US').format(start);
+    final String endStr = DateFormat('yyyy-MM-dd', 'en_US').format(end);
 
     final (
       Response<AccountArray> respAssetAccounts,
@@ -424,8 +948,8 @@ class _HomeMainState extends State<HomeMain>
           api.v1AccountsGet(type: AccountTypeFilter.asset),
           api.v1AccountsGet(type: AccountTypeFilter.liabilities),
           api.v1ChartAccountOverviewGet(
-            start: DateFormat('yyyy-MM-dd', 'en_US').format(start),
-            end: DateFormat('yyyy-MM-dd', 'en_US').format(end),
+            start: startStr,
+            end: endStr,
             preselected: V1ChartAccountOverviewGetPreselected.all,
             period: V1ChartAccountOverviewGetPeriod.value_1d,
           ),
@@ -451,12 +975,12 @@ class _HomeMainState extends State<HomeMain>
       entries.forEach((String dateStr, dynamic valueStr) {
         DateTime date = tzHandler.sTime(DateTime.parse(dateStr)).toLocal();
         if (
-        // Current month: take current day
-        (date.month == now.month &&
-                date.year == now.year &&
-                date.day == now.day) ||
+        // Range end month: take end day
+        (date.month == end.month &&
+                date.year == end.year &&
+                date.day == end.day) ||
             // Other month: take last day of month
-            (date.month != now.month &&
+            (date.month != end.month &&
                 date.copyWith(day: date.day + 1).month != date.month)) {
           final double value = double.tryParse(valueStr) ?? 0;
           // We don't really care about the exact date. Always using the first
@@ -474,7 +998,7 @@ class _HomeMainState extends State<HomeMain>
     }
 
     if (lastMonthsEarned.length < 3) {
-      final DateTime lastDate = now.copyWith(day: 1);
+      final DateTime lastDate = end.copyWith(day: 1);
       for (int i = 0; i < 3; i++) {
         final DateTime newDate = lastDate.copyWith(month: lastDate.month - i);
         lastMonthsEarned[newDate] = lastMonthsEarned[newDate] ?? 0;
@@ -486,7 +1010,7 @@ class _HomeMainState extends State<HomeMain>
     );
 
     if (lastMonthsSpent.length < 3) {
-      final DateTime lastDate = now.copyWith(day: 1);
+      final DateTime lastDate = end.copyWith(day: 1);
       for (int i = 0; i < 3; i++) {
         final DateTime newDate = lastDate.copyWith(month: lastDate.month - i);
         lastMonthsSpent[newDate] = lastMonthsSpent[newDate] ?? 0;
@@ -498,7 +1022,7 @@ class _HomeMainState extends State<HomeMain>
     );
 
     if (lastMonthsAssets.length < 12) {
-      final DateTime lastDate = now.copyWith(day: 1);
+      final DateTime lastDate = end.copyWith(day: 1);
       for (int i = 0; i < 12; i++) {
         final DateTime newDate = lastDate.copyWith(month: lastDate.month - i);
         lastMonthsAssets[newDate] = lastMonthsAssets[newDate] ?? 0;
@@ -510,7 +1034,7 @@ class _HomeMainState extends State<HomeMain>
     );
 
     if (lastMonthsLiabilities.length < 12) {
-      final DateTime lastDate = now.copyWith(day: 1);
+      final DateTime lastDate = end.copyWith(day: 1);
       for (int i = 0; i < 12; i++) {
         final DateTime newDate = lastDate.copyWith(month: lastDate.month - i);
         lastMonthsLiabilities[newDate] = lastMonthsLiabilities[newDate] ?? 0;
@@ -537,6 +1061,8 @@ class _HomeMainState extends State<HomeMain>
       lastMonthsSpent.clear();
       lastMonthsAssets.clear();
       lastMonthsLiabilities.clear();
+      chargesPerCardData = <_ChargePerCardRow>[];
+      _chargesPerCardHiddenLabels.clear();
     });
   }
 
@@ -619,87 +1145,7 @@ class _HomeMainState extends State<HomeMain>
               DashboardCards.accounts => ChartCard(
                 title: S.of(context).homeMainChartAccountsTitle,
                 future: _fetchOverviewChart(),
-                summary:
-                    () => Table(
-                      //border: TableBorder.all(), // :DEBUG:
-                      columnWidths: const <int, TableColumnWidth>{
-                        0: FixedColumnWidth(24),
-                        1: FlexColumnWidth(),
-                        2: IntrinsicColumnWidth(),
-                      },
-                      children: <TableRow>[
-                        TableRow(
-                          children: <Widget>[
-                            const SizedBox.shrink(),
-                            Text(
-                              S.of(context).generalAccount,
-                              style: Theme.of(context).textTheme.labelLarge,
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                S.of(context).generalBalance,
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
-                            ),
-                          ],
-                        ),
-                        ...overviewChartData.mapIndexed((
-                          int i,
-                          ChartDataSet e,
-                        ) {
-                          final Map<String, dynamic> entries =
-                              e.entries as Map<String, dynamic>;
-                          final double balance =
-                              double.tryParse(entries.entries.last.value) ?? 0;
-                          final CurrencyRead currency = CurrencyRead(
-                            id: e.currencyId ?? "0",
-                            type: "currencies",
-                            attributes: CurrencyProperties(
-                              code: e.currencyCode ?? "",
-                              name: "",
-                              symbol: e.currencySymbol ?? "",
-                              decimalPlaces: e.currencyDecimalPlaces,
-                            ),
-                          );
-                          return TableRow(
-                            children: <Widget>[
-                              Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "⬤",
-                                  style: TextStyle(
-                                    color: charts.ColorUtil.toDartColor(
-                                      possibleChartColors[i %
-                                          possibleChartColors.length],
-                                    ),
-                                    textBaseline: TextBaseline.ideographic,
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ),
-                              Text(e.label!),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  currency.fmt(balance),
-                                  style: TextStyle(
-                                    color:
-                                        (balance < 0)
-                                            ? Colors.red
-                                            : Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontFeatures: const <FontFeature>[
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
-                      ],
-                    ),
+                summary: () => _buildAccountSummaryTable(overviewChartData),
                 height: 175,
                 onTap:
                     () => showDialog<void>(
@@ -708,6 +1154,13 @@ class _HomeMainState extends State<HomeMain>
                           (BuildContext context) => const SummaryChartPopup(),
                     ),
                 child: () => SummaryChart(data: overviewChartData),
+              ),
+              DashboardCards.chargesPerCard => ChartCard(
+                key: ValueKey<String>(_chargesPerCardKey()),
+                title: S.of(context).homeMainChartChargesPerCardTitle,
+                future: _fetchChargesPerCard(),
+                height: 420,
+                child: () => _buildChargesPerCardContent(),
               ),
               DashboardCards.netearnings => ChartCard(
                 title: S.of(context).homeMainChartNetEarningsTitle,

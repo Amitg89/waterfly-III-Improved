@@ -13,6 +13,7 @@ import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
 import 'app_localizations_fa.dart';
 import 'app_localizations_fr.dart';
+import 'app_localizations_he.dart';
 import 'app_localizations_hu.dart';
 import 'app_localizations_id.dart';
 import 'app_localizations_it.dart';
@@ -121,6 +122,7 @@ abstract class S {
     Locale('es'),
     Locale('fa'),
     Locale('fr'),
+    Locale('he'),
     Locale('hu'),
     Locale('id'),
     Locale('it'),
@@ -612,6 +614,12 @@ abstract class S {
   /// **'All'**
   String get generalDateRangeAll;
 
+  /// Date Range: Custom start/end dates
+  ///
+  /// In en, this message translates to:
+  /// **'Custom range'**
+  String get generalDateRangeCustom;
+
   /// Indicates that something is the default choice
   ///
   /// In en, this message translates to:
@@ -756,6 +764,24 @@ abstract class S {
   /// **'Account Summary'**
   String get homeMainChartAccountsTitle;
 
+  /// Chart Label: Total charges per account for the dashboard date range
+  ///
+  /// In en, this message translates to:
+  /// **'Charges per card'**
+  String get homeMainChartChargesPerCardTitle;
+
+  /// Shown when the charges-per-card card has no data for the selected range
+  ///
+  /// In en, this message translates to:
+  /// **'No charges in this period'**
+  String get homeMainChartChargesPerCardEmpty;
+
+  /// Label for the sum of all card charges at the bottom of the card
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get homeMainChartChargesPerCardTotal;
+
   /// Chart Label: Category Summary
   ///
   /// In en, this message translates to:
@@ -815,6 +841,72 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Customize Dashboard'**
   String get homeMainDialogSettingsTitle;
+
+  /// Dashboard filter dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard filter'**
+  String get homeMainFilterTitle;
+
+  /// Dashboard filter: time frame label
+  ///
+  /// In en, this message translates to:
+  /// **'Time frame'**
+  String get homeMainFilterTimeFrame;
+
+  /// Dashboard filter: last 7 days preset
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get homeMainFilterLast7Days;
+
+  /// Dashboard filter: last 30 days preset
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get homeMainFilterLast30Days;
+
+  /// Dashboard filter: current month preset
+  ///
+  /// In en, this message translates to:
+  /// **'Current month'**
+  String get homeMainFilterCurrentMonth;
+
+  /// Dashboard filter: last 3 months preset
+  ///
+  /// In en, this message translates to:
+  /// **'Last 3 months'**
+  String get homeMainFilterLast3Months;
+
+  /// Dashboard filter: last 12 months preset
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get homeMainFilterLast12Months;
+
+  /// Dashboard filter: custom date range option
+  ///
+  /// In en, this message translates to:
+  /// **'Custom range'**
+  String get homeMainFilterCustomRange;
+
+  /// Dashboard filter: accounts section label
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get homeMainFilterAccounts;
+
+  /// Dashboard filter: show all accounts
+  ///
+  /// In en, this message translates to:
+  /// **'All accounts'**
+  String get homeMainFilterAllAccounts;
+
+  /// Dashboard filter: select specific accounts
+  ///
+  /// In en, this message translates to:
+  /// **'Select accounts'**
+  String get homeMainFilterSelectAccounts;
 
   /// Piggy bank is linked to asset account {account}.
   ///
@@ -983,6 +1075,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Select filters'**
   String get homeTransactionsDialogFilterTitle;
+
+  /// Hint that the selected filter is saved as default
+  ///
+  /// In en, this message translates to:
+  /// **'This selection will be used next time you open the app.'**
+  String get homeTransactionsDialogFilterDefaultHint;
 
   /// Message when no transactions are found.
   ///
@@ -1609,6 +1707,7 @@ class _SDelegate extends LocalizationsDelegate<S> {
     'es',
     'fa',
     'fr',
+    'he',
     'hu',
     'id',
     'it',
@@ -1668,6 +1767,8 @@ S lookupS(Locale locale) {
       return SFa();
     case 'fr':
       return SFr();
+    case 'he':
+      return SHe();
     case 'hu':
       return SHu();
     case 'id':

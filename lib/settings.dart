@@ -54,6 +54,7 @@ enum DashboardCards {
   categories,
   tags,
   accounts,
+  chargesPerCard,
   netearnings,
   networth,
   budgets,
@@ -77,6 +78,16 @@ enum TransactionDateFilter {
   currentYear,
   lastYear,
   all,
+  custom,
+}
+
+enum DashboardDateRange {
+  last7Days,
+  last30Days,
+  currentMonth,
+  last3Months,
+  last12Months,
+  custom,
 }
 
 class SettingsBitmask {
@@ -144,6 +155,13 @@ class SettingsProvider with ChangeNotifier {
   static const String settingsDashboardOrder = "DASHBOARD_ORDER";
   static const String settingsDashboardHidden = "DASHBOARD_HIDDEN";
   static const String settingTransactionDateFilter = "TX_DATE_FILTER";
+  static const String settingTransactionDateRangeStart = "TX_DATE_RANGE_START";
+  static const String settingTransactionDateRangeEnd = "TX_DATE_RANGE_END";
+  static const String settingDashboardDateRange = "DASHBOARD_DATE_RANGE";
+  static const String settingDashboardDateRangeStart =
+      "DASHBOARD_DATE_RANGE_START";
+  static const String settingDashboardDateRangeEnd = "DASHBOARD_DATE_RANGE_END";
+  static const String settingDashboardAccountIds = "DASHBOARD_ACCOUNT_IDS";
 
   bool get debug => _loaded ? _boolSettings[BoolSettings.debug] : false;
   bool get lock => _loaded ? _boolSettings[BoolSettings.lock] : false;
@@ -195,8 +213,22 @@ class SettingsProvider with ChangeNotifier {
   SettingsBitmask get boolSettings => _boolSettings;
 
   TransactionDateFilter _transactionDateFilter = TransactionDateFilter.all;
+  DateTime? _transactionDateRangeStart;
+  DateTime? _transactionDateRangeEnd;
 
   TransactionDateFilter get transactionDateFilter => _transactionDateFilter;
+  DateTime? get transactionDateRangeStart => _transactionDateRangeStart;
+  DateTime? get transactionDateRangeEnd => _transactionDateRangeEnd;
+
+  DashboardDateRange _dashboardDateRange = DashboardDateRange.last3Months;
+  DateTime? _dashboardDateRangeStart;
+  DateTime? _dashboardDateRangeEnd;
+  List<String> _dashboardAccountIds = <String>[];
+
+  DashboardDateRange get dashboardDateRange => _dashboardDateRange;
+  DateTime? get dashboardDateRangeStart => _dashboardDateRangeStart;
+  DateTime? get dashboardDateRangeEnd => _dashboardDateRangeEnd;
+  List<String> get dashboardAccountIds => List<String>.unmodifiable(_dashboardAccountIds);
 
   Future<void> migrateLegacy(SharedPreferencesAsync prefs) async {
     log.config("trying to migrate old prefs");
@@ -405,6 +437,36 @@ class SettingsProvider with ChangeNotifier {
       }
     }
 
+    final int? dashboardDateRangeIndex =
+        await prefs.getInt(settingDashboardDateRange);
+    _dashboardDateRange =
+        dashboardDateRangeIndex == null
+            ? DashboardDateRange.last3Months
+            : (dashboardDateRangeIndex >= 0 &&
+                    dashboardDateRangeIndex < DashboardDateRange.values.length)
+                ? DashboardDateRange.values[dashboardDateRangeIndex]
+                : DashboardDateRange.last3Months;
+
+    final String? dashboardRangeStartStr =
+        await prefs.getString(settingDashboardDateRangeStart);
+    final String? dashboardRangeEndStr =
+        await prefs.getString(settingDashboardDateRangeEnd);
+    if (dashboardRangeStartStr != null && dashboardRangeEndStr != null) {
+      try {
+        _dashboardDateRangeStart = DateTime.parse(dashboardRangeStartStr);
+        _dashboardDateRangeEnd = DateTime.parse(dashboardRangeEndStr);
+      } catch (_) {
+        _dashboardDateRangeStart = null;
+        _dashboardDateRangeEnd = null;
+      }
+    } else {
+      _dashboardDateRangeStart = null;
+      _dashboardDateRangeEnd = null;
+    }
+
+    _dashboardAccountIds =
+        await prefs.getStringList(settingDashboardAccountIds) ?? <String>[];
+
     // Load new transaction date filter setting
     final int? txDateFilterIndex = await prefs.getInt(
       settingTransactionDateFilter,
@@ -412,7 +474,25 @@ class SettingsProvider with ChangeNotifier {
     _transactionDateFilter =
         txDateFilterIndex == null
             ? TransactionDateFilter.all
-            : TransactionDateFilter.values[txDateFilterIndex];
+            : (txDateFilterIndex >= 0 && txDateFilterIndex < TransactionDateFilter.values.length)
+                ? TransactionDateFilter.values[txDateFilterIndex]
+                : TransactionDateFilter.all;
+
+    // Load custom date range when filter is custom
+    final String? rangeStartStr = await prefs.getString(settingTransactionDateRangeStart);
+    final String? rangeEndStr = await prefs.getString(settingTransactionDateRangeEnd);
+    if (rangeStartStr != null && rangeEndStr != null) {
+      try {
+        _transactionDateRangeStart = DateTime.parse(rangeStartStr);
+        _transactionDateRangeEnd = DateTime.parse(rangeEndStr);
+      } catch (_) {
+        _transactionDateRangeStart = null;
+        _transactionDateRangeEnd = null;
+      }
+    } else {
+      _transactionDateRangeStart = null;
+      _transactionDateRangeEnd = null;
+    }
 
     _loaded = _loading = true;
     log.finest(() => "notify SettingsProvider->loadSettings()");
@@ -773,6 +853,114 @@ class SettingsProvider with ChangeNotifier {
 
     log.finest(() => "notify SettingsProvider->setTransactionDateFilter()");
     notifyListeners();
+  }
+
+  Future<void> setTransactionDateRange(DateTime start, DateTime end) async {
+    if (_transactionDateRangeStart == start && _transactionDateRangeEnd == end) {
+      return;
+    }
+
+    _transactionDateRangeStart = start;
+    _transactionDateRangeEnd = end;
+    await SharedPreferencesAsync().setString(
+      settingTransactionDateRangeStart,
+      DateFormat('yyyy-MM-dd').format(start),
+    );
+    await SharedPreferencesAsync().setString(
+      settingTransactionDateRangeEnd,
+      DateFormat('yyyy-MM-dd').format(end),
+    );
+
+    log.finest(() => "notify SettingsProvider->setTransactionDateRange()");
+    notifyListeners();
+  }
+
+  Future<void> setDashboardDateRange(DashboardDateRange range) async {
+    if (range == _dashboardDateRange) {
+      return;
+    }
+    _dashboardDateRange = range;
+    await SharedPreferencesAsync().setInt(
+      settingDashboardDateRange,
+      range.index,
+    );
+    log.finest(() => "notify SettingsProvider->setDashboardDateRange()");
+    notifyListeners();
+  }
+
+  Future<void> setDashboardDateRangeCustom(DateTime start, DateTime end) async {
+    if (_dashboardDateRangeStart == start && _dashboardDateRangeEnd == end) {
+      return;
+    }
+    _dashboardDateRangeStart = start;
+    _dashboardDateRangeEnd = end;
+    await SharedPreferencesAsync().setString(
+      settingDashboardDateRangeStart,
+      DateFormat('yyyy-MM-dd').format(start),
+    );
+    await SharedPreferencesAsync().setString(
+      settingDashboardDateRangeEnd,
+      DateFormat('yyyy-MM-dd').format(end),
+    );
+    log.finest(() => "notify SettingsProvider->setDashboardDateRangeCustom()");
+    notifyListeners();
+  }
+
+  Future<void> setDashboardAccountIds(List<String> ids) async {
+    if (listEquals(_dashboardAccountIds, ids)) {
+      return;
+    }
+    _dashboardAccountIds = List<String>.from(ids);
+    await SharedPreferencesAsync().setStringList(
+      settingDashboardAccountIds,
+      _dashboardAccountIds,
+    );
+    log.finest(() => "notify SettingsProvider->setDashboardAccountIds()");
+    notifyListeners();
+  }
+
+  /// Returns the start and end date for the dashboard based on current range.
+  (DateTime start, DateTime end) getDashboardDateRange(DateTime now) {
+    late DateTime start;
+    late DateTime end;
+    switch (_dashboardDateRange) {
+      case DashboardDateRange.last7Days:
+        start = now.subtract(const Duration(days: 6));
+        end = now;
+        break;
+      case DashboardDateRange.last30Days:
+        start = now.subtract(const Duration(days: 30));
+        end = now;
+        break;
+      case DashboardDateRange.currentMonth:
+        start = now.copyWith(day: 1);
+        end = now;
+        break;
+      case DashboardDateRange.last3Months:
+        final int m3 = now.month - 3;
+        start = DateTime(
+          now.year + (m3 <= 0 ? -1 : 0),
+          m3 <= 0 ? m3 + 12 : m3,
+          1,
+        );
+        end = now;
+        break;
+      case DashboardDateRange.last12Months:
+        final int m12 = now.month - 12;
+        start = DateTime(
+          now.year + (m12 <= 0 ? -1 : 0),
+          m12 <= 0 ? m12 + 12 : m12,
+          1,
+        );
+        end = now;
+        break;
+      case DashboardDateRange.custom:
+        start = _dashboardDateRangeStart ??
+            now.subtract(const Duration(days: 30));
+        end = _dashboardDateRangeEnd ?? now;
+        break;
+    }
+    return (start, end);
   }
 }
 

@@ -105,7 +105,7 @@ class _BillDialogState extends State<BillDialog> {
                   .v1AutocompleteBillsGet(query: textEditingValue.text);
               apiThrowErrorIfEmpty(response, mounted ? context : null);
 
-              return response.body!;
+              return response.body ?? const <AutocompleteBill>[];
             } catch (e, stackTrace) {
               log.severe(
                 "Error while fetching autocomplete from API",

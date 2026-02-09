@@ -161,7 +161,8 @@ class _TransactionPageState extends State<TransactionPage>
 
       /// title
       if (transaction.attributes.groupTitle?.isNotEmpty ?? false) {
-        _titleTextController.text = transaction.attributes.groupTitle!;
+        _titleTextController.text =
+            transaction.attributes.groupTitle ?? '';
       } else {
         _titleTextController.text = transactions.first.description;
       }
@@ -1432,7 +1433,7 @@ class _TransactionPageState extends State<TransactionPage>
                       }
                       apiThrowErrorIfEmpty(response, mounted ? context : null);
 
-                      return response.body!;
+                      return response.body ?? const <AutocompleteAccount>[];
                     } catch (e, stackTrace) {
                       log.severe(
                         "Error while fetching autocomplete from API",
@@ -1537,7 +1538,7 @@ class _TransactionPageState extends State<TransactionPage>
                           mounted ? context : null,
                         );
 
-                        return response.body!;
+                        return response.body ?? const <AutocompleteAccount>[];
                       } catch (e, stackTrace) {
                         log.severe(
                           "Error while fetching autocomplete from API",
@@ -1830,7 +1831,7 @@ class _TransactionPageState extends State<TransactionPage>
                                           mounted ? context : null,
                                         );
 
-                                        return response.body!;
+                                        return response.body ?? const <AutocompleteAccount>[];
                                       } catch (e, stackTrace) {
                                         log.severe(
                                           "Error while fetching autocomplete from API",
@@ -1908,7 +1909,7 @@ class _TransactionPageState extends State<TransactionPage>
                                           mounted ? context : null,
                                         );
 
-                                        return response.body!;
+                                        return response.body ?? const <AutocompleteAccount>[];
                                       } catch (e, stackTrace) {
                                         log.severe(
                                           "Error while fetching autocomplete from API",
@@ -2656,7 +2657,7 @@ class _TransactionBudgetState extends State<TransactionBudget> {
                 }
                 apiThrowErrorIfEmpty(response, mounted ? context : null);
 
-                return response.body!;
+                return response.body ?? const <AutocompleteBudget>[];
               } catch (e, stackTrace) {
                 log.severe(
                   "Error while fetching autocomplete from API",

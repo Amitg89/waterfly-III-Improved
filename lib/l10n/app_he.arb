@@ -1,39 +1,39 @@
 {
-    "@@locale": "en",
+    "@@locale": "he",
     "@@x-reference": true,
-    "accountRoleAssetCashWallet": "Cash Wallet",
+    "accountRoleAssetCashWallet": "ארנק מזומן",
     "@accountRoleAssetCashWallet": {
         "description": "Firefly Translation String: account_role_cashWalletAsset"
     },
-    "accountRoleAssetCC": "Credit card",
+    "accountRoleAssetCC": "כרטיס אשראי",
     "@accountRoleAssetCC": {
         "description": "Firefly Translation String: account_role_ccAsset"
     },
-    "accountRoleAssetDefault": "Default asset account",
+    "accountRoleAssetDefault": "חשבון נכס ברירת מחדל",
     "@accountRoleAssetDefault": {
         "description": "Firefly Translation String: account_role_defaultAsset"
     },
-    "accountRoleAssetSavings": "Savings account",
+    "accountRoleAssetSavings": "חשבון חיסכון",
     "@accountRoleAssetSavings": {
         "description": "Firefly Translation String: account_role_savingAsset"
     },
-    "accountRoleAssetShared": "Shared asset account",
+    "accountRoleAssetShared": "חשבון נכס משותף",
     "@accountRoleAssetShared": {
         "description": "Firefly Translation String: account_role_sharedAsset"
     },
-    "accountsLabelAsset": "Asset Accounts",
+    "accountsLabelAsset": "חשבונות נכסים",
     "@accountsLabelAsset": {
         "description": "Firefly Translation String: asset_accounts"
     },
-    "accountsLabelExpense": "Expense Accounts",
+    "accountsLabelExpense": "חשבונות הוצאות",
     "@accountsLabelExpense": {
         "description": "Firefly Translation String: expense_accounts"
     },
-    "accountsLabelLiabilities": "Liabilities",
+    "accountsLabelLiabilities": "התחייבויות",
     "@accountsLabelLiabilities": {
         "description": "Firefly Translation String: liabilities_accounts"
     },
-    "accountsLabelRevenue": "Revenue Accounts",
+    "accountsLabelRevenue": "חשבונות הכנסות",
     "@accountsLabelRevenue": {
         "description": "Firefly Translation String: revenue_accounts"
     },
@@ -327,11 +327,11 @@
     "@formButtonHelp": {
         "description": "Button Label: Help"
     },
-    "formButtonLogin": "Login",
+    "formButtonLogin": "התחבר",
     "@formButtonLogin": {
         "description": "Button Label: Login"
     },
-    "formButtonLogout": "Logout",
+    "formButtonLogout": "התנתק",
     "@formButtonLogout": {
         "description": "Button Label: Logout"
     },
@@ -351,15 +351,15 @@
     "@formButtonTryAgain": {
         "description": "Button Label: Try that thing again (login etc)"
     },
-    "generalAccount": "Account",
+    "generalAccount": "חשבון",
     "@generalAccount": {
         "description": "Asset/Debt (Bank) Account"
     },
-    "generalAssets": "Assets",
+    "generalAssets": "נכסים",
     "@generalAssets": {
         "description": "(Monetary) Assets"
     },
-    "generalBalance": "Balance",
+    "generalBalance": "יתרה",
     "@generalBalance": {
         "description": "(Account) Balance"
     },
@@ -377,39 +377,39 @@
     "@generalBill": {
         "description": "Subscription (caution: was named Bill until Firefly version 6.2.0)"
     },
-    "generalBudget": "Budget",
+    "generalBudget": "תקציב",
     "@generalBudget": {
         "description": "(Monetary) Budget"
     },
-    "generalCategory": "Category",
+    "generalCategory": "קטגוריה",
     "@generalCategory": {
         "description": "Category (of transaction etc.)."
     },
-    "generalCurrency": "Currency",
+    "generalCurrency": "מטבע",
     "@generalCurrency": {
         "description": "(Money) Currency"
     },
-    "generalDateRangeCurrentMonth": "Current Month",
+    "generalDateRangeCurrentMonth": "חודש נוכחי",
     "@generalDateRangeCurrentMonth": {
         "description": "Date Range: Current Month"
     },
-    "generalDateRangeLast30Days": "Last 30 days",
+    "generalDateRangeLast30Days": "30 הימים האחרונים",
     "@generalDateRangeLast30Days": {
         "description": "Date Range: Last 30 days"
     },
-    "generalDateRangeCurrentYear": "Current Year",
+    "generalDateRangeCurrentYear": "שנה נוכחית",
     "@generalDateRangeCurrentYear": {
         "description": "Date Range: Current Year"
     },
-    "generalDateRangeLastYear": "Last year",
+    "generalDateRangeLastYear": "שנה שעברה",
     "@generalDateRangeLastYear": {
         "description": "Date Range: Last year"
     },
-    "generalDateRangeAll": "All",
+    "generalDateRangeAll": "הכל",
     "@generalDateRangeAll": {
         "description": "Date Range: All"
     },
-    "generalDateRangeCustom": "Custom range",
+    "generalDateRangeCustom": "טווח תאריכים מותאם",
     "@generalDateRangeCustom": {
         "description": "Date Range: Custom start/end dates"
     },
@@ -421,23 +421,23 @@
     "@generalDestinationAccount": {
         "description": "Destination Account (for transaction)"
     },
-    "generalDismiss": "Dismiss",
+    "generalDismiss": "סגור",
     "@generalDismiss": {
         "description": "Dismiss window/dialog without action"
     },
-    "generalEarned": "Earned",
+    "generalEarned": "הרווח",
     "@generalEarned": {
         "description": "(Amount) Earned"
     },
-    "generalError": "Error",
+    "generalError": "שגיאה",
     "@generalError": {
         "description": "Error (title in dialogs etc.)"
     },
-    "generalExpenses": "Expenses",
+    "generalExpenses": "הוצאות",
     "@generalExpenses": {
         "description": "(Account) Expenses"
     },
-    "generalIncome": "Income",
+    "generalIncome": "הכנסות",
     "@generalIncome": {
         "description": "(Account) Info"
     },
@@ -457,7 +457,7 @@
     "@generalReconcile": {
         "description": "Booking has been confirmed/reconciled"
     },
-    "generalReset": "Reset",
+    "generalReset": "איפוס",
     "@generalReset": {
         "description": "Reset something (i.e. set filters)"
     },
@@ -465,11 +465,11 @@
     "@generalSourceAccount": {
         "description": "Source Account (of transaction)"
     },
-    "generalSpent": "Spent",
+    "generalSpent": "הוצא",
     "@generalSpent": {
         "description": "(Amount) Spent"
     },
-    "generalSum": "Sum",
+    "generalSum": "סיכום",
     "@generalSum": {
         "description": "(Mathematical) Sum"
     },
@@ -554,20 +554,20 @@
         "description": "Title: Budgets for current month"
     },
     "homeMainChartAccountsTitle": "Account Summary",
-    "@homeMainChartAccountsTitle": {
-        "description": "Chart Label: Account Summary"
-    },
-    "homeMainChartChargesPerCardTitle": "Charges per card",
+    "homeMainChartChargesPerCardTitle": "חיובים לכרטיס",
     "@homeMainChartChargesPerCardTitle": {
         "description": "Chart Label: Total charges per account for the dashboard date range"
     },
-    "homeMainChartChargesPerCardEmpty": "No charges in this period",
+    "homeMainChartChargesPerCardEmpty": "אין חיובים בתקופה זו",
     "@homeMainChartChargesPerCardEmpty": {
         "description": "Shown when the charges-per-card card has no data for the selected range"
     },
-    "homeMainChartChargesPerCardTotal": "Total",
+    "homeMainChartChargesPerCardTotal": "סה״כ",
     "@homeMainChartChargesPerCardTotal": {
         "description": "Label for the sum of all card charges at the bottom of the card"
+    },
+    "@homeMainChartAccountsTitle": {
+        "description": "Chart Label: Account Summary"
     },
     "homeMainChartCategoriesTitle": "Category Summary for current month",
     "@homeMainChartCategoriesTitle": {
@@ -623,47 +623,47 @@
     "@homeMainDialogSettingsTitle": {
         "description": "Dialog title for dashboard settings (card order & visibility)"
     },
-    "homeMainFilterTitle": "Dashboard filter",
+    "homeMainFilterTitle": "מסנן לוח בקרה",
     "@homeMainFilterTitle": {
         "description": "Dashboard filter dialog title"
     },
-    "homeMainFilterTimeFrame": "Time frame",
+    "homeMainFilterTimeFrame": "טווח זמן",
     "@homeMainFilterTimeFrame": {
         "description": "Dashboard filter: time frame label"
     },
-    "homeMainFilterLast7Days": "Last 7 days",
+    "homeMainFilterLast7Days": "7 ימים אחרונים",
     "@homeMainFilterLast7Days": {
         "description": "Dashboard filter: last 7 days preset"
     },
-    "homeMainFilterLast30Days": "Last 30 days",
+    "homeMainFilterLast30Days": "30 ימים אחרונים",
     "@homeMainFilterLast30Days": {
         "description": "Dashboard filter: last 30 days preset"
     },
-    "homeMainFilterCurrentMonth": "Current month",
+    "homeMainFilterCurrentMonth": "חודש נוכחי",
     "@homeMainFilterCurrentMonth": {
         "description": "Dashboard filter: current month preset"
     },
-    "homeMainFilterLast3Months": "Last 3 months",
+    "homeMainFilterLast3Months": "3 חודשים אחרונים",
     "@homeMainFilterLast3Months": {
         "description": "Dashboard filter: last 3 months preset"
     },
-    "homeMainFilterLast12Months": "Last 12 months",
+    "homeMainFilterLast12Months": "12 חודשים אחרונים",
     "@homeMainFilterLast12Months": {
         "description": "Dashboard filter: last 12 months preset"
     },
-    "homeMainFilterCustomRange": "Custom range",
+    "homeMainFilterCustomRange": "טווח מותאם",
     "@homeMainFilterCustomRange": {
         "description": "Dashboard filter: custom date range option"
     },
-    "homeMainFilterAccounts": "Accounts",
+    "homeMainFilterAccounts": "חשבונות",
     "@homeMainFilterAccounts": {
         "description": "Dashboard filter: accounts section label"
     },
-    "homeMainFilterAllAccounts": "All accounts",
+    "homeMainFilterAllAccounts": "כל החשבונות",
     "@homeMainFilterAllAccounts": {
         "description": "Dashboard filter: show all accounts"
     },
-    "homeMainFilterSelectAccounts": "Select accounts",
+    "homeMainFilterSelectAccounts": "בחירת חשבונות",
     "@homeMainFilterSelectAccounts": {
         "description": "Dashboard filter: select specific accounts"
     },
@@ -747,19 +747,19 @@
             }
         }
     },
-    "homeTabLabelBalance": "Balance Sheet",
+    "homeTabLabelBalance": "מאזן",
     "@homeTabLabelBalance": {
         "description": "Tab Label: Balance Sheet page"
     },
-    "homeTabLabelMain": "Main",
+    "homeTabLabelMain": "ראשי",
     "@homeTabLabelMain": {
         "description": "Tab Label: Start page (\"main\")"
     },
-    "homeTabLabelPiggybanks": "Piggy Banks",
+    "homeTabLabelPiggybanks": "קופות",
     "@homeTabLabelPiggybanks": {
         "description": "Tab Label: Piggy Banks page"
     },
-    "homeTabLabelTransactions": "Transactions",
+    "homeTabLabelTransactions": "תנועות",
     "@homeTabLabelTransactions": {
         "description": "Tab Label: Transactions page"
     },
@@ -815,7 +815,7 @@
     "@homeTransactionsDialogFilterTitle": {
         "description": "Title of Filter Dialog"
     },
-    "homeTransactionsDialogFilterDefaultHint": "This selection will be used next time you open the app.",
+    "homeTransactionsDialogFilterDefaultHint": "הבחירה תשמר ותישתמש בפתיחת האפליקציה בפעם הבאה.",
     "@homeTransactionsDialogFilterDefaultHint": {
         "description": "Hint that the selected filter is saved as default"
     },
@@ -893,11 +893,11 @@
     "@navigationMain": {
         "description": "Navigation Label: Main Dashboard"
     },
-    "generalSettings": "Settings",
+    "generalSettings": "הגדרות",
     "@generalSettings": {
         "description": "Label: Settings"
     },
-    "no": "No",
+    "no": "לא",
     "@no": {
         "description": "The word no"
     },
@@ -1261,15 +1261,15 @@
     "@transactionTitleEdit": {
         "description": "Title: Edit existing transaction"
     },
-    "transactionTypeDeposit": "Deposit",
+    "transactionTypeDeposit": "הפקדה",
     "@transactionTypeDeposit": {
         "description": "Deposit transaction type"
     },
-    "transactionTypeTransfer": "Transfer",
+    "transactionTypeTransfer": "העברה",
     "@transactionTypeTransfer": {
         "description": "Transfer transaction type"
     },
-    "transactionTypeWithdrawal": "Withdrawal",
+    "transactionTypeWithdrawal": "משיכה",
     "@transactionTypeWithdrawal": {
         "description": "Withdrawal transaction type"
     }

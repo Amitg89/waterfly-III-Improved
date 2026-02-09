@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chopper/chopper.dart' show Response;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:waterflyiii/auth.dart';
@@ -234,12 +235,124 @@ class FilterDialog extends StatelessWidget {
                           context
                               .read<SettingsProvider>()
                               .setTransactionDateFilter(newValue);
+                          if (newValue == TransactionDateFilter.custom) {
+                            final SettingsProvider sp =
+                                context.read<SettingsProvider>();
+                            if (sp.transactionDateRangeStart == null ||
+                                sp.transactionDateRangeEnd == null) {
+                              final DateTime now = DateTime.now();
+                              sp.setTransactionDateRange(
+                                now.subtract(const Duration(days: 30)),
+                                now,
+                              );
+                            }
+                          }
                         }
                       },
                       width: inputWidth,
                     ),
                   );
                   child.add(const SizedBox(height: 12));
+
+                  // Custom date range pickers when Custom is selected
+                  if (context.read<SettingsProvider>().transactionDateFilter ==
+                      TransactionDateFilter.custom) {
+                    final SettingsProvider settings =
+                        context.read<SettingsProvider>();
+                    final DateTime now = DateTime.now();
+                    final DateTime rangeStart =
+                        settings.transactionDateRangeStart ??
+                            now.subtract(const Duration(days: 30));
+                    final DateTime rangeEnd =
+                        settings.transactionDateRangeEnd ?? now;
+                    child.add(
+                      SizedBox(
+                        width: inputWidth,
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final DateTime? picked =
+                                      await showDatePicker(
+                                    context: context,
+                                    initialDate: rangeStart,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101),
+                                  );
+                                  if (picked != null && context.mounted) {
+                                    final DateTime end =
+                                        context
+                                            .read<SettingsProvider>()
+                                            .transactionDateRangeEnd ??
+                                        rangeEnd;
+                                    if (picked.isBefore(end) ||
+                                        picked.isAtSameMomentAs(end)) {
+                                      await context
+                                          .read<SettingsProvider>()
+                                          .setTransactionDateRange(
+                                            picked,
+                                            end,
+                                          );
+                                    }
+                                  }
+                                },
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Start',
+                                  ),
+                                  child: Text(
+                                    DateFormat.yMd().format(rangeStart),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () async {
+                                  final DateTime? picked =
+                                      await showDatePicker(
+                                    context: context,
+                                    initialDate: rangeEnd,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101),
+                                  );
+                                  if (picked != null && context.mounted) {
+                                    final DateTime start =
+                                        context
+                                            .read<SettingsProvider>()
+                                            .transactionDateRangeStart ??
+                                        rangeStart;
+                                    if (picked.isAfter(start) ||
+                                        picked.isAtSameMomentAs(start)) {
+                                      await context
+                                          .read<SettingsProvider>()
+                                          .setTransactionDateRange(
+                                            start,
+                                            picked,
+                                          );
+                                    }
+                                  }
+                                },
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: 'End',
+                                  ),
+                                  child: Text(
+                                    DateFormat.yMd().format(rangeEnd),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                    child.add(const SizedBox(height: 12));
+                  }
 
                   // Search Term
                   child.add(
@@ -594,6 +707,16 @@ class FilterDialog extends StatelessWidget {
                   );
                   child.add(const SizedBox(height: 12));
 
+                  child.add(
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        S.of(context).homeTransactionsDialogFilterDefaultHint,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  );
+
                   return Padding(
                     padding: const EdgeInsets.all(12),
                     child: Column(
@@ -632,6 +755,8 @@ class FilterDialog extends StatelessWidget {
         return S.of(context).generalDateRangeLastYear;
       case TransactionDateFilter.all:
         return S.of(context).generalDateRangeAll;
+      case TransactionDateFilter.custom:
+        return S.of(context).generalDateRangeCustom;
     }
   }
 }

@@ -4,36 +4,36 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for English (`en`).
-class SEn extends S {
-  SEn([String locale = 'en']) : super(locale);
+/// The translations for Hebrew (`he`).
+class SHe extends S {
+  SHe([String locale = 'he']) : super(locale);
 
   @override
-  String get accountRoleAssetCashWallet => 'Cash Wallet';
+  String get accountRoleAssetCashWallet => 'ארנק מזומן';
 
   @override
-  String get accountRoleAssetCC => 'Credit card';
+  String get accountRoleAssetCC => 'כרטיס אשראי';
 
   @override
-  String get accountRoleAssetDefault => 'Default asset account';
+  String get accountRoleAssetDefault => 'חשבון נכס ברירת מחדל';
 
   @override
-  String get accountRoleAssetSavings => 'Savings account';
+  String get accountRoleAssetSavings => 'חשבון חיסכון';
 
   @override
-  String get accountRoleAssetShared => 'Shared asset account';
+  String get accountRoleAssetShared => 'חשבון נכס משותף';
 
   @override
-  String get accountsLabelAsset => 'Asset Accounts';
+  String get accountsLabelAsset => 'חשבונות נכסים';
 
   @override
-  String get accountsLabelExpense => 'Expense Accounts';
+  String get accountsLabelExpense => 'חשבונות הוצאות';
 
   @override
-  String get accountsLabelLiabilities => 'Liabilities';
+  String get accountsLabelLiabilities => 'התחייבויות';
 
   @override
-  String get accountsLabelRevenue => 'Revenue Accounts';
+  String get accountsLabelRevenue => 'חשבונות הכנסות';
 
   @override
   String accountsLiabilitiesInterest(double interest, String period) {
@@ -284,10 +284,10 @@ class SEn extends S {
   String get formButtonHelp => 'Help';
 
   @override
-  String get formButtonLogin => 'Login';
+  String get formButtonLogin => 'התחבר';
 
   @override
-  String get formButtonLogout => 'Logout';
+  String get formButtonLogout => 'התנתק';
 
   @override
   String get formButtonRemove => 'Remove';
@@ -302,13 +302,13 @@ class SEn extends S {
   String get formButtonTryAgain => 'Try again';
 
   @override
-  String get generalAccount => 'Account';
+  String get generalAccount => 'חשבון';
 
   @override
-  String get generalAssets => 'Assets';
+  String get generalAssets => 'נכסים';
 
   @override
-  String get generalBalance => 'Balance';
+  String get generalBalance => 'יתרה';
 
   @override
   String generalBalanceOn(DateTime date) {
@@ -322,31 +322,31 @@ class SEn extends S {
   String get generalBill => 'Subscription';
 
   @override
-  String get generalBudget => 'Budget';
+  String get generalBudget => 'תקציב';
 
   @override
-  String get generalCategory => 'Category';
+  String get generalCategory => 'קטגוריה';
 
   @override
-  String get generalCurrency => 'Currency';
+  String get generalCurrency => 'מטבע';
 
   @override
-  String get generalDateRangeCurrentMonth => 'Current Month';
+  String get generalDateRangeCurrentMonth => 'חודש נוכחי';
 
   @override
-  String get generalDateRangeLast30Days => 'Last 30 days';
+  String get generalDateRangeLast30Days => '30 הימים האחרונים';
 
   @override
-  String get generalDateRangeCurrentYear => 'Current Year';
+  String get generalDateRangeCurrentYear => 'שנה נוכחית';
 
   @override
-  String get generalDateRangeLastYear => 'Last year';
+  String get generalDateRangeLastYear => 'שנה שעברה';
 
   @override
-  String get generalDateRangeAll => 'All';
+  String get generalDateRangeAll => 'הכל';
 
   @override
-  String get generalDateRangeCustom => 'Custom range';
+  String get generalDateRangeCustom => 'טווח תאריכים מותאם';
 
   @override
   String get generalDefault => 'default';
@@ -355,19 +355,19 @@ class SEn extends S {
   String get generalDestinationAccount => 'Destination Account';
 
   @override
-  String get generalDismiss => 'Dismiss';
+  String get generalDismiss => 'סגור';
 
   @override
-  String get generalEarned => 'Earned';
+  String get generalEarned => 'הרווח';
 
   @override
-  String get generalError => 'Error';
+  String get generalError => 'שגיאה';
 
   @override
-  String get generalExpenses => 'Expenses';
+  String get generalExpenses => 'הוצאות';
 
   @override
-  String get generalIncome => 'Income';
+  String get generalIncome => 'הכנסות';
 
   @override
   String get generalLiabilities => 'Liabilities';
@@ -382,16 +382,16 @@ class SEn extends S {
   String get generalReconcile => 'Reconciled';
 
   @override
-  String get generalReset => 'Reset';
+  String get generalReset => 'איפוס';
 
   @override
   String get generalSourceAccount => 'Source Account';
 
   @override
-  String get generalSpent => 'Spent';
+  String get generalSpent => 'הוצא';
 
   @override
-  String get generalSum => 'Sum';
+  String get generalSum => 'סיכום';
 
   @override
   String get generalTarget => 'Target';
@@ -451,13 +451,13 @@ class SEn extends S {
   String get homeMainChartAccountsTitle => 'Account Summary';
 
   @override
-  String get homeMainChartChargesPerCardTitle => 'Charges per card';
+  String get homeMainChartChargesPerCardTitle => 'חיובים לכרטיס';
 
   @override
-  String get homeMainChartChargesPerCardEmpty => 'No charges in this period';
+  String get homeMainChartChargesPerCardEmpty => 'אין חיובים בתקופה זו';
 
   @override
-  String get homeMainChartChargesPerCardTotal => 'Total';
+  String get homeMainChartChargesPerCardTotal => 'סה״כ';
 
   @override
   String get homeMainChartCategoriesTitle =>
@@ -501,37 +501,37 @@ class SEn extends S {
   String get homeMainDialogSettingsTitle => 'Customize Dashboard';
 
   @override
-  String get homeMainFilterTitle => 'Dashboard filter';
+  String get homeMainFilterTitle => 'מסנן לוח בקרה';
 
   @override
-  String get homeMainFilterTimeFrame => 'Time frame';
+  String get homeMainFilterTimeFrame => 'טווח זמן';
 
   @override
-  String get homeMainFilterLast7Days => 'Last 7 days';
+  String get homeMainFilterLast7Days => '7 ימים אחרונים';
 
   @override
-  String get homeMainFilterLast30Days => 'Last 30 days';
+  String get homeMainFilterLast30Days => '30 ימים אחרונים';
 
   @override
-  String get homeMainFilterCurrentMonth => 'Current month';
+  String get homeMainFilterCurrentMonth => 'חודש נוכחי';
 
   @override
-  String get homeMainFilterLast3Months => 'Last 3 months';
+  String get homeMainFilterLast3Months => '3 חודשים אחרונים';
 
   @override
-  String get homeMainFilterLast12Months => 'Last 12 months';
+  String get homeMainFilterLast12Months => '12 חודשים אחרונים';
 
   @override
-  String get homeMainFilterCustomRange => 'Custom range';
+  String get homeMainFilterCustomRange => 'טווח מותאם';
 
   @override
-  String get homeMainFilterAccounts => 'Accounts';
+  String get homeMainFilterAccounts => 'חשבונות';
 
   @override
-  String get homeMainFilterAllAccounts => 'All accounts';
+  String get homeMainFilterAllAccounts => 'כל החשבונות';
 
   @override
-  String get homeMainFilterSelectAccounts => 'Select accounts';
+  String get homeMainFilterSelectAccounts => 'בחירת חשבונות';
 
   @override
   String homePiggyLinked(String account) {
@@ -579,16 +579,16 @@ class SEn extends S {
   }
 
   @override
-  String get homeTabLabelBalance => 'Balance Sheet';
+  String get homeTabLabelBalance => 'מאזן';
 
   @override
-  String get homeTabLabelMain => 'Main';
+  String get homeTabLabelMain => 'ראשי';
 
   @override
-  String get homeTabLabelPiggybanks => 'Piggy Banks';
+  String get homeTabLabelPiggybanks => 'קופות';
 
   @override
-  String get homeTabLabelTransactions => 'Transactions';
+  String get homeTabLabelTransactions => 'תנועות';
 
   @override
   String get homeTransactionsActionFilter => 'Filter List';
@@ -632,7 +632,7 @@ class SEn extends S {
 
   @override
   String get homeTransactionsDialogFilterDefaultHint =>
-      'This selection will be used next time you open the app.';
+      'הבחירה תשמר ותישתמש בפתיחת האפליקציה בפעם הבאה.';
 
   @override
   String get homeTransactionsEmpty => 'No transactions found.';
@@ -690,10 +690,10 @@ class SEn extends S {
   String get navigationMain => 'Main Dashboard';
 
   @override
-  String get generalSettings => 'Settings';
+  String get generalSettings => 'הגדרות';
 
   @override
-  String get no => 'No';
+  String get no => 'לא';
 
   @override
   String numPercent(double num) {
@@ -979,11 +979,11 @@ class SEn extends S {
   String get transactionTitleEdit => 'Edit Transaction';
 
   @override
-  String get transactionTypeDeposit => 'Deposit';
+  String get transactionTypeDeposit => 'הפקדה';
 
   @override
-  String get transactionTypeTransfer => 'Transfer';
+  String get transactionTypeTransfer => 'העברה';
 
   @override
-  String get transactionTypeWithdrawal => 'Withdrawal';
+  String get transactionTypeWithdrawal => 'משיכה';
 }

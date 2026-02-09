@@ -346,6 +346,9 @@ class SNl extends S {
   String get generalDateRangeAll => 'Alle';
 
   @override
+  String get generalDateRangeCustom => 'Custom range';
+
+  @override
   String get generalDefault => 'standaard';
 
   @override
@@ -448,6 +451,15 @@ class SNl extends S {
   String get homeMainChartAccountsTitle => 'Accountoverzicht';
 
   @override
+  String get homeMainChartChargesPerCardTitle => 'Charges per card';
+
+  @override
+  String get homeMainChartChargesPerCardEmpty => 'No charges in this period';
+
+  @override
+  String get homeMainChartChargesPerCardTotal => 'Total';
+
+  @override
   String get homeMainChartCategoriesTitle =>
       'Categorie samenvatting voor huidige maand';
 
@@ -487,6 +499,39 @@ class SNl extends S {
 
   @override
   String get homeMainDialogSettingsTitle => 'Dashboard aanpassen';
+
+  @override
+  String get homeMainFilterTitle => 'Dashboard filter';
+
+  @override
+  String get homeMainFilterTimeFrame => 'Time frame';
+
+  @override
+  String get homeMainFilterLast7Days => 'Last 7 days';
+
+  @override
+  String get homeMainFilterLast30Days => 'Last 30 days';
+
+  @override
+  String get homeMainFilterCurrentMonth => 'Current month';
+
+  @override
+  String get homeMainFilterLast3Months => 'Last 3 months';
+
+  @override
+  String get homeMainFilterLast12Months => 'Last 12 months';
+
+  @override
+  String get homeMainFilterCustomRange => 'Custom range';
+
+  @override
+  String get homeMainFilterAccounts => 'Accounts';
+
+  @override
+  String get homeMainFilterAllAccounts => 'All accounts';
+
+  @override
+  String get homeMainFilterSelectAccounts => 'Select accounts';
 
   @override
   String homePiggyLinked(String account) {
@@ -587,6 +632,10 @@ class SNl extends S {
 
   @override
   String get homeTransactionsDialogFilterTitle => 'Filters kiezen';
+
+  @override
+  String get homeTransactionsDialogFilterDefaultHint =>
+      'This selection will be used next time you open the app.';
 
   @override
   String get homeTransactionsEmpty => 'Geen transacties gevonden.';

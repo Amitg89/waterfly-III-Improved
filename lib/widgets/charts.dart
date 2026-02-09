@@ -16,6 +16,13 @@ class TimeSeriesChart {
   TimeSeriesChart(this.time, this.value);
 }
 
+/// Parses chart entry value (API may return string or num).
+double _chartEntryValueToDouble(dynamic value) {
+  if (value == null) return 0;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString()) ?? 0;
+}
+
 extension ConvertChartDataSet on ChartDataSet {
   List<TimeSeriesChart> toChart() {
     final List<TimeSeriesChart> data = <TimeSeriesChart>[];
@@ -23,7 +30,10 @@ extension ConvertChartDataSet on ChartDataSet {
     final Map<String, dynamic> e = entries! as Map<String, dynamic>;
     e.forEach(
       (String key, dynamic value) => data.add(
-        TimeSeriesChart(DateTime.parse(key), double.tryParse(value) ?? 0),
+        TimeSeriesChart(
+          DateTime.parse(key),
+          _chartEntryValueToDouble(value),
+        ),
       ),
     );
     return data;

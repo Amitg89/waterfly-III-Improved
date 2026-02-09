@@ -210,7 +210,7 @@ class _BillDetailsState extends State<BillDetails> {
             if (snapshot.connectionState == ConnectionState.done &&
                 snapshot.hasData &&
                 snapshot.data != null) {
-              return TransactionPage(transaction: snapshot.data);
+              return TransactionPage(transaction: snapshot.data!);
             }
             if (snapshot.hasError) {
               Navigator.of(context).pop();
