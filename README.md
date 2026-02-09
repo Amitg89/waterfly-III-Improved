@@ -1,81 +1,72 @@
-# Waterfly III
+# Waterfly III Improved
 
-<p align="center">
-  <a href="https://play.google.com/store/apps/details?id=com.dreautall.waterflyiii"><img src=".playstore/en_badge_web_generic.png" width="200" /></a>
-  <a href="https://f-droid.org/en/packages/com.dreautall.waterflyiii/"><img src=".github/assets/fdroid_get-it-on.png" width="200" /></a>
-</p>
+A fork of [Waterfly III](https://github.com/dreautall/waterfly-iii) with dashboard filtering and a **Charges per card** dashboard card.
 
-**Unofficial** Android App for [Firefly III](https://github.com/firefly-iii/firefly-iii), a free and open source personal finance manager.
+---
 
-The app design is heavily influenced
-by [Bluecoins](https://play.google.com/store/apps/details?id=com.rammigsoftware.bluecoins). Please
-also read the [FAQ](https://github.com/dreautall/waterfly-iii/blob/master/FAQ.md).
+## Credit to the original project
 
-## Features
+**Waterfly III Improved** is based on [**Waterfly III**](https://github.com/dreautall/waterfly-iii) by [dreautall](https://github.com/dreautall).
 
-- General
-  - Light & Dark mode, supports dynamic colors
-  - Translation ready - [**help to translate via Crowdin**](https://crowdin.com/project/waterfly-iii)!
-  - Listen to incoming notifications (e.g., from Google Pay or your banking app) and pre-fill transactions
-  - Option to require fingerprint to open the app
-- Dashboard
-  - Five different charts charts for the current balance & recent history
-  - Waterfall chart for net earnings in recent months
-  - Budget overview for last 30 days
-  - Upcoming bills
-- Transactions
-  - List transactions by date
-  - Ability to filter the list by various fields
-  - Add & edit transactions with autocomplete, including attachments and pictures, split transactions & multi currency support
-- Balance Sheet
-  - List individual account balances
-- Piggy Banks
-  - View piggy banks, sorted by category
-  - Add/Remove money from piggy banks
-- Accounts
-  - List all asset/expense/revenue/liability accounts
-  - Search for specific accounts
-- Categories
-  - View monthly transactions split up by category
-  - Add, edit & delete categories
-- Bills
-  - View bills and their overview organized into groups
-  - Inspect bill details and see connected transactions
+- **Original repository:** [https://github.com/dreautall/waterfly-iii](https://github.com/dreautall/waterfly-iii)
+- **License:** Same as the original project (see [LICENSE](LICENSE) in this repo).
 
-### Feature Status
+Waterfly III is the **unofficial** Android app for [Firefly III](https://github.com/firefly-iii/firefly-iii), a free and open source personal finance manager. All credit for the app concept, architecture, and the vast majority of the codebase belongs to the original Waterfly III project and its authors.
 
-The app does **not** try to replicate every single feature that the Webinterface has. Instead, it tries to be a good *companion* to access the most used functions on-the-go. More in-depth operations such as creating or modifying rules are not planned for this app.
+This fork adds a set of **dashboard and filtering improvements** on top of the original app. It is not an official variant and is not affiliated with the original project.
 
-If you are missing anything, feel free to open a [feature request](https://github.com/dreautall/waterfly-iii/issues/new/choose), or look at what other users [are requesting](https://github.com/dreautall/waterfly-iii/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
+---
 
-## Releases
+## List of changes in Waterfly III Improved
 
-The stable releases are published to the [Google Play Store](https://play.google.com/store/apps/details?id=com.dreautall.waterflyiii), and are also available for download from the [GitHub releases page](https://github.com/dreautall/waterfly-iii/releases/latest). There is no fixed release schedule.
+The following changes were made in this fork compared to the original Waterfly III codebase.
 
-You can also opt in to the (open) beta channel at Google Play [here](https://play.google.com/apps/testing/com.dreautall.waterflyiii). The beta channel will feature the "pre-releases" from the [GitHub releases page](https://github.com/dreautall/waterfly-iii/releases), and might not be as stable.
+### Dashboard filter (date range & accounts)
 
-## Screenshots
+- **Dashboard date range:** The dashboard can be limited to a configurable time range:
+  - Presets: Last 7 days, Last 30 days, Current month, Last 3 months, Last 12 months
+  - **Custom range:** Start and end date pickers for any range
+- **Filter dialog:** New filter icon in the app bar opens a dialog to set the date range and optionally “Select accounts.”
+- **Select accounts:** Optional filter to restrict dashboard (and some cards) to selected asset/liability accounts only.
+- **Persistence:** Chosen range and selected account IDs are saved and restored (e.g. via `SharedPreferences` / app settings).
+- **Settings:** New enums and settings: `DashboardDateRange`, `getDashboardDateRange()`, `dashboardAccountIds`, `setDashboardDateRange()`, `setDashboardDateRangeCustom()`, `setDashboardAccountIds()`.
 
-*All made with a Google Pixel 8, showing Waterfly III v1.0.0*
+### New dashboard card: “Charges per card”
 
-|Dashboard|Transactions|Transaction Filters|
-| :-: | :-: | :-: |
-| <img src=".github/assets/screen_dashboard.png" width="250" /> | <img src=".github/assets/screen_transactions_overview.png" width="250" /> | <img src=".github/assets/screen_transactions_filters.png" width="250" /> |
+- **Card purpose:** Shows total **charges** (withdrawals + outbound transfers) per account for the **dashboard date range** only.
+- **Data:** For each asset/liability account, transactions in the selected range are fetched and summed when the account is the source (withdrawal or transfer out). Only accounts with total charges > 0 are shown.
+- **Display:**
+  - **Pie chart** at the top: one slice per card; slice size = amount. Tapping a slice **hides it** from the pie (same idea as the Category Summary card). If all slices are hidden, the full pie is shown again. Chart height and card height were increased for clarity.
+  - **Table:** One row per account with a short label (e.g. last 4 digits if the account name ends with 4 digits, otherwise full name) and the total amount in that account’s currency.
+  - **Total row(s):** At the bottom, one or more “Total” lines: one total per currency when multiple currencies are present.
+- **Localization:** New strings for title, empty state, and total label (English and Hebrew).
 
-Transaction Add|Transaction Edit|Transaction Attachments|
-| :-: | :-: | :-: |
-| <img src=".github/assets/screen_transaction_add.png" width="250" /> | <img src=".github/assets/screen_transaction_edit.png" width="250" /> | <img src=".github/assets/screen_transaction_attachments.png" width="250" /> |
+### Dashboard card changes
 
-Account Screen|Category Screen|Piggy Banks with Chart|
-| :-: | :-: | :-: |
-| <img src=".github/assets/screen_accounts.png" width="250" /> | <img src=".github/assets/screen_categories.png" width="250" /> | <img src=".github/assets/screen_piggy_chart.png" width="250" /> |
+- **Removed:** The “Accounts in range” card was removed; the **Account Summary** card remains and still uses the dashboard date range and optional account filter.
+- **Account Summary:** Continues to use the dashboard date range and (when set) the selected accounts; balance is taken as the chronologically last date in range.
 
-## Technology
+### Robustness and UX (charts & data)
 
-The app is built using [Flutter](https://flutter.dev/), and tries to keep to the [Material 3](https://m3.material.io/) design guidelines. Additionally, I try to keep the app as "lean" as possible, **without any trackers** or unneeded dependency on external packages.
+- **Chart data:** Safer handling of chart entry keys (date parsing) and values (support for both string and numeric values from the API) in overview/account chart code and in `widgets/charts.dart`.
+- **Balance in tables:** Account summary and similar tables now use the **chronologically last** date in the data for the balance (instead of relying on map iteration order).
+- **Empty series:** Handled without crashing when a chart series has no entries.
 
-## Motivation
+### Localization (l10n)
 
-Having troubles with [Bluecoins](https://play.google.com/store/apps/details?id=com.rammigsoftware.bluecoins) syncing across devices and not always storing attachments online, I was looking for a self-hosted alternative and discovered [Firefly III](https://www.firefly-iii.org/). After a [quick script to migrate from Bluecoins to Firefly III](https://github.com/dreautall/bluecoins-to-fireflyiii), the only thing left was to download an app to easily track expenses on-the-go… or so I thought.
+- **Hebrew:** Added Hebrew locale: `app_he.arb` and generated `app_localizations_he.dart`.
+- **New keys:** All new UI strings (dashboard filter, charges-per-card card, total, etc.) were added to the ARB files and generated l10n.
 
-Unfortunately, I discovered that the existing Android Apps for Firefly III had been either outdated or very buggy and hardly maintained. Always wanting to use Flutter for something, I started to make my own app, modeling it after the Bluecoins app I used so far and its interface that I really liked.
+### Files touched (high level)
+
+- **Settings:** `lib/settings.dart` (dashboard range and account filter state and persistence).
+- **Dashboard UI:** `lib/pages/home/main.dart` (new card, pie chart, table, total, filter key, refresh behavior), `lib/pages/home/main/dashboard.dart` (card list and titles), **new** `lib/pages/home/main/dashboard_filter.dart` (filter dialog).
+- **Charts:** `lib/widgets/charts.dart` (value parsing for chart entries).
+- **L10n:** `lib/l10n/app_en.arb`, `lib/l10n/app_he.arb`, and generated `lib/generated/l10n/app_localizations*.dart`.
+- **Other:** `android/app/build.gradle.kts`, and any other files modified for the above (e.g. bills, transactions, transaction pages) as present in the working tree.
+
+---
+
+## Summary
+
+This fork keeps full credit with the original [Waterfly III](https://github.com/dreautall/waterfly-iii) and [Firefly III](https://github.com/firefly-iii/firefly-iii) projects and adds dashboard filtering (date range + optional accounts) and a dedicated “Charges per card” dashboard card with a tappable pie chart and per-currency totals.
