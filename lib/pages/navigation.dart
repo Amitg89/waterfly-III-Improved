@@ -7,6 +7,7 @@ import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/pages/home.dart';
 import 'package:waterflyiii/pages/settings.dart';
 import 'package:waterflyiii/pages/transactions_page.dart';
+import 'package:waterflyiii/widgets/vault_bottom_nav.dart';
 
 final Logger log = Logger("Pages.Navigation");
 
@@ -61,6 +62,18 @@ class NavPageElements with ChangeNotifier {
     }
     _fab = value;
     log.finest(() => "notify NavPageElements->setFab()");
+    notifyListeners();
+  }
+
+  Widget? _bottomNav;
+  Widget? get bottomNav => _bottomNav;
+  set bottomNav(Widget? value) {
+    if (value == bottomNav) {
+      log.finer(() => "NavPageElements->setBottomNav equal, skipping");
+      return;
+    }
+    _bottomNav = value;
+    log.finest(() => "notify NavPageElements->setBottomNav()");
     notifyListeners();
   }
 
@@ -163,6 +176,7 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
                   context.read<NavPageElements>().appBarActions = null;
                   context.read<NavPageElements>().appBarBottom = null;
                   context.read<NavPageElements>().fab = null;
+                  context.read<NavPageElements>().bottomNav = null;
                   context.read<NavPageElements>().appBarTitle = Text(
                     navDestinations[index].label,
                   );
@@ -218,18 +232,61 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
                 ),
               ],
             ),
-            body: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 100),
-              switchInCurve: animCurveStandard,
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: Tween<double>(begin: 0, end: 1).animate(animation),
-                  child: child,
+            extendBody: true,
+            body: Builder(
+              builder: (BuildContext context) {
+                final Widget? bottomNav =
+                    context.select((NavPageElements n) => n.bottomNav);
+                final Widget? fab =
+                    context.select((NavPageElements n) => n.fab);
+
+                // When a custom bottomNav is present, reserve space so page
+                // content is not obscured by the floating bar.
+                final double barReservation = bottomNav != null
+                    ? VaultBottomNav.barHeight +
+                        MediaQuery.viewPaddingOf(context).bottom
+                    : 0;
+
+                return Stack(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(bottom: barReservation),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 100),
+                        switchInCurve: animCurveStandard,
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity:
+                                Tween<double>(begin: 0, end: 1).animate(animation),
+                            child: child,
+                          );
+                        },
+                        child: currentPage.pageHandler,
+                      ),
+                    ),
+                    if (bottomNav != null)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: bottomNav,
+                      ),
+                    // FAB: RTL-safe placement, clearing the custom bar
+                    // (incl. safe area) when present, otherwise standard
+                    // 16 px + safe-area margin.
+                    if (fab != null)
+                      PositionedDirectional(
+                        end: 16,
+                        bottom: bottomNav != null
+                            ? barReservation + 16
+                            : 16 + MediaQuery.viewPaddingOf(context).bottom,
+                        child: fab,
+                      ),
+                  ],
                 );
               },
-              child: currentPage.pageHandler,
             ),
-            floatingActionButton: context.select((NavPageElements n) => n.fab),
           ),
     );
   }

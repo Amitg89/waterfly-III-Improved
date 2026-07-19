@@ -11,6 +11,7 @@ import 'package:waterflyiii/pages/home/mortgage.dart';
 import 'package:waterflyiii/pages/home/savings.dart';
 import 'package:waterflyiii/pages/navigation.dart';
 import 'package:waterflyiii/widgets/fabs.dart';
+import 'package:waterflyiii/widgets/vault_bottom_nav.dart';
 
 final Logger log = Logger("Pages.Home");
 
@@ -38,141 +39,148 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class HomePageState extends State<HomePage> {
   final Logger log = Logger("Pages.Home.Page");
 
-  late TabController _tabController;
+  int _index = 0;
   late Widget _newTransactionFab;
 
   final PageActions _actions = PageActions();
 
-  // AI tab is at index 5
-  static const int _aiTabIndex = 5;
+  // Page keys – preserved from original code.
+  static const Key _keyOverview = Key("HomeOverview");
+  static const Key _keyBanks = Key("HomeBanks");
+  static const Key _keyCards = Key("HomeCards");
+  static const Key _keySavings = Key("HomeSavings");
+  static const Key _keyMortgage = Key("HomeMortgage");
+
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
 
-    _tabController = TabController(vsync: this, length: 6);
-    _tabController.addListener(_handleTabChange);
-
-    tabPages = <Widget>[
+    _pages = <Widget>[
       HomeOverview(
-        key: const Key("HomeOverview"),
-        onNavigateToCards: () => _tabController.animateTo(2),
+        key: _keyOverview,
+        onNavigateToCards: () => _onSelect(2),
       ),
-      const HomeBanks(key: Key("HomeBanks")),
-      const HomeCards(key: Key("HomeCards")),
-      const HomeSavings(key: Key("HomeSavings")),
-      const HomeMortgage(key: Key("HomeMortgage")),
-      const HomeAnalyze(key: Key("HomeAnalyze")),
+      const HomeBanks(key: _keyBanks),
+      const HomeCards(key: _keyCards),
+      const HomeSavings(key: _keySavings),
+      const HomeMortgage(key: _keyMortgage),
     ];
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _newTransactionFab = NewTransactionFab(context: context);
-      // TabBar is set in build() so it updates when hasGeminiKey changes
-      _handleTabChange();
+      _publishElements();
     });
 
-    _actions.addListener(() => _handleTabChange());
+    _actions.addListener(_publishElements);
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_handleTabChange);
-    _tabController.dispose();
-
+    _actions.removeListener(_publishElements);
     super.dispose();
   }
 
-  void _handleTabChange() {
-    if (!_tabController.indexIsChanging) {
-      log.finer(() => "_handleTabChange(${_tabController.index})");
-      final bool hasGeminiKey = context.read<FireflyService>().hasGeminiKey;
-      if (_tabController.index == _aiTabIndex && !hasGeminiKey) {
-        final int previous = _tabController.previousIndex;
-        _tabController.animateTo(previous == _aiTabIndex ? 0 : previous);
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          SnackBar(
-            content: Text(S.of(context).analyzeAddGeminiKeyInSettings),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      // FAB only on Overview tab (index 0)
-      context.read<NavPageElements>().fab =
-          (_tabController.index == 0) ? _newTransactionFab : null;
-      context.read<NavPageElements>().appBarActions = _actions.get(
-        tabPages[_tabController.index].key ?? const Key(''),
-      );
-    }
+  /// Publishes FAB, appBarActions and bottomNav into [NavPageElements].
+  void _publishElements() {
+    if (!mounted) return;
+    log.finer(() => "_publishElements(index: $_index)");
+
+    final NavPageElements nav = context.read<NavPageElements>();
+
+    // FAB only on Overview (index 0).
+    nav.fab = (_index == 0) ? _newTransactionFab : null;
+
+    // App-bar actions: AI launcher + per-page actions.
+    final List<Widget> pageActions =
+        _actions.get(_pages[_index].key ?? const Key('')) ?? <Widget>[];
+    nav.appBarActions = <Widget>[
+      ..._buildAiAction(),
+      ...pageActions,
+    ];
+
+    // Bottom nav.
+    nav.bottomNav = VaultBottomNav(
+      currentIndex: _index,
+      onSelect: _onSelect,
+    );
   }
 
-  late List<Tab> tabs;
+  /// Builds the AI launcher app-bar action (shown on all 5 finance pages).
+  List<Widget> _buildAiAction() {
+    return <Widget>[
+      Builder(
+        builder: (BuildContext context) {
+          return IconButton(
+            icon: Image.asset(
+              'assets/images/ai_tab_icon.png',
+              width: 24,
+              height: 24,
+              fit: BoxFit.contain,
+            ),
+            tooltip: S.of(context).homeTabLabelAnalyze,
+            onPressed: () => _openAiPage(context),
+          );
+        },
+      ),
+    ];
+  }
 
-  late final List<Widget> tabPages;
+  void _openAiPage(BuildContext context) {
+    final bool hasGeminiKey = context.read<FireflyService>().hasGeminiKey;
+    if (!hasGeminiKey) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(S.of(context).analyzeAddGeminiKeyInSettings),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // HomeAnalyze uses: FireflyService (from root) and SettingsProvider (from root).
+    // It does NOT read PageActions, so no extra provider needed.
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext ctx) => Scaffold(
+          appBar: AppBar(
+            title: Text(S.of(ctx).homeTabLabelAnalyze),
+          ),
+          body: const HomeAnalyze(key: Key("HomeAnalyzeRoute")),
+        ),
+      ),
+    );
+  }
+
+  void _onSelect(int i) {
+    if (i == _index) return;
+    setState(() {
+      _index = i;
+    });
+    // Publish after setState so _index is updated.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _publishElements());
+  }
 
   @override
   Widget build(BuildContext context) {
-    log.finest(() => "build(tab: ${_tabController.index})");
-    final bool hasGeminiKey = context.watch<FireflyService>().hasGeminiKey;
-    final S l10n = S.of(context);
-    final TabBar tabBar = TabBar(
-      isScrollable: true,
-      controller: _tabController,
-      tabs: <Tab>[
-        Tab(text: l10n.homeTabLabelOverview),
-        Tab(text: l10n.homeTabLabelBanks),
-        Tab(text: l10n.homeTabLabelCards),
-        Tab(text: l10n.homeTabLabelSavings),
-        Tab(text: l10n.homeTabLabelMortgage),
-        Tab(
-          child: hasGeminiKey
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Image.asset(
-                      'assets/images/ai_tab_icon.png',
-                      width: 22,
-                      height: 22,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(l10n.homeTabLabelAnalyze),
-                  ],
-                )
-              : Opacity(
-                  opacity: 0.5,
-                  child: IgnorePointer(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Image.asset(
-                          'assets/images/ai_tab_icon.png',
-                          width: 22,
-                          height: 22,
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(l10n.homeTabLabelAnalyze),
-                        const SizedBox(width: 4),
-                        Icon(Icons.lock_outline, size: 14, color: Theme.of(context).colorScheme.onSurface),
-                      ],
-                    ),
-                  ),
-                ),
-        ),
-      ],
-      tabAlignment: TabAlignment.start,
-    );
+    log.finest(() => "build(index: $_index)");
+
+    // Publish bottom nav / appBarActions on every build so the bar reflects
+    // the current index without needing a separate listener call.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) return;
-      context.read<NavPageElements>().appBarBottom = tabBar;
+      if (mounted) _publishElements();
     });
+
     return ChangeNotifierProvider<PageActions>.value(
       value: _actions,
-      child: TabBarView(controller: _tabController, children: tabPages),
+      child: IndexedStack(
+        index: _index,
+        children: _pages,
+      ),
     );
   }
 }
