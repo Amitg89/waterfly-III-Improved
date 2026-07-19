@@ -6,7 +6,7 @@ import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/pages/home/analyze.dart';
 import 'package:waterflyiii/pages/home/banks.dart';
 import 'package:waterflyiii/pages/home/cards.dart';
-import 'package:waterflyiii/pages/home/main.dart';
+import 'package:waterflyiii/pages/home/overview.dart';
 import 'package:waterflyiii/pages/home/mortgage.dart';
 import 'package:waterflyiii/pages/home/savings.dart';
 import 'package:waterflyiii/pages/navigation.dart';
@@ -57,6 +57,18 @@ class HomePageState extends State<HomePage>
     _tabController = TabController(vsync: this, length: 6);
     _tabController.addListener(_handleTabChange);
 
+    tabPages = <Widget>[
+      HomeOverview(
+        key: const Key("HomeOverview"),
+        onNavigateToCards: () => _tabController.animateTo(2),
+      ),
+      const HomeBanks(key: Key("HomeBanks")),
+      const HomeCards(key: Key("HomeCards")),
+      const HomeSavings(key: Key("HomeSavings")),
+      const HomeMortgage(key: Key("HomeMortgage")),
+      const HomeAnalyze(key: Key("HomeAnalyze")),
+    ];
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _newTransactionFab = NewTransactionFab(context: context);
       // TabBar is set in build() so it updates when hasGeminiKey changes
@@ -99,14 +111,7 @@ class HomePageState extends State<HomePage>
 
   late List<Tab> tabs;
 
-  static const List<Widget> tabPages = <Widget>[
-    HomeMain(key: Key("HomeMain")),
-    HomeBanks(key: Key("HomeBanks")),
-    HomeCards(key: Key("HomeCards")),
-    HomeSavings(key: Key("HomeSavings")),
-    HomeMortgage(key: Key("HomeMortgage")),
-    HomeAnalyze(key: Key("HomeAnalyze")),
-  ];
+  late final List<Widget> tabPages;
 
   @override
   Widget build(BuildContext context) {

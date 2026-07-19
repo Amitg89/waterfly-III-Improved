@@ -1101,4 +1101,36 @@ class SFa extends S {
 
   @override
   String get transactionTypeWithdrawal => 'درخواست برداشت';
+
+  @override
+  String get overviewCardIncomeTitle => 'Income';
+
+  @override
+  String get overviewCardAvailableMoneyTitle => 'Available money';
+
+  @override
+  String get overviewCardUpcomingChargesTitle => 'Upcoming charges';
+
+  @override
+  String get overviewCardUpcomingByCategoryTitle =>
+      'Upcoming charges by category';
+
+  @override
+  String overviewCardTotal(String amount) {
+    return 'Total: $amount';
+  }
+
+  @override
+  String get overviewCategoryOther => 'Other';
+
+  @override
+  String get overviewErrorRetry => 'Error loading data. Tap to retry.';
+
+  @override
+  String get overviewNoData => 'No data';
+
+  @override
+  String overviewCategorySheetCard(String last4) {
+    return '•••• $last4';
+  }
 }

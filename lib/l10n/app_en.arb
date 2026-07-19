@@ -1434,5 +1434,53 @@
     "transactionTypeWithdrawal": "Withdrawal",
     "@transactionTypeWithdrawal": {
         "description": "Withdrawal transaction type"
+    },
+    "overviewCardIncomeTitle": "Income",
+    "@overviewCardIncomeTitle": {
+        "description": "Overview card: income bar chart title"
+    },
+    "overviewCardAvailableMoneyTitle": "Available money",
+    "@overviewCardAvailableMoneyTitle": {
+        "description": "Overview card: available bank balances title"
+    },
+    "overviewCardUpcomingChargesTitle": "Upcoming charges",
+    "@overviewCardUpcomingChargesTitle": {
+        "description": "Overview card: upcoming credit card charges pie chart title"
+    },
+    "overviewCardUpcomingByCategoryTitle": "Upcoming charges by category",
+    "@overviewCardUpcomingByCategoryTitle": {
+        "description": "Overview card: upcoming charges grouped by category pie chart title"
+    },
+    "overviewCardTotal": "Total: {amount}",
+    "@overviewCardTotal": {
+        "description": "Overview card: total amount row",
+        "placeholders": {
+            "amount": {
+                "type": "String",
+                "example": "₪1,234"
+            }
+        }
+    },
+    "overviewCategoryOther": "Other",
+    "@overviewCategoryOther": {
+        "description": "Overview: fallback category name when a transaction has no category"
+    },
+    "overviewErrorRetry": "Error loading data. Tap to retry.",
+    "@overviewErrorRetry": {
+        "description": "Overview card: inline error message with retry hint"
+    },
+    "overviewNoData": "No data",
+    "@overviewNoData": {
+        "description": "Overview card: empty state message"
+    },
+    "overviewCategorySheetCard": "•••• {last4}",
+    "@overviewCategorySheetCard": {
+        "description": "Overview: card identifier in category drill-down sheet",
+        "placeholders": {
+            "last4": {
+                "type": "String",
+                "example": "7725"
+            }
+        }
     }
 }

@@ -1366,5 +1366,53 @@
     "transactionTypeWithdrawal": "משיכה",
     "@transactionTypeWithdrawal": {
         "description": "Withdrawal transaction type"
+    },
+    "overviewCardIncomeTitle": "הכנסות",
+    "@overviewCardIncomeTitle": {
+        "description": "Overview card: income bar chart title"
+    },
+    "overviewCardAvailableMoneyTitle": "כסף זמין",
+    "@overviewCardAvailableMoneyTitle": {
+        "description": "Overview card: available bank balances title"
+    },
+    "overviewCardUpcomingChargesTitle": "חיובים קרובים",
+    "@overviewCardUpcomingChargesTitle": {
+        "description": "Overview card: upcoming credit card charges pie chart title"
+    },
+    "overviewCardUpcomingByCategoryTitle": "חיובים קרובים לפי קטגוריה",
+    "@overviewCardUpcomingByCategoryTitle": {
+        "description": "Overview card: upcoming charges grouped by category pie chart title"
+    },
+    "overviewCardTotal": "סה\"כ: {amount}",
+    "@overviewCardTotal": {
+        "description": "Overview card: total amount row",
+        "placeholders": {
+            "amount": {
+                "type": "String",
+                "example": "₪1,234"
+            }
+        }
+    },
+    "overviewCategoryOther": "אחר",
+    "@overviewCategoryOther": {
+        "description": "Overview: fallback category name when a transaction has no category"
+    },
+    "overviewErrorRetry": "שגיאה בטעינת הנתונים. הקש לנסות שוב.",
+    "@overviewErrorRetry": {
+        "description": "Overview card: inline error message with retry hint"
+    },
+    "overviewNoData": "אין נתונים",
+    "@overviewNoData": {
+        "description": "Overview card: empty state message"
+    },
+    "overviewCategorySheetCard": "•••• {last4}",
+    "@overviewCategorySheetCard": {
+        "description": "Overview: card identifier in category drill-down sheet",
+        "placeholders": {
+            "last4": {
+                "type": "String",
+                "example": "7725"
+            }
+        }
     }
 }

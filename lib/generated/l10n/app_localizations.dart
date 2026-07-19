@@ -1903,6 +1903,60 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Withdrawal'**
   String get transactionTypeWithdrawal;
+
+  /// Overview card: income bar chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get overviewCardIncomeTitle;
+
+  /// Overview card: available bank balances title
+  ///
+  /// In en, this message translates to:
+  /// **'Available money'**
+  String get overviewCardAvailableMoneyTitle;
+
+  /// Overview card: upcoming credit card charges pie chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming charges'**
+  String get overviewCardUpcomingChargesTitle;
+
+  /// Overview card: upcoming charges grouped by category pie chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming charges by category'**
+  String get overviewCardUpcomingByCategoryTitle;
+
+  /// Overview card: total amount row
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {amount}'**
+  String overviewCardTotal(String amount);
+
+  /// Overview: fallback category name when a transaction has no category
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get overviewCategoryOther;
+
+  /// Overview card: inline error message with retry hint
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading data. Tap to retry.'**
+  String get overviewErrorRetry;
+
+  /// Overview card: empty state message
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get overviewNoData;
+
+  /// Overview: card identifier in category drill-down sheet
+  ///
+  /// In en, this message translates to:
+  /// **'•••• {last4}'**
+  String overviewCategorySheetCard(String last4);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

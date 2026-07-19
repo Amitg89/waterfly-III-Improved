@@ -1104,4 +1104,35 @@ class SHe extends S {
 
   @override
   String get transactionTypeWithdrawal => 'משיכה';
+
+  @override
+  String get overviewCardIncomeTitle => 'הכנסות';
+
+  @override
+  String get overviewCardAvailableMoneyTitle => 'כסף זמין';
+
+  @override
+  String get overviewCardUpcomingChargesTitle => 'חיובים קרובים';
+
+  @override
+  String get overviewCardUpcomingByCategoryTitle => 'חיובים קרובים לפי קטגוריה';
+
+  @override
+  String overviewCardTotal(String amount) {
+    return 'סה\"כ: $amount';
+  }
+
+  @override
+  String get overviewCategoryOther => 'אחר';
+
+  @override
+  String get overviewErrorRetry => 'שגיאה בטעינת הנתונים. הקש לנסות שוב.';
+
+  @override
+  String get overviewNoData => 'אין נתונים';
+
+  @override
+  String overviewCategorySheetCard(String last4) {
+    return '•••• $last4';
+  }
 }
