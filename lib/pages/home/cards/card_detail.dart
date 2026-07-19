@@ -9,6 +9,7 @@ import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:waterflyiii/israeli/accounts_service.dart';
 import 'package:waterflyiii/israeli/transaction_row.dart';
+import 'package:waterflyiii/theme.dart';
 
 final Logger log = Logger("Pages.Home.Cards.Detail");
 
@@ -238,7 +239,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 : Text(
                   currency.fmt(total),
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    color: total < 0 ? Colors.green : Colors.red,
+                    color: total < 0
+                        ? Theme.of(context).extension<MoneyColors>()!.positive
+                        : Theme.of(context).extension<MoneyColors>()!.negative,
                     fontWeight: FontWeight.bold,
                     fontFeatures: const <FontFeature>[
                       FontFeature.tabularFigures(),

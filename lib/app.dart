@@ -19,6 +19,7 @@ import 'package:waterflyiii/pages/navigation.dart';
 import 'package:waterflyiii/pages/splash.dart';
 import 'package:waterflyiii/pages/transaction.dart';
 import 'package:waterflyiii/settings.dart';
+import 'package:waterflyiii/theme.dart';
 import 'package:waterflyiii/widgets/logo.dart';
 
 final Logger log = Logger("App");
@@ -192,16 +193,9 @@ class _WaterflyAppState extends State<WaterflyApp> {
         ColorScheme? cSchemeDynamicLight,
         ColorScheme? cSchemeDynamicDark,
       ) {
-        final ColorScheme cSchemeLight = ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-        );
-        final ColorScheme cSchemeDark = ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ).copyWith(
-          surfaceContainerHighest: Colors.blueGrey.shade900,
-          onSurfaceVariant: Colors.white,
-        );
+        // Vault brand themes (used when dynamicColors is false).
+        final ThemeData vaultThemeLight = vaultLight();
+        final ThemeData vaultThemeDark = vaultDark();
 
         log.finest(
           () =>
@@ -270,32 +264,46 @@ class _WaterflyAppState extends State<WaterflyApp> {
               log.config("signedIn: $signedIn");
             }
 
+            final bool useDynamic =
+                context.select((SettingsProvider s) => s.dynamicColors);
+
+            // Build light theme: vault brand OR harmonized dynamic colors.
+            final ThemeData resolvedLight = useDynamic &&
+                    cSchemeDynamicLight != null
+                ? withVaultMoneyColors(
+                    ThemeData(
+                      brightness: Brightness.light,
+                      colorScheme: cSchemeDynamicLight.harmonized(),
+                      useMaterial3: true,
+                      // See https://github.com/flutter/flutter/issues/131042
+                      appBarTheme:
+                          const AppBarTheme(shape: RoundedRectangleBorder()),
+                      pageTransitionsTheme: const PageTransitionsTheme(
+                        builders: <TargetPlatform, PageTransitionsBuilder>{
+                          TargetPlatform.android:
+                              PredictiveBackPageTransitionsBuilder(),
+                        },
+                      ),
+                    ),
+                  )
+                : vaultThemeLight;
+
+            // Build dark theme: vault brand OR harmonized dynamic colors.
+            final ThemeData resolvedDark =
+                useDynamic && cSchemeDynamicDark != null
+                    ? withVaultMoneyColors(
+                        ThemeData(
+                          brightness: Brightness.dark,
+                          colorScheme: cSchemeDynamicDark.harmonized(),
+                          useMaterial3: true,
+                        ),
+                      )
+                    : vaultThemeDark;
+
             return MaterialApp(
               title: 'Waterfly III',
-              theme: ThemeData(
-                brightness: Brightness.light,
-                colorScheme:
-                    context.select((SettingsProvider s) => s.dynamicColors)
-                        ? cSchemeDynamicLight?.harmonized() ?? cSchemeLight
-                        : cSchemeLight,
-                useMaterial3: true,
-                // See https://github.com/flutter/flutter/issues/131042#issuecomment-1690737834
-                appBarTheme: const AppBarTheme(shape: RoundedRectangleBorder()),
-                pageTransitionsTheme: const PageTransitionsTheme(
-                  builders: <TargetPlatform, PageTransitionsBuilder>{
-                    TargetPlatform.android:
-                        PredictiveBackPageTransitionsBuilder(),
-                  },
-                ),
-              ),
-              darkTheme: ThemeData(
-                brightness: Brightness.dark,
-                colorScheme:
-                    context.select((SettingsProvider s) => s.dynamicColors)
-                        ? cSchemeDynamicDark?.harmonized() ?? cSchemeDark
-                        : cSchemeDark,
-                useMaterial3: true,
-              ),
+              theme: resolvedLight,
+              darkTheme: resolvedDark,
               themeMode: context.select((SettingsProvider s) => s.theme),
               localizationsDelegates: S.localizationsDelegates,
               supportedLocales: S.supportedLocales,

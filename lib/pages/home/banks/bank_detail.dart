@@ -8,6 +8,7 @@ import 'package:waterflyiii/extensions.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:waterflyiii/israeli/transaction_row.dart';
+import 'package:waterflyiii/theme.dart';
 
 final Logger log = Logger("Pages.Home.Banks.Detail");
 
@@ -139,7 +140,9 @@ class _BankAccountDetailPageState extends State<BankAccountDetailPage> {
                   Text(
                     currency.fmt(balance),
                     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      color: balance < 0 ? Colors.red : Colors.green,
+                      color: balance < 0
+                          ? Theme.of(context).extension<MoneyColors>()!.negative
+                          : Theme.of(context).extension<MoneyColors>()!.positive,
                       fontWeight: FontWeight.bold,
                       fontFeatures: const <FontFeature>[
                         FontFeature.tabularFigures(),

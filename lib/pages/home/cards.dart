@@ -10,6 +10,7 @@ import 'package:waterflyiii/israeli/accounts_service.dart';
 import 'package:waterflyiii/israeli/transaction_row.dart';
 import 'package:waterflyiii/pages/home/cards/card_detail.dart';
 import 'package:waterflyiii/settings.dart';
+import 'package:waterflyiii/theme.dart';
 
 class HomeCards extends StatefulWidget {
   const HomeCards({super.key});
@@ -189,7 +190,9 @@ class _HomeCardsState extends State<HomeCards>
                 Text(
                   currency.fmt(charge),
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: charge < 0 ? Colors.green : Colors.red,
+                    color: charge < 0
+                        ? Theme.of(context).extension<MoneyColors>()!.positive
+                        : Theme.of(context).extension<MoneyColors>()!.negative,
                     fontWeight: FontWeight.bold,
                     fontFeatures: const <FontFeature>[
                       FontFeature.tabularFigures(),

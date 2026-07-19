@@ -12,6 +12,7 @@ import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:waterflyiii/israeli/accounts_service.dart';
 import 'package:waterflyiii/settings.dart';
+import 'package:waterflyiii/theme.dart';
 import 'package:waterflyiii/widgets/charts.dart';
 
 final Logger _log = Logger("Pages.Home.Overview");
@@ -637,7 +638,8 @@ class _BalanceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color amountColor = balance >= 0 ? Colors.green : Colors.red;
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
+    final Color amountColor = balance >= 0 ? mc.positive : mc.negative;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -961,7 +963,9 @@ class _UpcomingByCategoryCard extends StatelessWidget {
                           context,
                         ).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
+                          color: Theme.of(context)
+                              .extension<MoneyColors>()!
+                              .negative,
                         ),
                       ),
                     ],
@@ -1129,10 +1133,10 @@ class _CategoryTxRow extends StatelessWidget {
         children: <Widget>[
           Text(
             currency.fmt(amount),
-            style: const TextStyle(
-              color: Colors.red,
+            style: TextStyle(
+              color: Theme.of(context).extension<MoneyColors>()!.negative,
               fontWeight: FontWeight.w600,
-              fontFeatures: <FontFeature>[
+              fontFeatures: const <FontFeature>[
                 FontFeature.tabularFigures(),
               ],
             ),
