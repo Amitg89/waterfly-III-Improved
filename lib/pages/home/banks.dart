@@ -114,42 +114,87 @@ class _HomeBanksState extends State<HomeBanks>
     );
   }
 
+  /// Vault-styled bank row: surface card with hairline gold outline, a
+  /// rounded icon square and the balance trailing.
   Widget _bankRow(BuildContext context, AccountRead account) {
     final double balance =
         double.tryParse(account.attributes.currentBalance ?? "") ?? 0;
     final CurrencyRead currency = currencyFromAccount(context, account);
     final String? accountNumber = account.attributes.accountNumber;
+    final ColorScheme cs = Theme.of(context).colorScheme;
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.account_balance)),
-        title: Text(
-          account.attributes.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle:
-            (accountNumber?.isNotEmpty ?? false) ? Text(accountNumber!) : null,
-        trailing: Text(
-          currency.fmt(balance),
-          style: Theme.of(context).textTheme.titleMedium!.copyWith(
-            color: balance < 0
-                ? Theme.of(context).extension<MoneyColors>()!.negative
-                : Theme.of(context).extension<MoneyColors>()!.positive,
-            fontWeight: FontWeight.bold,
-            fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+    return Container(
+      margin: const EdgeInsetsDirectional.fromSTEB(12, 4, 12, 4),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: cs.outline, width: 1),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () => showBankSheet(context, account: account),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 12),
+            child: Row(
+              children: <Widget>[
+                // Rounded icon square (matches the mockup tx rows).
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.account_balance,
+                    size: 20,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        account.attributes.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (accountNumber?.isNotEmpty ?? false)
+                        Text(
+                          accountNumber!,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  currency.fmt(balance),
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: balance < 0 ? mc.negative : mc.positive,
+                    fontWeight: FontWeight.bold,
+                    fontFeatures: const <FontFeature>[
+                      FontFeature.tabularFigures(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        onTap:
-            () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder:
-                    (BuildContext context) =>
-                        BankAccountDetailPage(account: account),
-              ),
-            ),
       ),
     );
   }

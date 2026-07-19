@@ -422,6 +422,12 @@ abstract class S {
   /// **'No credit cards found.'**
   String get cardsNoCards;
 
+  /// Default label of the date pill on the card sheet, shown when no custom date range is active (the current billing cycle is shown)
+  ///
+  /// In en, this message translates to:
+  /// **'This cycle'**
+  String get cardsThisCycle;
+
   /// Header label for the transaction total of a user-picked date range on a credit card
   ///
   /// In en, this message translates to:
@@ -2041,6 +2047,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'UPCOMING'**
   String get overviewCarouselUpcoming;
+
+  /// Tooltip for the sun/moon icon button in the home app bar that switches between light and dark theme
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle light/dark theme'**
+  String get themeToggleTooltip;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

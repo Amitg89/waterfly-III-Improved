@@ -133,7 +133,7 @@ class _HomeCardsState extends State<HomeCards>
                     itemCount: cards.length,
                     itemBuilder:
                         (BuildContext context, int index) =>
-                            _cardRow(context, cards[index]),
+                            _cardRow(context, cards[index], index),
                   ),
         );
       },
@@ -145,82 +145,174 @@ class _HomeCardsState extends State<HomeCards>
     return number.length >= 4 ? number.substring(number.length - 4) : number;
   }
 
-  Widget _cardRow(BuildContext context, AccountRead card) {
+  /// Full-width vault card face: dark gradient, sheen, gold chip, name and
+  /// last-4 on the start side, upcoming charge on the end side.
+  Widget _cardRow(BuildContext context, AccountRead card, int index) {
     final CurrencyRead currency = currencyFromAccount(context, card);
     final String last4 = _last4(card);
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
+    final int gradientIndex = index % mc.cardGradients.length;
+    final List<Color> gradient = mc.cardGradients[gradientIndex];
+    final Color faceFg = mc.cardFaceForeground;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.credit_card)),
-        title: Text(
-          card.attributes.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+    return Container(
+      height: 96,
+      margin: const EdgeInsetsDirectional.fromSTEB(12, 4, 12, 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: gradient,
         ),
-        subtitle: last4.isNotEmpty ? Text("•••• $last4") : null,
-        trailing: FutureBuilder<double>(
-          future: _chargeFutures[card.id],
-          builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              );
-            }
-            if (snapshot.hasError) {
-              log.severe(
-                "error fetching upcoming charge for ${card.id}",
-                snapshot.error,
-                snapshot.stackTrace,
-              );
-              return Icon(
-                Icons.error_outline,
-                color: Theme.of(context).colorScheme.error,
-              );
-            }
-            final double charge = snapshot.data!;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  currency.fmt(charge),
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    color: charge < 0
-                        ? Theme.of(context).extension<MoneyColors>()!.positive
-                        : Theme.of(context).extension<MoneyColors>()!.negative,
-                    fontWeight: FontWeight.bold,
-                    fontFeatures: const <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
-                  ),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Stack(
+        children: <Widget>[
+          // Subtle radial sheen in the top-end corner.
+          PositionedDirectional(
+            top: -24,
+            end: -24,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: <Color>[faceFg.withAlpha(0x24), faceFg.withAlpha(0)],
                 ),
-                Text(
-                  S
-                      .of(context)
-                      .cardsChargeOn(DateFormat.yMd().format(_cycle.end)),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            );
-          },
-        ),
-        onTap:
-            () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder:
-                    (BuildContext context) => CardDetailPage(
-                      account: card,
-                      prevCharge: _cycle.start,
-                      nextCharge: _cycle.end,
-                    ),
               ),
             ),
+          ),
+          Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap:
+                  () => showCardSheet(
+                    context,
+                    account: card,
+                    prevCharge: _cycle.start,
+                    nextCharge: _cycle.end,
+                    gradientIndex: gradientIndex,
+                  ),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          // Gold chip rectangle.
+                          Container(
+                            width: 26,
+                            height: 19,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              gradient: LinearGradient(
+                                colors: mc.heroGradient.length >= 2
+                                    ? <Color>[mc.heroGradient[1], mc.goldDeep]
+                                    : <Color>[mc.goldDeep, mc.goldDeep],
+                              ),
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text(
+                                card.attributes.name,
+                                style: TextStyle(
+                                  color: faceFg.withAlpha(0xB2), // ~70 %
+                                  fontSize: 11,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '•••• $last4',
+                                style: TextStyle(
+                                  color: faceFg,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 2.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _chargeColumn(context, card, currency, faceFg),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Trailing upcoming-charge treatment: prominent light-on-dark amount plus
+  /// the "Charge on {date}" caption.
+  Widget _chargeColumn(
+    BuildContext context,
+    AccountRead card,
+    CurrencyRead currency,
+    Color faceFg,
+  ) {
+    return FutureBuilder<double>(
+      future: _chargeFutures[card.id],
+      builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2, color: faceFg),
+          );
+        }
+        if (snapshot.hasError) {
+          log.severe(
+            "error fetching upcoming charge for ${card.id}",
+            snapshot.error,
+            snapshot.stackTrace,
+          );
+          return Icon(
+            Icons.error_outline,
+            color: Theme.of(context).colorScheme.error,
+          );
+        }
+        final double charge = snapshot.data!;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            Text(
+              currency.fmt(charge),
+              style: TextStyle(
+                color: faceFg,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                fontFeatures: const <FontFeature>[
+                  FontFeature.tabularFigures(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              S.of(context).cardsChargeOn(DateFormat.yMd().format(_cycle.end)),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: faceFg.withAlpha(0xA8), // ~66 %
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

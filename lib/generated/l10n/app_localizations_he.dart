@@ -242,6 +242,9 @@ class SHe extends S {
   String get cardsNoCards => 'לא נמצאו כרטיסי אשראי.';
 
   @override
+  String get cardsThisCycle => 'מחזור נוכחי';
+
+  @override
   String get cardsTotalForPeriod => 'סה\"כ לתקופה';
 
   @override
@@ -1183,4 +1186,7 @@ class SHe extends S {
 
   @override
   String get overviewCarouselUpcoming => 'חיוב קרוב';
+
+  @override
+  String get themeToggleTooltip => 'החלף מצב בהיר/כהה';
 }

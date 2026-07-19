@@ -238,6 +238,9 @@ class SZh extends S {
   String get cardsNoCards => 'No credit cards found.';
 
   @override
+  String get cardsThisCycle => 'This cycle';
+
+  @override
   String get cardsTotalForPeriod => 'Total for period';
 
   @override
@@ -1165,6 +1168,9 @@ class SZh extends S {
 
   @override
   String get overviewCarouselUpcoming => 'UPCOMING';
+
+  @override
+  String get themeToggleTooltip => 'Toggle light/dark theme';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).

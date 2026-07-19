@@ -90,7 +90,7 @@ Widget israeliTransactionRow(
 
   return ListTile(
     leading: CircleAvatar(
-      foregroundColor: Colors.white,
+      foregroundColor: Theme.of(context).colorScheme.onInverseSurface,
       backgroundColor: first.type.color,
       child: Icon(first.type.icon),
     ),

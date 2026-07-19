@@ -269,6 +269,10 @@
     "@cardsNoCards": {
         "description": "Message shown when no credit card accounts exist"
     },
+    "cardsThisCycle": "מחזור נוכחי",
+    "@cardsThisCycle": {
+        "description": "Default label of the date pill on the card sheet, shown when no custom date range is active (the current billing cycle is shown)"
+    },
     "cardsTotalForPeriod": "סה\"כ לתקופה",
     "@cardsTotalForPeriod": {
         "description": "Header label for the transaction total of a user-picked date range on a credit card"
@@ -1482,5 +1486,9 @@
     "overviewCarouselUpcoming": "חיוב קרוב",
     "@overviewCarouselUpcoming": {
         "description": "Label on each card face in the carousel above the upcoming charge amount"
+    },
+    "themeToggleTooltip": "החלף מצב בהיר/כהה",
+    "@themeToggleTooltip": {
+        "description": "Tooltip for the sun/moon icon button in the home app bar that switches between light and dark theme"
     }
 }

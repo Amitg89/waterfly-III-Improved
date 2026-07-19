@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/pages/home/banks.dart';
 import 'package:waterflyiii/pages/home/cards.dart';
 import 'package:waterflyiii/pages/home/overview.dart';
 import 'package:waterflyiii/pages/home/mortgage.dart';
 import 'package:waterflyiii/pages/home/savings.dart';
 import 'package:waterflyiii/pages/navigation.dart';
+import 'package:waterflyiii/settings.dart';
 import 'package:waterflyiii/widgets/fabs.dart';
 import 'package:waterflyiii/widgets/vault_bottom_nav.dart';
 
@@ -92,9 +94,29 @@ class HomePageState extends State<HomePage> {
     // FAB only on Overview (index 0).
     nav.fab = (_index == 0) ? _newTransactionFab : null;
 
-    // App-bar actions: per-page actions.
-    nav.appBarActions =
+    // Theme toggle – first action on every tab. Uses a Builder so that
+    // Theme.of(context).brightness reflects the current effective brightness
+    // and rebuilds whenever the theme changes.
+    final Widget themeToggle = Builder(
+      builder: (BuildContext ctx) {
+        final Brightness brightness = Theme.of(ctx).brightness;
+        final bool isDark = brightness == Brightness.dark;
+        return IconButton(
+          icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+          tooltip: S.of(ctx).themeToggleTooltip,
+          onPressed: () {
+            context.read<SettingsProvider>().setTheme(
+              isDark ? ThemeMode.light : ThemeMode.dark,
+            );
+          },
+        );
+      },
+    );
+
+    // App-bar actions: theme toggle first, then per-page actions.
+    final List<Widget> pageActions =
         _actions.get(_pages[_index].key ?? const Key('')) ?? <Widget>[];
+    nav.appBarActions = <Widget>[themeToggle, ...pageActions];
 
     // Bottom nav.
     nav.bottomNav = VaultBottomNav(

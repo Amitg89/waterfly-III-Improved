@@ -931,8 +931,12 @@ class _CardCarousel extends StatelessWidget {
     final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
     final ColorScheme cs = Theme.of(context).colorScheme;
 
-    // Show ALL cards (including zero charge) in the carousel.
-    final List<_CardCharge> cards = data.cardCharges;
+    // Show ALL cards in the carousel, sorted by upcoming charge descending
+    // so meaningful cards come first and zero-charge cards go last.
+    final List<_CardCharge> cards =
+        data.cardCharges.toList()..sort(
+          (_CardCharge a, _CardCharge b) => b.charge.compareTo(a.charge),
+        );
 
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 0),
@@ -970,9 +974,11 @@ class _CardCarousel extends StatelessWidget {
                     const SizedBox(width: 12),
                 itemBuilder: (BuildContext ctx, int i) {
                   final _CardCharge cc = cards[i];
+                  final int gradientIndex = i % mc.cardGradients.length;
                   return _CardFace(
                     cardCharge: cc,
-                    gradientColors: mc.cardGradients[i % mc.cardGradients.length],
+                    gradientIndex: gradientIndex,
+                    gradientColors: mc.cardGradients[gradientIndex],
                     heroGradient: mc.heroGradient,
                     faceFg: mc.cardFaceForeground,
                     goldDeep: mc.goldDeep,
@@ -990,6 +996,7 @@ class _CardCarousel extends StatelessWidget {
 class _CardFace extends StatelessWidget {
   const _CardFace({
     required this.cardCharge,
+    required this.gradientIndex,
     required this.gradientColors,
     required this.heroGradient,
     required this.faceFg,
@@ -998,6 +1005,10 @@ class _CardFace extends StatelessWidget {
   });
 
   final _CardCharge cardCharge;
+
+  /// Index into MoneyColors.cardGradients; passed to the card sheet so the
+  /// sheet header face matches this carousel face.
+  final int gradientIndex;
   final List<Color> gradientColors;
   final List<Color> heroGradient;
   final Color faceFg;
@@ -1012,21 +1023,19 @@ class _CardFace extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        // Navigate to card detail (same as Cards tab).
+        // Open the card detail sheet (same as Cards tab), with the matching
+        // gradient so the sheet header face mirrors this carousel face.
         final SettingsProvider settings = context.read<SettingsProvider>();
         final ({DateTime start, DateTime end}) cycle = currentCycle(
           DateTime.now(),
           settings.creditCardCycleDay,
         );
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder:
-                (_) => CardDetailPage(
-                  account: cardCharge.account,
-                  prevCharge: cycle.start,
-                  nextCharge: cycle.end,
-                ),
-          ),
+        showCardSheet(
+          context,
+          account: cardCharge.account,
+          prevCharge: cycle.start,
+          nextCharge: cycle.end,
+          gradientIndex: gradientIndex,
         );
       },
       child: Container(

@@ -37,6 +37,10 @@ class _AiBubbleState extends State<AiBubble> {
   /// Local position while (and after) dragging; null = follow provider.
   Offset? _dragPosition;
 
+  /// Whether the current gesture has moved enough to be treated as a drag.
+  /// Used to suppress the onTap callback after a successful pan.
+  bool _isDragging = false;
+
   Offset _resolvePosition(
     SettingsProvider settings,
     BoxConstraints constraints,
@@ -113,19 +117,53 @@ class _AiBubbleState extends State<AiBubble> {
               Positioned(
                 left: pos.dx,
                 top: pos.dy,
+                // ONE unified GestureDetector handles both tap (open AI page)
+                // and pan (drag bubble). HitTestBehavior.opaque ensures the
+                // full column area (including transparent gaps between widgets)
+                // participates in hit-testing, so slow precise swipes that land
+                // anywhere on the column are captured correctly.
                 child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    // Only fire if this gesture was not a drag.
+                    if (!_isDragging) {
+                      _openAiPage(context);
+                    }
+                  },
+                  onPanStart: (DragStartDetails details) {
+                    // Seed _dragPosition from the already-resolved position
+                    // stored in state (_dragPosition) rather than from the
+                    // build-captured `pos` variable. This avoids the stale-
+                    // closure bug where multiple onPanUpdate calls within a
+                    // single frame would each add their delta to the same old
+                    // `pos` value, compounding incorrectly.
+                    setState(() {
+                      _isDragging = false;
+                      _dragPosition ??= pos;
+                    });
+                  },
                   onPanUpdate: (DragUpdateDetails details) {
                     setState(() {
-                      _dragPosition = pos + details.delta;
+                      _isDragging = true;
+                      // Accumulate purely against _dragPosition (state), not
+                      // against the build-captured `pos`. If multiple updates
+                      // arrive before the next frame, each correctly builds on
+                      // the previous accumulated value rather than re-basing on
+                      // a stale snapshot.
+                      _dragPosition = (_dragPosition ?? pos) + details.delta;
                     });
                   },
                   onPanEnd: (DragEndDetails details) {
+                    // Re-resolve to apply clamping before persisting.
                     final Offset end = _resolvePosition(
                       settings,
                       constraints,
                       direction,
                     );
                     settings.setAiBubblePosition(end.dx, end.dy);
+                    setState(() {
+                      _isDragging = false;
+                    });
                   },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -139,50 +177,68 @@ class _AiBubbleState extends State<AiBubble> {
                             PositionedDirectional(
                               start: 0,
                               bottom: 0,
-                              child: GestureDetector(
-                                onTap: () => _openAiPage(context),
-                                child: Container(
-                                  width: _bubbleSize,
-                                  height: _bubbleSize,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: RadialGradient(
-                                      center: const Alignment(-0.5, -0.5),
-                                      radius: 1.2,
-                                      colors: <Color>[
-                                        moneyColors.heroGradient[1],
-                                        moneyColors.heroGradient[0],
-                                        moneyColors.heroGradient[2],
-                                      ],
-                                    ),
-                                    boxShadow: <BoxShadow>[
-                                      BoxShadow(
-                                        color: colorScheme.primary
-                                            .withAlpha(0x66),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 8),
-                                      ),
+                              // The bubble circle itself has no separate tap
+                              // handler — taps bubble up to the outer
+                              // GestureDetector's onTap, which calls
+                              // _openAiPage. No nested tap recognizer means no
+                              // arena conflict with the outer pan recognizer.
+                              child: Container(
+                                width: _bubbleSize,
+                                height: _bubbleSize,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: RadialGradient(
+                                    center: const Alignment(-0.5, -0.5),
+                                    radius: 1.2,
+                                    colors: <Color>[
+                                      moneyColors.heroGradient[1],
+                                      moneyColors.heroGradient[0],
+                                      moneyColors.heroGradient[2],
                                     ],
                                   ),
-                                  child: Icon(
-                                    Icons.auto_awesome,
-                                    color: colorScheme.onPrimary,
-                                    size: 26,
-                                  ),
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                      color: colorScheme.primary
+                                          .withAlpha(0x66),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.auto_awesome,
+                                  color: colorScheme.onPrimary,
+                                  size: 26,
                                 ),
                               ),
                             ),
                             PositionedDirectional(
                               end: 0,
                               top: 0,
+                              // The ✕ badge keeps its own GestureDetector with
+                              // onTap only (no pan). Because it is a *deeper*
+                              // hit-test member than the outer GestureDetector,
+                              // Flutter's hit-test walk visits it first. Its
+                              // TapGestureRecognizer is added to the gesture
+                              // arena before the outer recognizers, giving it
+                              // priority: when the pointer is released without
+                              // moving, the inner tap wins and setAiBubbleVisible
+                              // fires; the outer onTap is NOT called because the
+                              // inner recognizer claims the pointer. Drags on the
+                              // badge area still propagate to the outer pan
+                              // recognizer because the inner detector has no pan
+                              // handler and therefore never claims pointer
+                              // ownership for pan gestures.
                               child: GestureDetector(
-                                onTap: () => settings.setAiBubbleVisible(false),
+                                onTap: () =>
+                                    settings.setAiBubbleVisible(false),
                                 child: Container(
                                   width: _badgeSize,
                                   height: _badgeSize,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: colorScheme.surfaceContainerHighest,
+                                    color:
+                                        colorScheme.surfaceContainerHighest,
                                     border: Border.all(
                                       color: colorScheme.outline,
                                     ),

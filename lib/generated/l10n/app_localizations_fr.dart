@@ -245,6 +245,9 @@ class SFr extends S {
   String get cardsNoCards => 'No credit cards found.';
 
   @override
+  String get cardsThisCycle => 'This cycle';
+
+  @override
   String get cardsTotalForPeriod => 'Total for period';
 
   @override
@@ -1199,4 +1202,7 @@ class SFr extends S {
 
   @override
   String get overviewCarouselUpcoming => 'UPCOMING';
+
+  @override
+  String get themeToggleTooltip => 'Toggle light/dark theme';
 }

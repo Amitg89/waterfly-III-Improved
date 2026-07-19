@@ -10,31 +10,64 @@ import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger
 import 'package:waterflyiii/israeli/accounts_service.dart';
 import 'package:waterflyiii/israeli/transaction_row.dart';
 import 'package:waterflyiii/theme.dart';
+import 'package:waterflyiii/widgets/vault_sheet.dart';
 
 final Logger log = Logger("Pages.Home.Cards.Detail");
 
-/// Detail page for a credit card: a header with the upcoming charge and the
-/// cycle's transactions below. When the user picks a custom date range, both
-/// the list and the header switch to a "total for period" view based on the
+/// Opens the credit-card detail bottom sheet: a gradient card-face header,
+/// the upcoming charge (or a custom-period total) and the cycle's
+/// transactions below. When the user picks a custom date range, both the
+/// list and the header switch to a "total for period" view based on the
 /// purchase date (which matches the intuition of "what did I spend between
 /// X and Y"); the cycle view uses the billing date (process_date).
-class CardDetailPage extends StatefulWidget {
-  const CardDetailPage({
+///
+/// [gradientIndex] selects the card-face gradient so the sheet header matches
+/// the row/carousel face the user tapped.
+Future<void> showCardSheet(
+  BuildContext context, {
+  required AccountRead account,
+  required DateTime prevCharge,
+  required DateTime nextCharge,
+  required int gradientIndex,
+}) {
+  return showVaultSheet<void>(
+    context: context,
+    builder:
+        (BuildContext sheetContext, ScrollController scrollController) =>
+            CardSheetContent(
+              account: account,
+              prevCharge: prevCharge,
+              nextCharge: nextCharge,
+              gradientIndex: gradientIndex,
+              scrollController: scrollController,
+            ),
+  );
+}
+
+/// Sheet body for a single credit card. Kept as a public widget so it can be
+/// hosted by [showCardSheet]; all data logic (cycle fetch vs. date-range
+/// fetch, header total recomputed from the list) lives here.
+class CardSheetContent extends StatefulWidget {
+  const CardSheetContent({
     super.key,
     required this.account,
     required this.prevCharge,
     required this.nextCharge,
+    required this.gradientIndex,
+    required this.scrollController,
   });
 
   final AccountRead account;
   final DateTime prevCharge;
   final DateTime nextCharge;
+  final int gradientIndex;
+  final ScrollController scrollController;
 
   @override
-  State<CardDetailPage> createState() => _CardDetailPageState();
+  State<CardSheetContent> createState() => _CardSheetContentState();
 }
 
-class _CardDetailPageState extends State<CardDetailPage> {
+class _CardSheetContentState extends State<CardSheetContent> {
   static const int _pageLimit = 50;
   static const int _maxPages = 100;
 
@@ -149,113 +182,240 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return sum;
   }
 
+  String _last4() {
+    final String number = widget.account.attributes.accountNumber ?? "";
+    if (number.length >= 4) {
+      return number.substring(number.length - 4);
+    }
+    final String name = widget.account.attributes.name;
+    if (name.length >= 4) {
+      final String tail = name.substring(name.length - 4);
+      if (RegExp(r'^\d{4}$').hasMatch(tail)) {
+        return tail;
+      }
+    }
+    return number;
+  }
+
   @override
   Widget build(BuildContext context) {
     final CurrencyRead currency = currencyFromAccount(context, widget.account);
     final S l10n = S.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.account.attributes.name),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            tooltip: l10n.homeTransactionsDialogFilterDateRange,
-            onPressed: _pickRange,
-          ),
-        ],
+    return FutureBuilder<List<TransactionRead>>(
+      future: _txFuture,
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<List<TransactionRead>> snapshot,
+      ) {
+        final bool done = snapshot.connectionState == ConnectionState.done;
+        final List<TransactionRead>? transactions =
+            done && !snapshot.hasError ? snapshot.data : null;
+        if (done && snapshot.hasError) {
+          log.severe(
+            "error fetching card transactions",
+            snapshot.error,
+            snapshot.stackTrace,
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 0),
+              child: _cardFace(context),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 0),
+              child: Text(
+                (_range == null
+                        ? "${l10n.cardsUpcomingCharge}"
+                            " · ${DateFormat.yMd().format(widget.nextCharge)}"
+                        : l10n.cardsTotalForPeriod)
+                    .toUpperCase(),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 6, 16, 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(child: _totalText(context, currency, transactions)),
+                  const SizedBox(width: 8),
+                  _rangePill(context, l10n),
+                ],
+              ),
+            ),
+            Expanded(child: _body(context, snapshot, transactions)),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Gradient card-face header matching the row/carousel face that was
+  /// tapped (same gradient index).
+  Widget _cardFace(BuildContext context) {
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
+    final List<Color> gradient =
+        mc.cardGradients[widget.gradientIndex % mc.cardGradients.length];
+    final Color faceFg = mc.cardFaceForeground;
+    final String last4 = _last4();
+
+    return Container(
+      height: 150,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: gradient,
+        ),
       ),
-      body: FutureBuilder<List<TransactionRead>>(
-        future: _txFuture,
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<List<TransactionRead>> snapshot,
-        ) {
-          final bool done = snapshot.connectionState == ConnectionState.done;
-          final List<TransactionRead>? transactions =
-              done && !snapshot.hasError ? snapshot.data : null;
-          if (done && snapshot.hasError) {
-            log.severe(
-              "error fetching card transactions",
-              snapshot.error,
-              snapshot.stackTrace,
-            );
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              _header(context, currency, transactions),
-              if (_range != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: InputChip(
-                      avatar: const Icon(Icons.filter_alt),
-                      label: Text(
-                        "${DateFormat.yMd().format(_range!.start)}"
-                        " – ${DateFormat.yMd().format(_range!.end)}",
-                      ),
-                      deleteButtonTooltipMessage: l10n.generalClearFilter,
-                      onDeleted: _clearRange,
+      clipBehavior: Clip.hardEdge,
+      child: Stack(
+        children: <Widget>[
+          // Subtle radial sheen in the top-end corner.
+          PositionedDirectional(
+            top: -36,
+            end: -36,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: <Color>[faceFg.withAlpha(0x24), faceFg.withAlpha(0)],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(18, 16, 18, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                // Gold chip rectangle.
+                Container(
+                  width: 30,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    gradient: LinearGradient(
+                      colors: mc.heroGradient.length >= 2
+                          ? <Color>[mc.heroGradient[1], mc.goldDeep]
+                          : <Color>[mc.goldDeep, mc.goldDeep],
                     ),
                   ),
                 ),
-              Expanded(child: _body(context, snapshot, transactions)),
-            ],
-          );
-        },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      widget.account.attributes.name,
+                      style: TextStyle(
+                        color: faceFg.withAlpha(0xB2), // ~70 %
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '•••• $last4',
+                      style: TextStyle(
+                        color: faceFg,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 2.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _header(
+  /// Big total for the current view (upcoming charge or period total).
+  Widget _totalText(
     BuildContext context,
     CurrencyRead currency,
     List<TransactionRead>? transactions,
   ) {
-    final S l10n = S.of(context);
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
     final double? total = transactions != null ? _total(transactions) : null;
-    return Card(
-      margin: const EdgeInsets.all(12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              _range == null
-                  ? l10n.cardsUpcomingCharge
-                  : l10n.cardsTotalForPeriod,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            const SizedBox(height: 4),
-            total == null
-                ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-                : Text(
-                  currency.fmt(total),
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    color: total < 0
-                        ? Theme.of(context).extension<MoneyColors>()!.positive
-                        : Theme.of(context).extension<MoneyColors>()!.negative,
-                    fontWeight: FontWeight.bold,
-                    fontFeatures: const <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
+    if (total == null) {
+      return const SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+    return Text(
+      currency.fmt(total),
+      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+        color: total < 0 ? mc.positive : mc.negative,
+        fontSize: 30,
+        fontWeight: FontWeight.w700,
+        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  /// Date pill: shows "This cycle" (default) or the active custom range with
+  /// a clear affordance. Tapping it opens the existing date-range picker.
+  Widget _rangePill(BuildContext context, S l10n) {
+    final ColorScheme cs = Theme.of(context).colorScheme;
+    final String label = _range == null
+        ? l10n.cardsThisCycle
+        : "${DateFormat.yMd().format(_range!.start)}"
+            " – ${DateFormat.yMd().format(_range!.end)}";
+
+    return Material(
+      color: cs.surfaceContainerHighest,
+      shape: StadiumBorder(side: BorderSide(color: cs.outline, width: 1)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: _pickRange,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 12, 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.calendar_today_outlined, size: 15, color: cs.primary),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: cs.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (_range != null) ...<Widget>[
+                const SizedBox(width: 6),
+                Tooltip(
+                  message: l10n.generalClearFilter,
+                  child: InkWell(
+                    onTap: _clearRange,
+                    customBorder: const CircleBorder(),
+                    child: Icon(Icons.close, size: 15, color: cs.primary),
                   ),
                 ),
-            if (_range == null) ...<Widget>[
-              const SizedBox(height: 4),
-              Text(
-                l10n.cardsChargeOn(DateFormat.yMd().format(widget.nextCharge)),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -270,24 +430,32 @@ class _CardDetailPageState extends State<CardDetailPage> {
       return const Center(child: CircularProgressIndicator());
     }
     if (snapshot.hasError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(S.of(context).errorUnknown),
-            const SizedBox(height: 8),
-            FilledButton(
+      return ListView(
+        controller: widget.scrollController,
+        children: <Widget>[
+          const SizedBox(height: 32),
+          Center(child: Text(S.of(context).errorUnknown)),
+          const SizedBox(height: 8),
+          Center(
+            child: FilledButton(
               onPressed: _refetch,
               child: Text(S.of(context).generalRetry),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
     if (transactions == null || transactions.isEmpty) {
-      return Center(child: Text(S.of(context).homeTransactionsEmpty));
+      return ListView(
+        controller: widget.scrollController,
+        children: <Widget>[
+          const SizedBox(height: 32),
+          Center(child: Text(S.of(context).homeTransactionsEmpty)),
+        ],
+      );
     }
     return ListView.builder(
+      controller: widget.scrollController,
       itemCount: transactions.length,
       itemBuilder:
           (BuildContext context, int index) => israeliTransactionRow(
