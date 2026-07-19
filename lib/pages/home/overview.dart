@@ -102,10 +102,19 @@ Future<List<TransactionRead>> _fetchDeposits(
   return transactions;
 }
 
+/// Salaries are normally deposited on the 1st-10th of the month, but around
+/// holidays they can land a day or two early — i.e. on the 30th/31st of the
+/// previous month. A salary deposit on such a day belongs to the NEXT month.
+const int _salaryEarlyDepositDay = 30;
+
 /// Groups deposit splits by calendar month over the last [_incomeMonthCount]
 /// months (oldest first). Every deposit counts towards [_IncomeMonth.total];
 /// deposits whose description contains one of [salaryKeywords]
 /// (case-insensitive substring) also count towards [_IncomeMonth.salary].
+///
+/// Salary-matched deposits dated on/after [_salaryEarlyDepositDay] are
+/// attributed to the following month (in BOTH series, so salary never
+/// exceeds total within a month).
 List<_IncomeMonth> _groupIncomeByMonth(
   List<TransactionRead> transactions,
   List<String> salaryKeywords,
@@ -125,14 +134,19 @@ List<_IncomeMonth> _groupIncomeByMonth(
     for (final TransactionSplit split in tx.attributes.transactions) {
       if (split.type != TransactionTypeProperty.deposit) continue;
       final DateTime date = split.date.toLocal();
-      final DateTime month = DateTime(date.year, date.month, 1);
-      final ({double total, double salary})? entry = byMonth[month];
-      if (entry == null) continue; // outside the window
-      final double amount = double.tryParse(split.amount) ?? 0;
       final String description = split.description.toLowerCase();
       final bool isSalary = keywords.any(
         (String k) => description.contains(k),
       );
+      // Early salary (e.g. deposited 31.03 because of a holiday) belongs to
+      // the next month (April).
+      final DateTime month =
+          (isSalary && date.day >= _salaryEarlyDepositDay)
+              ? DateTime(date.year, date.month + 1, 1)
+              : DateTime(date.year, date.month, 1);
+      final ({double total, double salary})? entry = byMonth[month];
+      if (entry == null) continue; // outside the window
+      final double amount = double.tryParse(split.amount) ?? 0;
       byMonth[month] = (
         total: entry.total + amount,
         salary: entry.salary + (isSalary ? amount : 0),
@@ -214,11 +228,14 @@ Future<_OverviewData> _loadOverviewData(
   // 5. Fetch all deposits into every bank account for the last 6 calendar
   //    months and group them by month client-side (total vs. salary).
   final DateTime now = DateTime.now();
+  // Start 2 days before the oldest month so an early salary deposited on the
+  // 30th/31st of the preceding month (attributed to the oldest month) is
+  // included in the fetch.
   final DateTime windowStart = DateTime(
     now.year,
     now.month - (_incomeMonthCount - 1),
     1,
-  );
+  ).subtract(const Duration(days: 2));
 
   final List<List<TransactionRead>> depositLists = await Future.wait(
     bankAccounts.map(
