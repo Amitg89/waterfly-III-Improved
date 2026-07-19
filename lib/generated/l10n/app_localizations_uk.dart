@@ -822,6 +822,20 @@ class SUk extends S {
   }
 
   @override
+  String get settingsSalaryKeywords => 'Salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsSubtitle =>
+      'Deposits matching these keywords count as salary in the income chart';
+
+  @override
+  String get settingsSalaryKeywordsDialogTitle => 'Edit salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsDialogHelp =>
+      'Comma-separated keywords. A deposit whose description contains one of them is counted as salary.';
+
+  @override
   String get settingsDialogDebugInfo =>
       'You can enable & send debug logs here. These have a bad impact on performance, so please don\'t enable them unless you\'re advised to do so. Disabling logging will delete the stored log.';
 
@@ -1107,6 +1121,12 @@ class SUk extends S {
 
   @override
   String get overviewCardIncomeTitle => 'Income';
+
+  @override
+  String get incomeChartSalary => 'Salary';
+
+  @override
+  String get incomeChartTotal => 'Total income';
 
   @override
   String get overviewCardAvailableMoneyTitle => 'Available money';

@@ -824,6 +824,20 @@ class SRo extends S {
   }
 
   @override
+  String get settingsSalaryKeywords => 'Salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsSubtitle =>
+      'Deposits matching these keywords count as salary in the income chart';
+
+  @override
+  String get settingsSalaryKeywordsDialogTitle => 'Edit salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsDialogHelp =>
+      'Comma-separated keywords. A deposit whose description contains one of them is counted as salary.';
+
+  @override
   String get settingsDialogDebugInfo =>
       'Poți activa și trimite jurnale de depanare aici. Acestea au un impact negativ asupra performanței, așa că vă rog să nu le activați decât dacă sunteți sfătuit să faceți acest lucru. Dezactivarea jurnalului va șterge jurnalul stocat.';
 
@@ -1115,6 +1129,12 @@ class SRo extends S {
 
   @override
   String get overviewCardIncomeTitle => 'Income';
+
+  @override
+  String get incomeChartSalary => 'Salary';
+
+  @override
+  String get incomeChartTotal => 'Total income';
 
   @override
   String get overviewCardAvailableMoneyTitle => 'Available money';

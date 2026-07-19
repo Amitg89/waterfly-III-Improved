@@ -827,6 +827,20 @@ class SEs extends S {
   }
 
   @override
+  String get settingsSalaryKeywords => 'Salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsSubtitle =>
+      'Deposits matching these keywords count as salary in the income chart';
+
+  @override
+  String get settingsSalaryKeywordsDialogTitle => 'Edit salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsDialogHelp =>
+      'Comma-separated keywords. A deposit whose description contains one of them is counted as salary.';
+
+  @override
   String get settingsDialogDebugInfo =>
       'Puede activar y enviar los registros de depuración desde aquí. Su activación tiene un impacto perjudicial en el rendimiento, así que no los active a no ser que se le haya recomendado. Desactivar los registros elimina los guardados anteriormente.';
 
@@ -1117,6 +1131,12 @@ class SEs extends S {
 
   @override
   String get overviewCardIncomeTitle => 'Income';
+
+  @override
+  String get incomeChartSalary => 'Salary';
+
+  @override
+  String get incomeChartTotal => 'Total income';
 
   @override
   String get overviewCardAvailableMoneyTitle => 'Available money';

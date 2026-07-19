@@ -825,6 +825,20 @@ class SSl extends S {
   }
 
   @override
+  String get settingsSalaryKeywords => 'Salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsSubtitle =>
+      'Deposits matching these keywords count as salary in the income chart';
+
+  @override
+  String get settingsSalaryKeywordsDialogTitle => 'Edit salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsDialogHelp =>
+      'Comma-separated keywords. A deposit whose description contains one of them is counted as salary.';
+
+  @override
   String get settingsDialogDebugInfo =>
       'Tukaj lahko omogočite in pošljete dnevnike odpravljanja napak. Vklop slabo vpliva na delovanje aplikacije, zato jih ne omogočite, razen če so vam tako svetovali. Če onemogočite beleženje, boste izbrisali shranjeni dnevnik.';
 
@@ -1111,6 +1125,12 @@ class SSl extends S {
 
   @override
   String get overviewCardIncomeTitle => 'Income';
+
+  @override
+  String get incomeChartSalary => 'Salary';
+
+  @override
+  String get incomeChartTotal => 'Total income';
 
   @override
   String get overviewCardAvailableMoneyTitle => 'Available money';

@@ -822,6 +822,20 @@ class SSv extends S {
   }
 
   @override
+  String get settingsSalaryKeywords => 'Salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsSubtitle =>
+      'Deposits matching these keywords count as salary in the income chart';
+
+  @override
+  String get settingsSalaryKeywordsDialogTitle => 'Edit salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsDialogHelp =>
+      'Comma-separated keywords. A deposit whose description contains one of them is counted as salary.';
+
+  @override
   String get settingsDialogDebugInfo =>
       'Du kan aktivera och skicka felsökningsloggar här. Dessa har en dålig inverkan på prestandan, så var snäll och aktivera dem inte om du inte rekommenderas att göra det. Inaktivering av loggning kommer att ta bort den lagrade loggen.';
 
@@ -1108,6 +1122,12 @@ class SSv extends S {
 
   @override
   String get overviewCardIncomeTitle => 'Income';
+
+  @override
+  String get incomeChartSalary => 'Salary';
+
+  @override
+  String get incomeChartTotal => 'Total income';
 
   @override
   String get overviewCardAvailableMoneyTitle => 'Available money';

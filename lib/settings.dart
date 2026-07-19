@@ -163,8 +163,11 @@ class SettingsProvider with ChangeNotifier {
   static const String settingDashboardDateRangeEnd = "DASHBOARD_DATE_RANGE_END";
   static const String settingDashboardAccountIds = "DASHBOARD_ACCOUNT_IDS";
   static const String settingCreditCardCycleDay = "CC_CYCLE_DAY";
+  static const String settingSalaryKeywords = "SALARY_KEYWORDS";
 
   static const int defaultCreditCardCycleDay = 10;
+  static const String defaultSalaryKeywords =
+      "מזרחי טפחו משכורת,שיכון ובינ משכורת";
 
   bool get debug => _loaded ? _boolSettings[BoolSettings.debug] : false;
   bool get lock => _loaded ? _boolSettings[BoolSettings.lock] : false;
@@ -235,6 +238,19 @@ class SettingsProvider with ChangeNotifier {
   // Day of month (1-28) an Israeli credit card billing cycle is charged.
   int _creditCardCycleDay = defaultCreditCardCycleDay;
   int get creditCardCycleDay => _creditCardCycleDay;
+
+  // Comma-separated keywords identifying salary deposits by description.
+  String _salaryKeywords = defaultSalaryKeywords;
+  String get salaryKeywords => _salaryKeywords;
+
+  /// [salaryKeywords] parsed into a list: split on commas, entries trimmed,
+  /// empty entries dropped.
+  List<String> get salaryKeywordsList =>
+      _salaryKeywords
+          .split(',')
+          .map((String s) => s.trim())
+          .where((String s) => s.isNotEmpty)
+          .toList();
   List<String> get dashboardAccountIds =>
       List<String>.unmodifiable(_dashboardAccountIds);
 
@@ -487,6 +503,9 @@ class SettingsProvider with ChangeNotifier {
                 creditCardCycleDay <= 28)
             ? creditCardCycleDay
             : defaultCreditCardCycleDay;
+
+    _salaryKeywords =
+        await prefs.getString(settingSalaryKeywords) ?? defaultSalaryKeywords;
 
     // Load new transaction date filter setting
     final int? txDateFilterIndex = await prefs.getInt(
@@ -940,6 +959,16 @@ class SettingsProvider with ChangeNotifier {
     _creditCardCycleDay = day;
     await SharedPreferencesAsync().setInt(settingCreditCardCycleDay, day);
     log.finest(() => "notify SettingsProvider->setCreditCardCycleDay()");
+    notifyListeners();
+  }
+
+  Future<void> setSalaryKeywords(String keywords) async {
+    if (keywords == _salaryKeywords) {
+      return;
+    }
+    _salaryKeywords = keywords;
+    await SharedPreferencesAsync().setString(settingSalaryKeywords, keywords);
+    log.finest(() => "notify SettingsProvider->setSalaryKeywords()");
     notifyListeners();
   }
 

@@ -818,6 +818,20 @@ class SKo extends S {
   }
 
   @override
+  String get settingsSalaryKeywords => 'Salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsSubtitle =>
+      'Deposits matching these keywords count as salary in the income chart';
+
+  @override
+  String get settingsSalaryKeywordsDialogTitle => 'Edit salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsDialogHelp =>
+      'Comma-separated keywords. A deposit whose description contains one of them is counted as salary.';
+
+  @override
   String get settingsDialogDebugInfo =>
       '여기에서 디버그 로그를 활성화하고 보낼 수 있습니다. 이는 성능에 나쁜 영향을 미치므로 권장받지 않는 한 활성화하지 마십시오. 로깅을 비활성화하면 저장된 로그가 삭제됩니다.';
 
@@ -1096,6 +1110,12 @@ class SKo extends S {
 
   @override
   String get overviewCardIncomeTitle => 'Income';
+
+  @override
+  String get incomeChartSalary => 'Salary';
+
+  @override
+  String get incomeChartTotal => 'Total income';
 
   @override
   String get overviewCardAvailableMoneyTitle => 'Available money';

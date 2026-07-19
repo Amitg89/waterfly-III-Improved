@@ -1072,6 +1072,22 @@
             }
         }
     },
+    "settingsSalaryKeywords": "Salary keywords",
+    "@settingsSalaryKeywords": {
+        "description": "Settings item title: keywords identifying salary deposits"
+    },
+    "settingsSalaryKeywordsSubtitle": "Deposits matching these keywords count as salary in the income chart",
+    "@settingsSalaryKeywordsSubtitle": {
+        "description": "Settings item subtitle for the salary keywords setting"
+    },
+    "settingsSalaryKeywordsDialogTitle": "Edit salary keywords",
+    "@settingsSalaryKeywordsDialogTitle": {
+        "description": "Dialog title: edit salary keywords"
+    },
+    "settingsSalaryKeywordsDialogHelp": "Comma-separated keywords. A deposit whose description contains one of them is counted as salary.",
+    "@settingsSalaryKeywordsDialogHelp": {
+        "description": "Helper text explaining the comma-separated salary keywords field"
+    },
     "settingsDialogDebugInfo": "You can enable & send debug logs here. These have a bad impact on performance, so please don't enable them unless you're advised to do so. Disabling logging will delete the stored log.",
     "@settingsDialogDebugInfo": {
         "description": "Information about debug logs and their impact."
@@ -1437,7 +1453,15 @@
     },
     "overviewCardIncomeTitle": "Income",
     "@overviewCardIncomeTitle": {
-        "description": "Overview card: income bar chart title"
+        "description": "Overview card: income line chart title"
+    },
+    "incomeChartSalary": "Salary",
+    "@incomeChartSalary": {
+        "description": "Income chart: legend label for the salary series"
+    },
+    "incomeChartTotal": "Total income",
+    "@incomeChartTotal": {
+        "description": "Income chart: legend label for the total income series"
     },
     "overviewCardAvailableMoneyTitle": "Available money",
     "@overviewCardAvailableMoneyTitle": {

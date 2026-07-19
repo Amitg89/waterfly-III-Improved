@@ -822,6 +822,20 @@ class SHe extends S {
   }
 
   @override
+  String get settingsSalaryKeywords => 'מילות זיהוי משכורת';
+
+  @override
+  String get settingsSalaryKeywordsSubtitle =>
+      'הפקדות התואמות למילים אלו נספרות כמשכורת בגרף ההכנסות';
+
+  @override
+  String get settingsSalaryKeywordsDialogTitle => 'עריכת מילות זיהוי משכורת';
+
+  @override
+  String get settingsSalaryKeywordsDialogHelp =>
+      'מילות מפתח מופרדות בפסיקים. הפקדה שהתיאור שלה מכיל אחת מהן נספרת כמשכורת.';
+
+  @override
   String get settingsDialogDebugInfo =>
       'You can enable & send debug logs here. These have a bad impact on performance, so please don\'t enable them unless you\'re advised to do so. Disabling logging will delete the stored log.';
 
@@ -1107,6 +1121,12 @@ class SHe extends S {
 
   @override
   String get overviewCardIncomeTitle => 'הכנסות';
+
+  @override
+  String get incomeChartSalary => 'משכורת';
+
+  @override
+  String get incomeChartTotal => 'סה\"כ הכנסות';
 
   @override
   String get overviewCardAvailableMoneyTitle => 'כסף זמין';

@@ -1394,6 +1394,30 @@ abstract class S {
   /// **'Day {day} of each month'**
   String settingsCreditCardCycleDaySubtitle(int day);
 
+  /// Settings item title: keywords identifying salary deposits
+  ///
+  /// In en, this message translates to:
+  /// **'Salary keywords'**
+  String get settingsSalaryKeywords;
+
+  /// Settings item subtitle for the salary keywords setting
+  ///
+  /// In en, this message translates to:
+  /// **'Deposits matching these keywords count as salary in the income chart'**
+  String get settingsSalaryKeywordsSubtitle;
+
+  /// Dialog title: edit salary keywords
+  ///
+  /// In en, this message translates to:
+  /// **'Edit salary keywords'**
+  String get settingsSalaryKeywordsDialogTitle;
+
+  /// Helper text explaining the comma-separated salary keywords field
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated keywords. A deposit whose description contains one of them is counted as salary.'**
+  String get settingsSalaryKeywordsDialogHelp;
+
   /// Information about debug logs and their impact.
   ///
   /// In en, this message translates to:
@@ -1904,11 +1928,23 @@ abstract class S {
   /// **'Withdrawal'**
   String get transactionTypeWithdrawal;
 
-  /// Overview card: income bar chart title
+  /// Overview card: income line chart title
   ///
   /// In en, this message translates to:
   /// **'Income'**
   String get overviewCardIncomeTitle;
+
+  /// Income chart: legend label for the salary series
+  ///
+  /// In en, this message translates to:
+  /// **'Salary'**
+  String get incomeChartSalary;
+
+  /// Income chart: legend label for the total income series
+  ///
+  /// In en, this message translates to:
+  /// **'Total income'**
+  String get incomeChartTotal;
 
   /// Overview card: available bank balances title
   ///

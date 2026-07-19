@@ -1024,6 +1024,22 @@
             }
         }
     },
+    "settingsSalaryKeywords": "מילות זיהוי משכורת",
+    "@settingsSalaryKeywords": {
+        "description": "Settings item title: keywords identifying salary deposits"
+    },
+    "settingsSalaryKeywordsSubtitle": "הפקדות התואמות למילים אלו נספרות כמשכורת בגרף ההכנסות",
+    "@settingsSalaryKeywordsSubtitle": {
+        "description": "Settings item subtitle for the salary keywords setting"
+    },
+    "settingsSalaryKeywordsDialogTitle": "עריכת מילות זיהוי משכורת",
+    "@settingsSalaryKeywordsDialogTitle": {
+        "description": "Dialog title: edit salary keywords"
+    },
+    "settingsSalaryKeywordsDialogHelp": "מילות מפתח מופרדות בפסיקים. הפקדה שהתיאור שלה מכיל אחת מהן נספרת כמשכורת.",
+    "@settingsSalaryKeywordsDialogHelp": {
+        "description": "Helper text explaining the comma-separated salary keywords field"
+    },
     "settingsDialogDebugInfo": "You can enable & send debug logs here. These have a bad impact on performance, so please don't enable them unless you're advised to do so. Disabling logging will delete the stored log.",
     "@settingsDialogDebugInfo": {
         "description": "Information about debug logs and their impact."
@@ -1369,7 +1385,15 @@
     },
     "overviewCardIncomeTitle": "הכנסות",
     "@overviewCardIncomeTitle": {
-        "description": "Overview card: income bar chart title"
+        "description": "Overview card: income line chart title"
+    },
+    "incomeChartSalary": "משכורת",
+    "@incomeChartSalary": {
+        "description": "Income chart: legend label for the salary series"
+    },
+    "incomeChartTotal": "סה\"כ הכנסות",
+    "@incomeChartTotal": {
+        "description": "Income chart: legend label for the total income series"
     },
     "overviewCardAvailableMoneyTitle": "כסף זמין",
     "@overviewCardAvailableMoneyTitle": {

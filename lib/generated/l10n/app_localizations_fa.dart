@@ -819,6 +819,20 @@ class SFa extends S {
   }
 
   @override
+  String get settingsSalaryKeywords => 'Salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsSubtitle =>
+      'Deposits matching these keywords count as salary in the income chart';
+
+  @override
+  String get settingsSalaryKeywordsDialogTitle => 'Edit salary keywords';
+
+  @override
+  String get settingsSalaryKeywordsDialogHelp =>
+      'Comma-separated keywords. A deposit whose description contains one of them is counted as salary.';
+
+  @override
   String get settingsDialogDebugInfo =>
       'می‌توانید گزارش‌های اشکال‌زدایی را در اینجا فعال و ارسال کنید. اینها تأثیر بدی بر عملکرد دارند، بنابراین لطفاً آنها را فعال نکنید مگر اینکه به شما توصیه شده باشد. غیرفعال کردن گزارش، گزارش ذخیره شده را حذف می کند.\n';
 
@@ -1104,6 +1118,12 @@ class SFa extends S {
 
   @override
   String get overviewCardIncomeTitle => 'Income';
+
+  @override
+  String get incomeChartSalary => 'Salary';
+
+  @override
+  String get incomeChartTotal => 'Total income';
 
   @override
   String get overviewCardAvailableMoneyTitle => 'Available money';

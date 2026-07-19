@@ -32,12 +32,16 @@ class _CardCharge {
   final List<TransactionRead> transactions;
 }
 
+/// One month of income data: all deposits into the bank accounts ([total])
+/// and the subset whose description matches a salary keyword ([salary]).
+typedef _IncomeMonth = ({DateTime month, double total, double salary});
+
 /// All data needed by the four overview cards, fetched once and shared.
 class _OverviewData {
   _OverviewData({
     required this.bankAccounts,
     required this.cardCharges,
-    required this.incomePerMonth,
+    required this.incomeMonths,
   });
 
   /// defaultAsset accounts.
@@ -47,32 +51,111 @@ class _OverviewData {
   /// so card 3 (upcoming by card) and card 4 (by category) can share them.
   final List<_CardCharge> cardCharges;
 
-  /// Income by month: list of 5 entries, oldest first.
-  /// Each entry: (monthStart, totalIncome).
-  final List<({DateTime month, double income})> incomePerMonth;
+  /// Income by month: 6 entries (current month + 5 previous), oldest first.
+  final List<_IncomeMonth> incomeMonths;
 }
 
-/// Builds the last 5 calendar months (current + 4 previous), oldest first.
-List<({DateTime start, DateTime end})> _last5MonthWindows(DateTime now) {
-  final List<({DateTime start, DateTime end})> windows = <({
-    DateTime start,
-    DateTime end,
-  })>[];
-  for (int i = 4; i >= 0; i--) {
-    // Subtract i months from the current month.
-    final DateTime ms = DateTime(now.year, now.month - i, 1);
-    final DateTime me = DateTime(now.year, now.month - i + 1, 1)
-        .subtract(const Duration(days: 1));
-    // For the current month cap end at today.
-    final DateTime end = (i == 0 && now.isBefore(me)) ? now : me;
-    windows.add((start: ms, end: end));
+/// Number of calendar months shown in the income chart (current + previous).
+const int _incomeMonthCount = 6;
+
+const int _incomePageLimit = 50;
+
+// Safety net so a server bug can never make us loop forever
+// (mirrors lib/israeli/accounts_service.dart).
+const int _incomeMaxPages = 100;
+
+/// Fetches all deposit transactions into [accountId] between [start] and
+/// [end], paginating through every page (same break condition as the loaders
+/// in lib/israeli/accounts_service.dart).
+Future<List<TransactionRead>> _fetchDeposits(
+  FireflyIii api,
+  String accountId,
+  DateTime start,
+  DateTime end,
+) async {
+  final DateFormat fmt = DateFormat('yyyy-MM-dd', 'en_US');
+  final List<TransactionRead> transactions = <TransactionRead>[];
+  int page = 1;
+  while (page <= _incomeMaxPages) {
+    final Response<TransactionArray> response = await api
+        .v1AccountsIdTransactionsGet(
+          id: accountId,
+          type: TransactionTypeFilter.deposit,
+          start: fmt.format(start),
+          end: fmt.format(end),
+          page: page,
+          limit: _incomePageLimit,
+        );
+    if (!response.isSuccessful || response.body == null) {
+      _log.severe("invalid deposits response", response.error);
+      throw Exception("Invalid API response: ${response.error}");
+    }
+    final List<TransactionRead> data = response.body!.data;
+    transactions.addAll(data);
+    final int? totalPages = response.body!.meta.pagination?.totalPages;
+    if (data.length < _incomePageLimit ||
+        (totalPages != null && page >= totalPages)) {
+      break;
+    }
+    page++;
   }
-  return windows;
+  return transactions;
+}
+
+/// Groups deposit splits by calendar month over the last [_incomeMonthCount]
+/// months (oldest first). Every deposit counts towards [_IncomeMonth.total];
+/// deposits whose description contains one of [salaryKeywords]
+/// (case-insensitive substring) also count towards [_IncomeMonth.salary].
+List<_IncomeMonth> _groupIncomeByMonth(
+  List<TransactionRead> transactions,
+  List<String> salaryKeywords,
+  DateTime now,
+) {
+  final List<String> keywords =
+      salaryKeywords.map((String k) => k.toLowerCase()).toList();
+
+  // Month start -> (total, salary), pre-seeded so empty months show as 0.
+  final Map<DateTime, ({double total, double salary})> byMonth =
+      <DateTime, ({double total, double salary})>{
+        for (int i = _incomeMonthCount - 1; i >= 0; i--)
+          DateTime(now.year, now.month - i, 1): (total: 0, salary: 0),
+      };
+
+  for (final TransactionRead tx in transactions) {
+    for (final TransactionSplit split in tx.attributes.transactions) {
+      if (split.type != TransactionTypeProperty.deposit) continue;
+      final DateTime date = split.date.toLocal();
+      final DateTime month = DateTime(date.year, date.month, 1);
+      final ({double total, double salary})? entry = byMonth[month];
+      if (entry == null) continue; // outside the window
+      final double amount = double.tryParse(split.amount) ?? 0;
+      final String description = split.description.toLowerCase();
+      final bool isSalary = keywords.any(
+        (String k) => description.contains(k),
+      );
+      byMonth[month] = (
+        total: entry.total + amount,
+        salary: entry.salary + (isSalary ? amount : 0),
+      );
+    }
+  }
+
+  return byMonth.entries
+      .map(
+        (MapEntry<DateTime, ({double total, double salary})> e) => (
+          month: e.key,
+          total: e.value.total,
+          salary: e.value.salary,
+        ),
+      )
+      .toList()
+    ..sort((_IncomeMonth a, _IncomeMonth b) => a.month.compareTo(b.month));
 }
 
 Future<_OverviewData> _loadOverviewData(
   FireflyIii api,
   int cycleDay,
+  List<String> salaryKeywords,
 ) async {
   // 1. Fetch bank accounts and credit cards concurrently.
   final (
@@ -128,50 +211,34 @@ Future<_OverviewData> _loadOverviewData(
     );
   }
 
-  // 5. Fetch income for last 5 months using v1InsightIncomeAssetGet.
-  //    Pass the bank account IDs so we only get deposits into bank accounts.
-  final List<int> bankIds =
-      bankAccounts
-          .map((AccountRead a) => int.tryParse(a.id))
-          .whereType<int>()
-          .toList();
-
+  // 5. Fetch all deposits into every bank account for the last 6 calendar
+  //    months and group them by month client-side (total vs. salary).
   final DateTime now = DateTime.now();
-  final List<({DateTime start, DateTime end})> monthWindows =
-      _last5MonthWindows(now);
-  final DateFormat dateFmt = DateFormat('yyyy-MM-dd', 'en_US');
+  final DateTime windowStart = DateTime(
+    now.year,
+    now.month - (_incomeMonthCount - 1),
+    1,
+  );
 
-  final List<Future<Response<InsightGroup>>> incomeFutures =
-      monthWindows
-          .map(
-            (({DateTime start, DateTime end}) w) =>
-                api.v1InsightIncomeAssetGet(
-                  start: dateFmt.format(w.start),
-                  end: dateFmt.format(w.end),
-                  accounts: bankIds.isEmpty ? null : bankIds,
-                ),
-          )
-          .toList();
-  final List<Response<InsightGroup>> incomeResponses =
-      await Future.wait(incomeFutures);
+  final List<List<TransactionRead>> depositLists = await Future.wait(
+    bankAccounts.map(
+      (AccountRead account) =>
+          _fetchDeposits(api, account.id, windowStart, now),
+    ),
+  );
+  final List<TransactionRead> deposits =
+      depositLists.expand((List<TransactionRead> l) => l).toList();
 
-  final List<({DateTime month, double income})> incomePerMonth =
-      <({DateTime month, double income})>[];
-  for (int i = 0; i < monthWindows.length; i++) {
-    final Response<InsightGroup> resp = incomeResponses[i];
-    double total = 0;
-    if (resp.isSuccessful && resp.body != null) {
-      for (final InsightGroupEntry entry in resp.body!) {
-        total += (entry.differenceFloat ?? 0).abs();
-      }
-    }
-    incomePerMonth.add((month: monthWindows[i].start, income: total));
-  }
+  final List<_IncomeMonth> incomeMonths = _groupIncomeByMonth(
+    deposits,
+    salaryKeywords,
+    now,
+  );
 
   return _OverviewData(
     bankAccounts: bankAccounts,
     cardCharges: cardCharges,
-    incomePerMonth: incomePerMonth,
+    incomeMonths: incomeMonths,
   );
 }
 
@@ -208,9 +275,12 @@ class _HomeOverviewState extends State<HomeOverview>
 
   Future<_OverviewData> _load() {
     final FireflyIii api = context.read<FireflyService>().api;
-    final int cycleDay =
-        context.read<SettingsProvider>().creditCardCycleDay;
-    return _loadOverviewData(api, cycleDay);
+    final SettingsProvider settings = context.read<SettingsProvider>();
+    return _loadOverviewData(
+      api,
+      settings.creditCardCycleDay,
+      settings.salaryKeywordsList,
+    );
   }
 
   Future<void> _refresh() async {
@@ -292,20 +362,6 @@ class _HomeOverviewState extends State<HomeOverview>
 // Helpers
 // ---------------------------------------------------------------------------
 
-/// Compact amount label: "₪12.3K", "₪1.2M", or full for small values.
-String _compactAmount(CurrencyRead currency, double amount) {
-  final double abs = amount.abs();
-  if (abs >= 1000000) {
-    final double m = amount / 1000000;
-    return '${currency.attributes.symbol}${m.toStringAsFixed(1)}M';
-  }
-  if (abs >= 1000) {
-    final double k = amount / 1000;
-    return '${currency.attributes.symbol}${k.toStringAsFixed(1)}K';
-  }
-  return currency.fmt(amount);
-}
-
 /// Builds the standard card shell used by all four overview cards.
 Widget _overviewCard({
   required BuildContext context,
@@ -359,19 +415,31 @@ CurrencyRead _currencyFromAccount(AccountRead account) => CurrencyRead(
     );
 
 // ---------------------------------------------------------------------------
-// Card 1: Income bar chart
+// Card 1: Income line chart (salary vs. total income, last 6 months)
 // ---------------------------------------------------------------------------
 
-class _IncomeCard extends StatelessWidget {
+class _IncomeCard extends StatefulWidget {
   const _IncomeCard({required this.data});
   final _OverviewData data;
+
+  @override
+  State<_IncomeCard> createState() => _IncomeCardState();
+}
+
+class _IncomeCardState extends State<_IncomeCard> {
+  late final TrackballBehavior _trackball = TrackballBehavior(
+    enable: true,
+    activationMode: ActivationMode.singleTap,
+    tooltipDisplayMode: TrackballDisplayMode.groupAllPoints,
+  );
 
   @override
   Widget build(BuildContext context) {
     final S l10n = S.of(context);
     final ColorScheme cs = Theme.of(context).colorScheme;
+    final _OverviewData data = widget.data;
 
-    if (data.incomePerMonth.isEmpty) {
+    if (data.incomeMonths.isEmpty) {
       return _overviewCard(
         context: context,
         title: l10n.overviewCardIncomeTitle,
@@ -391,16 +459,25 @@ class _IncomeCard extends StatelessWidget {
             ? _currencyFromAccount(data.bankAccounts.first)
             : defaultCurrency;
 
-    final int lastIndex = data.incomePerMonth.length - 1;
-
     return _overviewCard(
       context: context,
       title: l10n.overviewCardIncomeTitle,
       child: SizedBox(
-        height: 220,
+        height: 260,
         child: SfCartesianChart(
           plotAreaBorderWidth: 0,
-          margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          margin: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+          trackballBehavior: _trackball,
+          legend: Legend(
+            isVisible: true,
+            position: LegendPosition.bottom,
+            overflowMode: LegendItemOverflowMode.wrap,
+            itemPadding: 12,
+            textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.normal,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
           primaryXAxis: CategoryAxis(
             majorGridLines: const MajorGridLines(width: 0),
             axisLine: const AxisLine(width: 0),
@@ -408,32 +485,37 @@ class _IncomeCard extends StatelessWidget {
               color: cs.onSurfaceVariant,
             ),
           ),
-          primaryYAxis: const NumericAxis(
-            isVisible: false,
+          primaryYAxis: NumericAxis(
+            axisLine: const AxisLine(width: 0),
+            majorTickLines: const MajorTickLines(size: 0),
+            numberFormat: NumberFormat.compactCurrency(
+              symbol: currency.attributes.symbol,
+              decimalDigits: 0,
+            ),
+            labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
           ),
-          series: <CartesianSeries<({DateTime month, double income}), String>>[
-            ColumnSeries<({DateTime month, double income}), String>(
-              dataSource: data.incomePerMonth,
-              xValueMapper: (({DateTime month, double income}) e, _) =>
+          series: <CartesianSeries<_IncomeMonth, String>>[
+            LineSeries<_IncomeMonth, String>(
+              name: l10n.incomeChartSalary,
+              dataSource: data.incomeMonths,
+              xValueMapper: (_IncomeMonth e, _) =>
                   DateFormat.MMM().format(e.month),
-              yValueMapper: (({DateTime month, double income}) e, _) =>
-                  e.income,
-              pointColorMapper:
-                  (({DateTime month, double income}) e, int index) =>
-                      index == lastIndex ? cs.primary : cs.primaryContainer,
-              dataLabelMapper: (({DateTime month, double income}) e, _) =>
-                  _compactAmount(currency, e.income),
-              dataLabelSettings: DataLabelSettings(
-                isVisible: true,
-                labelAlignment: ChartDataLabelAlignment.top,
-                textStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(4),
-              ),
+              yValueMapper: (_IncomeMonth e, _) => e.salary,
+              color: cs.primary,
+              width: 2.5,
+              markerSettings: const MarkerSettings(isVisible: true),
+            ),
+            LineSeries<_IncomeMonth, String>(
+              name: l10n.incomeChartTotal,
+              dataSource: data.incomeMonths,
+              xValueMapper: (_IncomeMonth e, _) =>
+                  DateFormat.MMM().format(e.month),
+              yValueMapper: (_IncomeMonth e, _) => e.total,
+              color: cs.tertiary,
+              width: 2.5,
+              markerSettings: const MarkerSettings(isVisible: true),
             ),
           ],
         ),

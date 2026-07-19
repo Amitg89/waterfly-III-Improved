@@ -269,6 +269,24 @@ class SettingsPageState extends State<SettingsPage>
                 settings.setCreditCardCycleDay(day);
               }),
         ),
+        ListTile(
+          title: Text(S.of(context).settingsSalaryKeywords),
+          subtitle: Text(S.of(context).settingsSalaryKeywordsSubtitle),
+          leading: const CircleAvatar(child: Icon(Icons.payments)),
+          onTap:
+              () => showDialog<String>(
+                context: context,
+                builder:
+                    (BuildContext context) => SalaryKeywordsDialog(
+                      currentKeywords: settings.salaryKeywords,
+                    ),
+              ).then((String? keywords) {
+                if (keywords == null) {
+                  return;
+                }
+                settings.setSalaryKeywords(keywords);
+              }),
+        ),
         const Divider(),
         ListTile(
           title: Text(S.of(context).settingsFAQ),
@@ -422,6 +440,56 @@ class CycleDayDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+        ),
+      ],
+    );
+  }
+}
+
+class SalaryKeywordsDialog extends StatefulWidget {
+  const SalaryKeywordsDialog({super.key, required this.currentKeywords});
+
+  final String currentKeywords;
+
+  @override
+  State<SalaryKeywordsDialog> createState() => _SalaryKeywordsDialogState();
+}
+
+class _SalaryKeywordsDialogState extends State<SalaryKeywordsDialog> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.currentKeywords,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final S l10n = S.of(context);
+    return AlertDialog(
+      title: Text(l10n.settingsSalaryKeywordsDialogTitle),
+      content: TextFormField(
+        controller: _controller,
+        decoration: InputDecoration(
+          labelText: l10n.settingsSalaryKeywords,
+          helperText: l10n.settingsSalaryKeywordsDialogHelp,
+          helperMaxLines: 4,
+          filled: true,
+        ),
+        maxLines: 3,
+        minLines: 1,
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_controller.text),
+          child: Text(MaterialLocalizations.of(context).saveButtonLabel),
         ),
       ],
     );
