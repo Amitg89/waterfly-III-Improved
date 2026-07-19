@@ -206,6 +206,19 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
                   );
                 }),
                 const Divider(indent: 28, endIndent: 28),
+                SwitchListTile(
+                  secondary: const Icon(Icons.auto_awesome),
+                  title: Text(S.of(context).settingsShowAiBubble),
+                  value: context.select(
+                    (SettingsProvider s) => s.aiBubbleVisible,
+                  ),
+                  onChanged: (bool v) =>
+                      context.read<SettingsProvider>().setAiBubbleVisible(v),
+                  contentPadding: const EdgeInsetsDirectional.only(
+                    start: 28,
+                    end: 28,
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 28,

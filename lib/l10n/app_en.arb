@@ -1558,5 +1558,17 @@
     "themeToggleTooltip": "Toggle light/dark theme",
     "@themeToggleTooltip": {
         "description": "Tooltip for the sun/moon icon button in the home app bar that switches between light and dark theme"
+    },
+    "greetingMorning": "Good morning",
+    "@greetingMorning": {
+        "description": "Greeting shown in the home app bar before noon"
+    },
+    "greetingAfternoon": "Good afternoon",
+    "@greetingAfternoon": {
+        "description": "Greeting shown in the home app bar from noon to 17:00"
+    },
+    "greetingEvening": "Good evening",
+    "@greetingEvening": {
+        "description": "Greeting shown in the home app bar from 17:00 onwards"
     }
 }

@@ -1171,6 +1171,15 @@ class SZh extends S {
 
   @override
   String get themeToggleTooltip => 'Toggle light/dark theme';
+
+  @override
+  String get greetingMorning => 'Good morning';
+
+  @override
+  String get greetingAfternoon => 'Good afternoon';
+
+  @override
+  String get greetingEvening => 'Good evening';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).

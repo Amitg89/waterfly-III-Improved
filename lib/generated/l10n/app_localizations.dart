@@ -2053,6 +2053,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Toggle light/dark theme'**
   String get themeToggleTooltip;
+
+  /// Greeting shown in the home app bar before noon
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get greetingMorning;
+
+  /// Greeting shown in the home app bar from noon to 17:00
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get greetingAfternoon;
+
+  /// Greeting shown in the home app bar from 17:00 onwards
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get greetingEvening;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

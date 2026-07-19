@@ -14,7 +14,7 @@ import 'package:waterflyiii/israeli/accounts_service.dart';
 import 'package:waterflyiii/pages/home/cards/card_detail.dart';
 import 'package:waterflyiii/settings.dart';
 import 'package:waterflyiii/theme.dart';
-import 'package:waterflyiii/widgets/charts.dart';
+
 
 final Logger _log = Logger("Pages.Home.Overview");
 
@@ -886,6 +886,7 @@ Widget _overviewCard({
   required String title,
   required Widget child,
   VoidCallback? onTap,
+  Widget? trailing,
 }) {
   final ColorScheme cs = Theme.of(context).colorScheme;
   return Container(
@@ -904,10 +905,23 @@ Widget _overviewCard({
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            child: trailing != null
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      trailing,
+                    ],
+                  )
+                : Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
           ),
           child,
           const SizedBox(height: 8),
@@ -1344,9 +1358,9 @@ class _UpcomingByCategoryCard extends StatelessWidget {
     final ColorScheme cs = Theme.of(context).colorScheme;
     final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
 
-    final List<_CategoryEntry> categories = _buildCategories(context);
+    final List<_CategoryEntry> allCategories = _buildCategories(context);
 
-    if (categories.isEmpty) {
+    if (allCategories.isEmpty) {
       return _overviewCard(
         context: context,
         title: l10n.overviewCardUpcomingByCategoryTitle,
@@ -1363,91 +1377,213 @@ class _UpcomingByCategoryCard extends StatelessWidget {
             ? _currencyFromAccount(data.cardCharges.first.account)
             : context.read<FireflyService>().defaultCurrency;
 
-    final double grandTotal = categories.fold(
+    final double grandTotal = allCategories.fold(
       0.0,
       (double acc, _CategoryEntry e) => acc + e.total,
     );
 
-    final List<LabelAmountChart> pieData = categories
-        .map((_CategoryEntry e) => LabelAmountChart(e.name, e.total))
-        .toList();
+    // Cap at 7 visible rows + aggregate "Other" for the rest.
+    const int maxVisible = 7;
+    final List<_CategoryEntry> visibleCategories;
+    if (allCategories.length <= maxVisible + 1) {
+      visibleCategories = allCategories;
+    } else {
+      final List<_CategoryEntry> top = allCategories.sublist(0, maxVisible);
+      final List<_CategoryEntry> rest = allCategories.sublist(maxVisible);
+      final double otherTotal = rest.fold(
+        0.0,
+        (double acc, _CategoryEntry e) => acc + e.total,
+      );
+      final List<({TransactionRead tx, String cardLast4})> otherTxs =
+          rest
+              .expand(
+                (_CategoryEntry e) => e.transactions,
+              )
+              .toList();
+      final _CategoryEntry otherEntry = _CategoryEntry(
+        name: l10n.overviewCategoryOther,
+        total: otherTotal,
+        transactions: otherTxs,
+      );
+      visibleCategories = <_CategoryEntry>[...top, otherEntry];
+    }
 
-    // Build vault palette from theme tokens — distinct enough for pie slices.
-    final List<Color> vaultPalette = <Color>[
+    // Largest category total (first after DESC sort) — used for bar widths.
+    final double largestTotal =
+        visibleCategories.isNotEmpty ? visibleCategories.first.total : 1.0;
+
+    // Bar fill colours: top category uses heroGradient, rest cycle through
+    // solid on-theme colours.
+    final List<Color> barCycleColors = <Color>[
       cs.primary,
       mc.positive,
-      mc.negative,
-      mc.goldDeep,
       cs.tertiary,
+      mc.goldDeep,
       cs.secondary,
-      cs.primaryContainer,
-      cs.tertiaryContainer,
-      cs.secondaryContainer,
     ];
 
     return _overviewCard(
       context: context,
       title: l10n.overviewCardUpcomingByCategoryTitle,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SizedBox(
-            height: 260,
-            child: SfCircularChart(
-              legend: Legend(
-                isVisible: true,
-                position: LegendPosition.bottom,
-                overflowMode: LegendItemOverflowMode.wrap,
-                itemPadding: 4,
-                textStyle:
-                    Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.normal,
-                      color: cs.onSurfaceVariant,
-                    ),
+      trailing: Text(
+        l10n.overviewCardTotal(currency.fmt(grandTotal)),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: mc.negative,
+          fontWeight: FontWeight.w700,
+          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 12, 0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            for (int i = 0; i < visibleCategories.length; i++) ...<Widget>[
+              _CategoryBarRow(
+                entry: visibleCategories[i],
+                grandTotal: grandTotal,
+                largestTotal: largestTotal,
+                isTop: i == 0,
+                barColor: i == 0 ? null : barCycleColors[(i - 1) % barCycleColors.length],
+                heroGradient: mc.heroGradient,
+                currency: currency,
+                onTap: () => _showCategorySheet(
+                  context,
+                  visibleCategories[i],
+                  currency,
+                ),
+                cs: cs,
               ),
-              palette: vaultPalette,
-              series: <CircularSeries<LabelAmountChart, String>>[
-                PieSeries<LabelAmountChart, String>(
-                  dataSource: pieData,
-                  xValueMapper: (LabelAmountChart d, _) => d.label,
-                  yValueMapper: (LabelAmountChart d, _) => d.amount,
-                  dataLabelMapper: (LabelAmountChart d, _) => d.label,
-                  dataLabelSettings: DataLabelSettings(
-                    isVisible: true,
-                    labelPosition: ChartDataLabelPosition.outside,
-                    textStyle:
-                        Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                    connectorLineSettings: ConnectorLineSettings(
-                      color: cs.onSurfaceVariant,
+              if (i < visibleCategories.length - 1)
+                Divider(
+                  height: 1,
+                  color: cs.outlineVariant.withAlpha(0x60),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One tappable bar row inside the by-category card.
+class _CategoryBarRow extends StatelessWidget {
+  const _CategoryBarRow({
+    required this.entry,
+    required this.grandTotal,
+    required this.largestTotal,
+    required this.isTop,
+    required this.heroGradient,
+    required this.onTap,
+    required this.cs,
+    required this.currency,
+    this.barColor,
+  });
+
+  final _CategoryEntry entry;
+  final double grandTotal;
+
+  /// Total of the largest (first) category — bar widths scale to this.
+  final double largestTotal;
+
+  /// True for the rank-0 category, which gets the hero gradient bar.
+  final bool isTop;
+
+  /// Solid colour for non-top bars (null when isTop is true).
+  final Color? barColor;
+  final List<Color> heroGradient;
+  final VoidCallback onTap;
+  final ColorScheme cs;
+  final CurrencyRead currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final int pct =
+        grandTotal > 0 ? (entry.total / grandTotal * 100).round() : 0;
+    final double widthFactor =
+        largestTotal > 0 ? (entry.total / largestTotal).clamp(0.0, 1.0) : 0.0;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Row 1: name · amount · percent.
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    entry.name,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  onPointTap: (ChartPointDetails details) {
-                    final int? idx = details.pointIndex;
-                    if (idx == null || idx >= categories.length) return;
-                    _showCategorySheet(
-                      context,
-                      categories[idx],
-                      currency,
-                    );
-                  },
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  currency.fmt(entry.total),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const <FontFeature>[
+                      FontFeature.tabularFigures(),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '($pct%)',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-            child: Text(
-              l10n.overviewCardTotal(currency.fmt(grandTotal)),
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+            const SizedBox(height: 4),
+            // Row 2: the bar.
+            SizedBox(
+              height: 10,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Stack(
+                  children: <Widget>[
+                    // Track (full width).
+                    Container(
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest,
+                      ),
+                    ),
+                    // Fill (proportional to largestTotal).
+                    FractionallySizedBox(
+                      alignment: AlignmentDirectional.centerStart,
+                      widthFactor: widthFactor,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: isTop
+                              ? LinearGradient(
+                                  colors: heroGradient,
+                                  begin: AlignmentDirectional.centerStart,
+                                  end: AlignmentDirectional.centerEnd,
+                                )
+                              : null,
+                          color: isTop ? null : barColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              textAlign: TextAlign.end,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

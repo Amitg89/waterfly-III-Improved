@@ -1194,4 +1194,13 @@ class SSl extends S {
 
   @override
   String get themeToggleTooltip => 'Toggle light/dark theme';
+
+  @override
+  String get greetingMorning => 'Good morning';
+
+  @override
+  String get greetingAfternoon => 'Good afternoon';
+
+  @override
+  String get greetingEvening => 'Good evening';
 }

@@ -1189,4 +1189,13 @@ class SHe extends S {
 
   @override
   String get themeToggleTooltip => 'החלף מצב בהיר/כהה';
+
+  @override
+  String get greetingMorning => 'בוקר טוב';
+
+  @override
+  String get greetingAfternoon => 'צהריים טובים';
+
+  @override
+  String get greetingEvening => 'ערב טוב';
 }

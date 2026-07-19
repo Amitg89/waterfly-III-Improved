@@ -1490,5 +1490,17 @@
     "themeToggleTooltip": "החלף מצב בהיר/כהה",
     "@themeToggleTooltip": {
         "description": "Tooltip for the sun/moon icon button in the home app bar that switches between light and dark theme"
+    },
+    "greetingMorning": "בוקר טוב",
+    "@greetingMorning": {
+        "description": "Greeting shown in the home app bar before noon"
+    },
+    "greetingAfternoon": "צהריים טובים",
+    "@greetingAfternoon": {
+        "description": "Greeting shown in the home app bar from noon to 17:00"
+    },
+    "greetingEvening": "ערב טוב",
+    "@greetingEvening": {
+        "description": "Greeting shown in the home app bar from 17:00 onwards"
     }
 }
