@@ -11,6 +11,7 @@ import 'package:waterflyiii/extensions.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:waterflyiii/israeli/accounts_service.dart';
+import 'package:waterflyiii/pages/home/cards/card_detail.dart';
 import 'package:waterflyiii/settings.dart';
 import 'package:waterflyiii/theme.dart';
 import 'package:waterflyiii/widgets/charts.dart';
@@ -333,18 +334,21 @@ class _HomeOverviewState extends State<HomeOverview>
             return _buildError(snapshot.error!);
           }
           final _OverviewData data = snapshot.data!;
+          final SettingsProvider settings = context.read<SettingsProvider>();
           return ListView(
             padding: const EdgeInsets.all(8),
             children: <Widget>[
-              _IncomeCard(data: data),
-              const SizedBox(height: 4),
-              _AvailableMoneyCard(data: data),
-              const SizedBox(height: 4),
-              _UpcomingChargesCard(
+              _HeroCard(data: data),
+              const SizedBox(height: 8),
+              _StatChipsRow(
                 data: data,
-                onTap: widget.onNavigateToCards,
+                cycleDay: settings.creditCardCycleDay,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
+              _IncomeCard(data: data),
+              const SizedBox(height: 8),
+              _CardCarousel(data: data),
+              const SizedBox(height: 8),
               _UpcomingByCategoryCard(data: data),
               const SizedBox(height: 68),
             ],
@@ -380,37 +384,6 @@ class _HomeOverviewState extends State<HomeOverview>
 // Helpers
 // ---------------------------------------------------------------------------
 
-/// Builds the standard card shell used by all four overview cards.
-Widget _overviewCard({
-  required BuildContext context,
-  required String title,
-  required Widget child,
-  VoidCallback? onTap,
-}) {
-  return Card(
-    clipBehavior: Clip.hardEdge,
-    margin: const EdgeInsets.fromLTRB(4, 4, 4, 4),
-    child: InkWell(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          child,
-          const SizedBox(height: 8),
-        ],
-      ),
-    ),
-  );
-}
-
 /// Gets the last-4 digits from an account name if it ends with exactly 4 digits,
 /// otherwise returns the full name.
 String _cardLast4(String name) {
@@ -432,8 +405,365 @@ CurrencyRead _currencyFromAccount(AccountRead account) => CurrencyRead(
       ),
     );
 
+/// Ordinal suffix for a day number (English: 1st, 2nd, 3rd, 4th…).
+String _ordinal(int day) {
+  if (day >= 11 && day <= 13) return '${day}th';
+  switch (day % 10) {
+    case 1:
+      return '${day}st';
+    case 2:
+      return '${day}nd';
+    case 3:
+      return '${day}rd';
+    default:
+      return '${day}th';
+  }
+}
+
 // ---------------------------------------------------------------------------
-// Card 1: Income line chart (salary vs. total income, last 6 months)
+// Section 1: Hero "Total available" card
+// ---------------------------------------------------------------------------
+
+class _HeroCard extends StatelessWidget {
+  const _HeroCard({required this.data});
+  final _OverviewData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final S l10n = S.of(context);
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
+    final Color fg = mc.heroForeground;
+
+    if (data.bankAccounts.isEmpty) {
+      return _buildShell(
+        context: context,
+        mc: mc,
+        fg: fg,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(16),
+          child: Text(l10n.overviewNoData, style: TextStyle(color: fg)),
+        ),
+      );
+    }
+
+    // Group totals by currency.
+    final Map<String, ({CurrencyRead currency, double sum})> totals =
+        <String, ({CurrencyRead currency, double sum})>{};
+    for (final AccountRead account in data.bankAccounts) {
+      final double balance =
+          double.tryParse(account.attributes.currentBalance ?? '0') ?? 0;
+      final CurrencyRead currency = _currencyFromAccount(account);
+      final String key = currency.attributes.code;
+      totals[key] = (
+        currency: currency,
+        sum: (totals[key]?.sum ?? 0) + balance,
+      );
+    }
+
+    // Primary total: first currency entry.
+    final ({CurrencyRead currency, double sum}) primary = totals.values.first;
+
+    return _buildShell(
+      context: context,
+      mc: mc,
+      fg: fg,
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(20, 20, 20, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // Label
+            Text(
+              l10n.overviewHeroTotalAvailable,
+              style: TextStyle(
+                color: fg.withAlpha(0xB8), // ~72 % opacity
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 6),
+            // Big total
+            Text(
+              primary.currency.fmt(primary.sum),
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                color: fg,
+                fontWeight: FontWeight.w700,
+                fontSize: 40,
+                fontFeatures: const <FontFeature>[
+                  FontFeature.tabularFigures(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Sub-line
+            Text(
+              l10n.overviewHeroAcrossAccounts(data.bankAccounts.length),
+              style: TextStyle(
+                color: fg.withAlpha(0xAA), // ~67 % opacity
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Per-bank row with vertical dividers
+            _PerBankRow(
+              accounts: data.bankAccounts,
+              fg: fg,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShell({
+    required BuildContext context,
+    required MoneyColors mc,
+    required Color fg,
+    required Widget child,
+  }) {
+    return Container(
+      margin: const EdgeInsetsDirectional.fromSTEB(4, 4, 4, 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: mc.heroGradient,
+        ),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Stack(
+        children: <Widget>[
+          // Subtle radial sheen in top-end corner (glass effect).
+          PositionedDirectional(
+            top: -40,
+            end: -40,
+            child: Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: <Color>[
+                    fg.withAlpha(0x2E),
+                    fg.withAlpha(0x00),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _PerBankRow extends StatelessWidget {
+  const _PerBankRow({required this.accounts, required this.fg});
+  final List<AccountRead> accounts;
+  final Color fg;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> items = <Widget>[];
+    for (int i = 0; i < accounts.length; i++) {
+      if (i > 0) {
+        items.add(
+          Container(
+            width: 1,
+            height: 32,
+            color: fg.withAlpha(0x40),
+            margin: const EdgeInsetsDirectional.symmetric(horizontal: 10),
+          ),
+        );
+      }
+      items.add(_BankEntry(account: accounts[i], fg: fg));
+    }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: items,
+      ),
+    );
+  }
+}
+
+class _BankEntry extends StatelessWidget {
+  const _BankEntry({required this.account, required this.fg});
+  final AccountRead account;
+  final Color fg;
+
+  @override
+  Widget build(BuildContext context) {
+    final CurrencyRead currency = _currencyFromAccount(account);
+    final double balance =
+        double.tryParse(account.attributes.currentBalance ?? '0') ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          account.attributes.name,
+          style: TextStyle(
+            color: fg.withAlpha(0xAA),
+            fontSize: 11,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          currency.fmt(balance),
+          style: TextStyle(
+            color: fg,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Section 2: Stat chips row (income this month · next charge)
+// ---------------------------------------------------------------------------
+
+class _StatChipsRow extends StatelessWidget {
+  const _StatChipsRow({required this.data, required this.cycleDay});
+  final _OverviewData data;
+  final int cycleDay;
+
+  @override
+  Widget build(BuildContext context) {
+    final S l10n = S.of(context);
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
+    final ColorScheme cs = Theme.of(context).colorScheme;
+
+    // This month's income: last entry in incomeMonths (oldest-first list).
+    final double thisMonthIncome =
+        data.incomeMonths.isNotEmpty ? data.incomeMonths.last.total : 0;
+
+    // Sum upcoming charges across all cards.
+    double totalCharge = 0;
+    CurrencyRead? chargeCurrency;
+    for (final _CardCharge cc in data.cardCharges) {
+      totalCharge += cc.charge;
+      chargeCurrency ??= _currencyFromAccount(cc.account);
+    }
+
+    // Default currency for income chips.
+    final CurrencyRead incomeCurrency =
+        data.bankAccounts.isNotEmpty
+            ? _currencyFromAccount(data.bankAccounts.first)
+            : context.read<FireflyService>().defaultCurrency;
+
+    chargeCurrency ??= incomeCurrency;
+
+    final String cycleLabel = _ordinal(cycleDay);
+
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: _StatChip(
+            dotColor: mc.positive,
+            label: l10n.overviewStatChipInThisMonth,
+            valueText: '+${incomeCurrency.fmt(thisMonthIncome)}',
+            valueColor: mc.positive,
+            cs: cs,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _StatChip(
+            dotColor: mc.negative,
+            label: l10n.overviewStatChipNextCharge(cycleLabel),
+            valueText: chargeCurrency.fmt(totalCharge),
+            valueColor: mc.negative,
+            cs: cs,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  const _StatChip({
+    required this.dotColor,
+    required this.label,
+    required this.valueText,
+    required this.valueColor,
+    required this.cs,
+  });
+
+  final Color dotColor;
+  final String label;
+  final String valueText;
+  final Color valueColor;
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outline, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: dotColor,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            valueText,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: valueColor,
+              fontWeight: FontWeight.w700,
+              fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Section 3: Income line chart (salary vs. total income, last 6 months)
 // ---------------------------------------------------------------------------
 
 class _IncomeCard extends StatefulWidget {
@@ -455,6 +785,7 @@ class _IncomeCardState extends State<_IncomeCard> {
   Widget build(BuildContext context) {
     final S l10n = S.of(context);
     final ColorScheme cs = Theme.of(context).colorScheme;
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
     final _OverviewData data = widget.data;
 
     if (data.incomeMonths.isEmpty) {
@@ -515,6 +846,7 @@ class _IncomeCardState extends State<_IncomeCard> {
             ),
           ),
           series: <CartesianSeries<_IncomeMonth, String>>[
+            // Salary → gold (colorScheme.primary)
             LineSeries<_IncomeMonth, String>(
               name: l10n.incomeChartSalary,
               dataSource: data.incomeMonths,
@@ -525,13 +857,14 @@ class _IncomeCardState extends State<_IncomeCard> {
               width: 2.5,
               markerSettings: const MarkerSettings(isVisible: true),
             ),
+            // Total income → emerald (mc.positive)
             LineSeries<_IncomeMonth, String>(
               name: l10n.incomeChartTotal,
               dataSource: data.incomeMonths,
               xValueMapper: (_IncomeMonth e, _) =>
                   DateFormat.MMM().format(e.month),
               yValueMapper: (_IncomeMonth e, _) => e.total,
-              color: cs.tertiary,
+              color: mc.positive,
               width: 2.5,
               markerSettings: const MarkerSettings(isVisible: true),
             ),
@@ -543,79 +876,264 @@ class _IncomeCardState extends State<_IncomeCard> {
 }
 
 // ---------------------------------------------------------------------------
-// Card 2: Available money
+// Helpers (standard card shell reused by Income + Category cards)
 // ---------------------------------------------------------------------------
 
-class _AvailableMoneyCard extends StatelessWidget {
-  const _AvailableMoneyCard({required this.data});
+/// Builds the standard card shell used by overview cards that keep the
+/// plain surface style (income chart, upcoming-by-category).
+Widget _overviewCard({
+  required BuildContext context,
+  required String title,
+  required Widget child,
+  VoidCallback? onTap,
+}) {
+  final ColorScheme cs = Theme.of(context).colorScheme;
+  return Container(
+    margin: const EdgeInsetsDirectional.fromSTEB(4, 4, 4, 4),
+    decoration: BoxDecoration(
+      color: cs.surface,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: cs.outline, width: 1),
+    ),
+    clipBehavior: Clip.hardEdge,
+    child: InkWell(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          child,
+          const SizedBox(height: 8),
+        ],
+      ),
+    ),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Section 4: "Your cards" horizontal carousel
+// ---------------------------------------------------------------------------
+
+class _CardCarousel extends StatelessWidget {
+  const _CardCarousel({required this.data});
   final _OverviewData data;
 
   @override
   Widget build(BuildContext context) {
     final S l10n = S.of(context);
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
+    final ColorScheme cs = Theme.of(context).colorScheme;
 
-    if (data.bankAccounts.isEmpty) {
-      return _overviewCard(
-        context: context,
-        title: l10n.overviewCardAvailableMoneyTitle,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(l10n.overviewNoData),
-        ),
-      );
-    }
+    // Show ALL cards (including zero charge) in the carousel.
+    final List<_CardCharge> cards = data.cardCharges;
 
-    // Group totals by currency code.
-    final Map<String, ({CurrencyRead currency, double sum})> totals =
-        <String, ({CurrencyRead currency, double sum})>{};
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // Section header
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 8),
+            child: Text(
+              l10n.overviewCarouselSectionTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          if (cards.isEmpty)
+            Container(
+              padding: const EdgeInsetsDirectional.all(16),
+              decoration: BoxDecoration(
+                color: cs.surface,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: cs.outline, width: 1),
+              ),
+              child: Text(l10n.overviewNoData),
+            )
+          else
+            SizedBox(
+              height: 140,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 8, 0),
+                itemCount: cards.length,
+                separatorBuilder: (BuildContext context2, int index) =>
+                    const SizedBox(width: 12),
+                itemBuilder: (BuildContext ctx, int i) {
+                  final _CardCharge cc = cards[i];
+                  return _CardFace(
+                    cardCharge: cc,
+                    gradientColors: mc.cardGradients[i % mc.cardGradients.length],
+                    heroGradient: mc.heroGradient,
+                    faceFg: mc.cardFaceForeground,
+                    goldDeep: mc.goldDeep,
+                    l10n: l10n,
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
 
-    final List<Widget> rows = <Widget>[];
-    for (final AccountRead account in data.bankAccounts) {
-      final double balance =
-          double.tryParse(account.attributes.currentBalance ?? '0') ?? 0;
-      final CurrencyRead currency = _currencyFromAccount(account);
+class _CardFace extends StatelessWidget {
+  const _CardFace({
+    required this.cardCharge,
+    required this.gradientColors,
+    required this.heroGradient,
+    required this.faceFg,
+    required this.goldDeep,
+    required this.l10n,
+  });
 
-      rows.add(_BalanceRow(
-        label: account.attributes.name,
-        balance: balance,
-        currency: currency,
-      ));
+  final _CardCharge cardCharge;
+  final List<Color> gradientColors;
+  final List<Color> heroGradient;
+  final Color faceFg;
+  final Color goldDeep;
+  final S l10n;
 
-      final String key = currency.attributes.code;
-      if (totals.containsKey(key)) {
-        totals[key] = (
-          currency: totals[key]!.currency,
-          sum: totals[key]!.sum + balance,
+  @override
+  Widget build(BuildContext context) {
+    final CurrencyRead currency = _currencyFromAccount(cardCharge.account);
+    final String last4 = _cardLast4(cardCharge.account.attributes.name);
+    final String name = cardCharge.account.attributes.name;
+
+    return GestureDetector(
+      onTap: () {
+        // Navigate to card detail (same as Cards tab).
+        final SettingsProvider settings = context.read<SettingsProvider>();
+        final ({DateTime start, DateTime end}) cycle = currentCycle(
+          DateTime.now(),
+          settings.creditCardCycleDay,
         );
-      } else {
-        totals[key] = (currency: currency, sum: balance);
-      }
-    }
-
-    // Divider + total row(s).
-    final List<Widget> totalRows = totals.values.map((
-      ({CurrencyRead currency, double sum}) t,
-    ) {
-      return _BalanceRow(
-        label: l10n.generalSum,
-        balance: t.sum,
-        currency: t.currency,
-        bold: true,
-      );
-    }).toList();
-
-    return _overviewCard(
-      context: context,
-      title: l10n.overviewCardAvailableMoneyTitle,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder:
+                (_) => CardDetailPage(
+                  account: cardCharge.account,
+                  prevCharge: cycle.start,
+                  nextCharge: cycle.end,
+                ),
+          ),
+        );
+      },
+      child: Container(
+        width: 176,
+        height: 112,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: gradientColors,
+          ),
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Stack(
           children: <Widget>[
-            ...rows,
-            const Divider(height: 16),
-            ...totalRows,
+            // Subtle radial sheen top-end corner.
+            PositionedDirectional(
+              top: -24,
+              end: -24,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: <Color>[
+                      faceFg.withAlpha(0x24),
+                      faceFg.withAlpha(0x00),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  // Gold chip rectangle
+                  Container(
+                    width: 26,
+                    height: 19,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      gradient: LinearGradient(
+                        colors: heroGradient.length >= 2
+                            ? <Color>[heroGradient[1], goldDeep]
+                            : <Color>[goldDeep, goldDeep],
+                      ),
+                    ),
+                  ),
+                  // Card name + last4
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        name,
+                        style: TextStyle(
+                          color: faceFg.withAlpha(0xB2), // ~70 %
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '•••• $last4',
+                        style: TextStyle(
+                          color: faceFg,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 2.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Upcoming label + amount
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      Text(
+                        l10n.overviewCarouselUpcoming,
+                        style: TextStyle(
+                          color: faceFg.withAlpha(0xAA), // ~66 %
+                          fontSize: 10,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      Text(
+                        currency.fmt(cardCharge.charge),
+                        style: TextStyle(
+                          color: faceFg,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const <FontFeature>[
+                            FontFeature.tabularFigures(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -623,188 +1141,8 @@ class _AvailableMoneyCard extends StatelessWidget {
   }
 }
 
-class _BalanceRow extends StatelessWidget {
-  const _BalanceRow({
-    required this.label,
-    required this.balance,
-    required this.currency,
-    this.bold = false,
-  });
-
-  final String label;
-  final double balance;
-  final CurrencyRead currency;
-  final bool bold;
-
-  @override
-  Widget build(BuildContext context) {
-    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
-    final Color amountColor = balance >= 0 ? mc.positive : mc.negative;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Expanded(
-            child: Text(
-              label,
-              style: bold
-                  ? Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.bold)
-                  : null,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Text(
-            currency.fmt(balance),
-            style: TextStyle(
-              color: amountColor,
-              fontWeight: bold ? FontWeight.bold : FontWeight.w600,
-              fontFeatures: const <FontFeature>[
-                FontFeature.tabularFigures(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ---------------------------------------------------------------------------
-// Card 3: Upcoming charges (pie, per card) — tappable to navigate to Cards tab
-// ---------------------------------------------------------------------------
-
-class _UpcomingChargesCard extends StatelessWidget {
-  const _UpcomingChargesCard({
-    required this.data,
-    this.onTap,
-  });
-
-  final _OverviewData data;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final S l10n = S.of(context);
-
-    // Only cards with a nonzero upcoming charge.
-    final List<_CardCharge> visible =
-        data.cardCharges.where((_CardCharge c) => c.charge > 0).toList();
-
-    if (visible.isEmpty) {
-      return _overviewCard(
-        context: context,
-        title: l10n.overviewCardUpcomingChargesTitle,
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(l10n.overviewNoData),
-        ),
-      );
-    }
-
-    // Build pie data.
-    final List<LabelAmountChart> pieData = visible
-        .map(
-          (_CardCharge c) => LabelAmountChart(
-            _cardLast4(c.account.attributes.name),
-            c.charge,
-          ),
-        )
-        .toList();
-
-    // Total (group by currency).
-    final Map<String, ({CurrencyRead currency, double sum})> totals =
-        <String, ({CurrencyRead currency, double sum})>{};
-    for (final _CardCharge c in visible) {
-      final CurrencyRead currency = _currencyFromAccount(c.account);
-      final String key = currency.attributes.code;
-      totals[key] = (
-        currency: currency,
-        sum: (totals[key]?.sum ?? 0) + c.charge,
-      );
-    }
-
-    // Use the first card's currency for the total display (most common case).
-    final CurrencyRead totalCurrency =
-        totals.values.isNotEmpty
-            ? totals.values.first.currency
-            : _currencyFromAccount(visible.first.account);
-    final double totalSum = totals.values.fold(
-      0,
-      (double acc, ({CurrencyRead currency, double sum}) t) => acc + t.sum,
-    );
-
-    return _overviewCard(
-      context: context,
-      title: l10n.overviewCardUpcomingChargesTitle,
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SizedBox(
-            height: 240,
-            child: SfCircularChart(
-              legend: Legend(
-                isVisible: true,
-                position: LegendPosition.bottom,
-                overflowMode: LegendItemOverflowMode.wrap,
-                itemPadding: 4,
-                textStyle:
-                    Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.normal,
-                      color:
-                          Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-              palette: possibleChartColorsDart,
-              series: <CircularSeries<LabelAmountChart, String>>[
-                PieSeries<LabelAmountChart, String>(
-                  dataSource: pieData,
-                  xValueMapper: (LabelAmountChart d, _) => d.label,
-                  yValueMapper: (LabelAmountChart d, _) => d.amount,
-                  dataLabelMapper: (LabelAmountChart d, _) => d.label,
-                  dataLabelSettings: DataLabelSettings(
-                    isVisible: true,
-                    labelPosition: ChartDataLabelPosition.outside,
-                    textStyle:
-                        Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.normal,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurfaceVariant,
-                        ),
-                    connectorLineSettings: ConnectorLineSettings(
-                      color:
-                          Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-            child: Text(
-              l10n.overviewCardTotal(totalCurrency.fmt(totalSum)),
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.end,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Card 4: Upcoming charges by category (pie + bottom sheet drill-down)
+// Section 5: Upcoming charges by category (pie + bottom sheet drill-down)
 // ---------------------------------------------------------------------------
 
 class _CategoryEntry {
@@ -916,12 +1254,14 @@ class _UpcomingByCategoryCard extends StatelessWidget {
     _CategoryEntry entry,
     CurrencyRead currency,
   ) {
+    final ColorScheme cs = Theme.of(context).colorScheme;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
       ),
       builder: (BuildContext sheetCtx) => DraggableScrollableSheet(
         initialChildSize: 0.6,
@@ -938,8 +1278,7 @@ class _UpcomingByCategoryCard extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant
-                        .withValues(alpha: 0.4),
+                    color: cs.outline,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -993,6 +1332,8 @@ class _UpcomingByCategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final S l10n = S.of(context);
+    final ColorScheme cs = Theme.of(context).colorScheme;
+    final MoneyColors mc = Theme.of(context).extension<MoneyColors>()!;
 
     final List<_CategoryEntry> categories = _buildCategories(context);
 
@@ -1022,6 +1363,19 @@ class _UpcomingByCategoryCard extends StatelessWidget {
         .map((_CategoryEntry e) => LabelAmountChart(e.name, e.total))
         .toList();
 
+    // Build vault palette from theme tokens — distinct enough for pie slices.
+    final List<Color> vaultPalette = <Color>[
+      cs.primary,
+      mc.positive,
+      mc.negative,
+      mc.goldDeep,
+      cs.tertiary,
+      cs.secondary,
+      cs.primaryContainer,
+      cs.tertiaryContainer,
+      cs.secondaryContainer,
+    ];
+
     return _overviewCard(
       context: context,
       title: l10n.overviewCardUpcomingByCategoryTitle,
@@ -1040,11 +1394,10 @@ class _UpcomingByCategoryCard extends StatelessWidget {
                 textStyle:
                     Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.normal,
-                      color:
-                          Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: cs.onSurfaceVariant,
                     ),
               ),
-              palette: possibleChartColorsDart,
+              palette: vaultPalette,
               series: <CircularSeries<LabelAmountChart, String>>[
                 PieSeries<LabelAmountChart, String>(
                   dataSource: pieData,
@@ -1056,13 +1409,10 @@ class _UpcomingByCategoryCard extends StatelessWidget {
                     labelPosition: ChartDataLabelPosition.outside,
                     textStyle:
                         Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurfaceVariant,
+                          color: cs.onSurfaceVariant,
                         ),
                     connectorLineSettings: ConnectorLineSettings(
-                      color:
-                          Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                   onPointTap: (ChartPointDetails details) {
@@ -1152,4 +1502,3 @@ class _CategoryTxRow extends StatelessWidget {
     );
   }
 }
-

@@ -9,6 +9,12 @@ class SId extends S {
   SId([String locale = 'id']) : super(locale);
 
   @override
+  String get aiBubbleTag => 'Ask AI';
+
+  @override
+  String get settingsShowAiBubble => 'Show AI assistant';
+
+  @override
   String get accountRoleAssetCashWallet => 'Dompet Kas';
 
   @override
@@ -1160,4 +1166,26 @@ class SId extends S {
   String overviewCategorySheetCard(String last4) {
     return '•••• $last4';
   }
+
+  @override
+  String get overviewHeroTotalAvailable => 'TOTAL AVAILABLE';
+
+  @override
+  String overviewHeroAcrossAccounts(int n) {
+    return 'Across $n bank accounts';
+  }
+
+  @override
+  String get overviewStatChipInThisMonth => 'In this month';
+
+  @override
+  String overviewStatChipNextCharge(String day) {
+    return 'Next charge · $day';
+  }
+
+  @override
+  String get overviewCarouselSectionTitle => 'Your cards';
+
+  @override
+  String get overviewCarouselUpcoming => 'UPCOMING';
 }

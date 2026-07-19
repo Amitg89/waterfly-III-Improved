@@ -246,6 +246,12 @@ class SettingsPageState extends State<SettingsPage>
                     ),
               ),
         ),
+        SwitchListTile(
+          title: Text(S.of(context).settingsShowAiBubble),
+          value: context.select((SettingsProvider s) => s.aiBubbleVisible),
+          secondary: const CircleAvatar(child: Icon(Icons.auto_awesome)),
+          onChanged: (bool value) => settings.setAiBubbleVisible(value),
+        ),
         ListTile(
           title: Text(S.of(context).settingsCreditCardCycleDay),
           subtitle: Text(

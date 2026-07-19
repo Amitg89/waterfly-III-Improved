@@ -9,6 +9,12 @@ class SPt extends S {
   SPt([String locale = 'pt']) : super(locale);
 
   @override
+  String get aiBubbleTag => 'Ask AI';
+
+  @override
+  String get settingsShowAiBubble => 'Show AI assistant';
+
+  @override
   String get accountRoleAssetCashWallet => 'Carteira de dinheiro';
 
   @override
@@ -1156,11 +1162,39 @@ class SPt extends S {
   String overviewCategorySheetCard(String last4) {
     return '•••• $last4';
   }
+
+  @override
+  String get overviewHeroTotalAvailable => 'TOTAL AVAILABLE';
+
+  @override
+  String overviewHeroAcrossAccounts(int n) {
+    return 'Across $n bank accounts';
+  }
+
+  @override
+  String get overviewStatChipInThisMonth => 'In this month';
+
+  @override
+  String overviewStatChipNextCharge(String day) {
+    return 'Next charge · $day';
+  }
+
+  @override
+  String get overviewCarouselSectionTitle => 'Your cards';
+
+  @override
+  String get overviewCarouselUpcoming => 'UPCOMING';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
 class SPtBr extends SPt {
   SPtBr() : super('pt_BR');
+
+  @override
+  String get aiBubbleTag => 'Ask AI';
+
+  @override
+  String get settingsShowAiBubble => 'Show AI assistant';
 
   @override
   String get accountRoleAssetCashWallet => 'Carteira de Dinheiro';

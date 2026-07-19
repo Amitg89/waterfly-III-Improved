@@ -70,6 +70,9 @@ enum BoolSettings {
   hideTags,
   billsShowOnlyActive,
   billsShowOnlyExpected,
+  // Stored inverted ("hidden") so the unset bit (0) means the bubble is
+  // visible by default. Appended at the end to keep existing bit positions.
+  aiBubbleHidden,
 }
 
 enum TransactionDateFilter {
@@ -164,6 +167,11 @@ class SettingsProvider with ChangeNotifier {
   static const String settingDashboardAccountIds = "DASHBOARD_ACCOUNT_IDS";
   static const String settingCreditCardCycleDay = "CC_CYCLE_DAY";
   static const String settingSalaryKeywords = "SALARY_KEYWORDS";
+  static const String settingAiBubbleX = "AI_BUBBLE_X";
+  static const String settingAiBubbleY = "AI_BUBBLE_Y";
+
+  /// Sentinel meaning "position not set yet, use the default placement".
+  static const double aiBubblePositionUnset = -1;
 
   static const int defaultCreditCardCycleDay = 10;
   static const String defaultSalaryKeywords =
@@ -182,6 +190,8 @@ class SettingsProvider with ChangeNotifier {
       _loaded ? _boolSettings[BoolSettings.billsShowOnlyActive] : false;
   bool get billsShowOnlyExpected =>
       _loaded ? _boolSettings[BoolSettings.billsShowOnlyExpected] : false;
+  bool get aiBubbleVisible =>
+      _loaded ? !_boolSettings[BoolSettings.aiBubbleHidden] : true;
 
   ThemeMode _theme = ThemeMode.system;
   ThemeMode get theme => _theme;
@@ -242,6 +252,13 @@ class SettingsProvider with ChangeNotifier {
   // Comma-separated keywords identifying salary deposits by description.
   String _salaryKeywords = defaultSalaryKeywords;
   String get salaryKeywords => _salaryKeywords;
+
+  // Persisted position (left/top) of the floating AI bubble.
+  // [aiBubblePositionUnset] means "not dragged yet, use default placement".
+  double _aiBubbleX = aiBubblePositionUnset;
+  double _aiBubbleY = aiBubblePositionUnset;
+  double get aiBubbleX => _aiBubbleX;
+  double get aiBubbleY => _aiBubbleY;
 
   /// [salaryKeywords] parsed into a list: split on commas, entries trimmed,
   /// empty entries dropped.
@@ -507,6 +524,9 @@ class SettingsProvider with ChangeNotifier {
     _salaryKeywords =
         await prefs.getString(settingSalaryKeywords) ?? defaultSalaryKeywords;
 
+    _aiBubbleX = await prefs.getDouble(settingAiBubbleX) ?? aiBubblePositionUnset;
+    _aiBubbleY = await prefs.getDouble(settingAiBubbleY) ?? aiBubblePositionUnset;
+
     // Load new transaction date filter setting
     final int? txDateFilterIndex = await prefs.getInt(
       settingTransactionDateFilter,
@@ -598,6 +618,21 @@ class SettingsProvider with ChangeNotifier {
       _setBool(BoolSettings.billsShowOnlyActive, enabled);
   set billsShowOnlyExpected(bool enabled) =>
       _setBool(BoolSettings.billsShowOnlyExpected, enabled);
+  void setAiBubbleVisible(bool visible) =>
+      _setBool(BoolSettings.aiBubbleHidden, !visible);
+
+  Future<void> setAiBubblePosition(double x, double y) async {
+    if (x == _aiBubbleX && y == _aiBubbleY) {
+      return;
+    }
+    _aiBubbleX = x;
+    _aiBubbleY = y;
+    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
+    await prefs.setDouble(settingAiBubbleX, x);
+    await prefs.setDouble(settingAiBubbleY, y);
+    log.finest(() => "notify SettingsProvider->setAiBubblePosition()");
+    notifyListeners();
+  }
 
   Future<void> setTheme(ThemeMode theme) async {
     _theme = theme;

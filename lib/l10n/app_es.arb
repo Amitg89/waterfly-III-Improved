@@ -1,4 +1,12 @@
 {
+    "aiBubbleTag": "Ask AI",
+    "@aiBubbleTag": {
+        "description": "Label under the floating AI assistant bubble"
+    },
+    "settingsShowAiBubble": "Show AI assistant",
+    "@settingsShowAiBubble": {
+        "description": "Settings toggle for the floating AI assistant bubble"
+    },
   "@@locale": "es",
     "@@x-reference": true,
     "accountRoleAssetCashWallet": "Billetera de efectivo",

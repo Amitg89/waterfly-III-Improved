@@ -9,6 +9,12 @@ class SZh extends S {
   SZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get aiBubbleTag => 'Ask AI';
+
+  @override
+  String get settingsShowAiBubble => 'Show AI assistant';
+
+  @override
   String get accountRoleAssetCashWallet => '现金';
 
   @override
@@ -1137,11 +1143,39 @@ class SZh extends S {
   String overviewCategorySheetCard(String last4) {
     return '•••• $last4';
   }
+
+  @override
+  String get overviewHeroTotalAvailable => 'TOTAL AVAILABLE';
+
+  @override
+  String overviewHeroAcrossAccounts(int n) {
+    return 'Across $n bank accounts';
+  }
+
+  @override
+  String get overviewStatChipInThisMonth => 'In this month';
+
+  @override
+  String overviewStatChipNextCharge(String day) {
+    return 'Next charge · $day';
+  }
+
+  @override
+  String get overviewCarouselSectionTitle => 'Your cards';
+
+  @override
+  String get overviewCarouselUpcoming => 'UPCOMING';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
 class SZhTw extends SZh {
   SZhTw() : super('zh_TW');
+
+  @override
+  String get aiBubbleTag => 'Ask AI';
+
+  @override
+  String get settingsShowAiBubble => 'Show AI assistant';
 
   @override
   String get accountRoleAssetCashWallet => '現金皮夾';

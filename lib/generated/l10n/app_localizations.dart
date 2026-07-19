@@ -141,6 +141,18 @@ abstract class S {
     Locale('zh'),
   ];
 
+  /// Label under the floating AI assistant bubble
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI'**
+  String get aiBubbleTag;
+
+  /// Settings toggle for the floating AI assistant bubble
+  ///
+  /// In en, this message translates to:
+  /// **'Show AI assistant'**
+  String get settingsShowAiBubble;
+
   /// Firefly Translation String: account_role_cashWalletAsset
   ///
   /// In en, this message translates to:
@@ -1993,6 +2005,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'•••• {last4}'**
   String overviewCategorySheetCard(String last4);
+
+  /// Overview hero card: uppercase label above the total balance
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL AVAILABLE'**
+  String get overviewHeroTotalAvailable;
+
+  /// Overview hero card: sub-line showing how many bank accounts are summed
+  ///
+  /// In en, this message translates to:
+  /// **'Across {n} bank accounts'**
+  String overviewHeroAcrossAccounts(int n);
+
+  /// Stat chip label: current month total income
+  ///
+  /// In en, this message translates to:
+  /// **'In this month'**
+  String get overviewStatChipInThisMonth;
+
+  /// Stat chip label: upcoming charge cycle day
+  ///
+  /// In en, this message translates to:
+  /// **'Next charge · {day}'**
+  String overviewStatChipNextCharge(String day);
+
+  /// Section header above the horizontal card-face carousel
+  ///
+  /// In en, this message translates to:
+  /// **'Your cards'**
+  String get overviewCarouselSectionTitle;
+
+  /// Label on each card face in the carousel above the upcoming charge amount
+  ///
+  /// In en, this message translates to:
+  /// **'UPCOMING'**
+  String get overviewCarouselUpcoming;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

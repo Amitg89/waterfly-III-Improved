@@ -1,6 +1,14 @@
 {
     "@@locale": "he",
     "@@x-reference": true,
+    "aiBubbleTag": "שאל AI",
+    "@aiBubbleTag": {
+        "description": "Label under the floating AI assistant bubble"
+    },
+    "settingsShowAiBubble": "הצג עוזר AI",
+    "@settingsShowAiBubble": {
+        "description": "Settings toggle for the floating AI assistant bubble"
+    },
     "accountRoleAssetCashWallet": "ארנק מזומן",
     "@accountRoleAssetCashWallet": {
         "description": "Firefly Translation String: account_role_cashWalletAsset"
@@ -1438,5 +1446,41 @@
                 "example": "7725"
             }
         }
+    },
+    "overviewHeroTotalAvailable": "סה\"כ זמין",
+    "@overviewHeroTotalAvailable": {
+        "description": "Overview hero card: uppercase label above the total balance"
+    },
+    "overviewHeroAcrossAccounts": "על פני {n} חשבונות בנק",
+    "@overviewHeroAcrossAccounts": {
+        "description": "Overview hero card: sub-line showing how many bank accounts are summed",
+        "placeholders": {
+            "n": {
+                "type": "int",
+                "example": "3"
+            }
+        }
+    },
+    "overviewStatChipInThisMonth": "החודש",
+    "@overviewStatChipInThisMonth": {
+        "description": "Stat chip label: current month total income"
+    },
+    "overviewStatChipNextCharge": "חיוב הבא · {day}",
+    "@overviewStatChipNextCharge": {
+        "description": "Stat chip label: upcoming charge cycle day",
+        "placeholders": {
+            "day": {
+                "type": "String",
+                "example": "10"
+            }
+        }
+    },
+    "overviewCarouselSectionTitle": "הכרטיסים שלי",
+    "@overviewCarouselSectionTitle": {
+        "description": "Section header above the horizontal card-face carousel"
+    },
+    "overviewCarouselUpcoming": "חיוב קרוב",
+    "@overviewCarouselUpcoming": {
+        "description": "Label on each card face in the carousel above the upcoming charge amount"
     }
 }

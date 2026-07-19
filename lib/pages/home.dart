@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:waterflyiii/generated/l10n/app_localizations.dart';
-import 'package:waterflyiii/auth.dart';
-import 'package:waterflyiii/pages/home/analyze.dart';
 import 'package:waterflyiii/pages/home/banks.dart';
 import 'package:waterflyiii/pages/home/cards.dart';
 import 'package:waterflyiii/pages/home/overview.dart';
@@ -95,64 +92,14 @@ class HomePageState extends State<HomePage> {
     // FAB only on Overview (index 0).
     nav.fab = (_index == 0) ? _newTransactionFab : null;
 
-    // App-bar actions: AI launcher + per-page actions.
-    final List<Widget> pageActions =
+    // App-bar actions: per-page actions.
+    nav.appBarActions =
         _actions.get(_pages[_index].key ?? const Key('')) ?? <Widget>[];
-    nav.appBarActions = <Widget>[
-      ..._buildAiAction(),
-      ...pageActions,
-    ];
 
     // Bottom nav.
     nav.bottomNav = VaultBottomNav(
       currentIndex: _index,
       onSelect: _onSelect,
-    );
-  }
-
-  /// Builds the AI launcher app-bar action (shown on all 5 finance pages).
-  List<Widget> _buildAiAction() {
-    return <Widget>[
-      Builder(
-        builder: (BuildContext context) {
-          return IconButton(
-            icon: Image.asset(
-              'assets/images/ai_tab_icon.png',
-              width: 24,
-              height: 24,
-              fit: BoxFit.contain,
-            ),
-            tooltip: S.of(context).homeTabLabelAnalyze,
-            onPressed: () => _openAiPage(context),
-          );
-        },
-      ),
-    ];
-  }
-
-  void _openAiPage(BuildContext context) {
-    final bool hasGeminiKey = context.read<FireflyService>().hasGeminiKey;
-    if (!hasGeminiKey) {
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(S.of(context).analyzeAddGeminiKeyInSettings),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    // HomeAnalyze uses: FireflyService (from root) and SettingsProvider (from root).
-    // It does NOT read PageActions, so no extra provider needed.
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext ctx) => Scaffold(
-          appBar: AppBar(
-            title: Text(S.of(ctx).homeTabLabelAnalyze),
-          ),
-          body: const HomeAnalyze(key: Key("HomeAnalyzeRoute")),
-        ),
-      ),
     );
   }
 

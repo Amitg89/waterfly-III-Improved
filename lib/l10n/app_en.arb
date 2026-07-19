@@ -1,6 +1,14 @@
 {
     "@@locale": "en",
     "@@x-reference": true,
+    "aiBubbleTag": "Ask AI",
+    "@aiBubbleTag": {
+        "description": "Label under the floating AI assistant bubble"
+    },
+    "settingsShowAiBubble": "Show AI assistant",
+    "@settingsShowAiBubble": {
+        "description": "Settings toggle for the floating AI assistant bubble"
+    },
     "accountRoleAssetCashWallet": "Cash Wallet",
     "@accountRoleAssetCashWallet": {
         "description": "Firefly Translation String: account_role_cashWalletAsset"
@@ -1506,5 +1514,41 @@
                 "example": "7725"
             }
         }
+    },
+    "overviewHeroTotalAvailable": "TOTAL AVAILABLE",
+    "@overviewHeroTotalAvailable": {
+        "description": "Overview hero card: uppercase label above the total balance"
+    },
+    "overviewHeroAcrossAccounts": "Across {n} bank accounts",
+    "@overviewHeroAcrossAccounts": {
+        "description": "Overview hero card: sub-line showing how many bank accounts are summed",
+        "placeholders": {
+            "n": {
+                "type": "int",
+                "example": "3"
+            }
+        }
+    },
+    "overviewStatChipInThisMonth": "In this month",
+    "@overviewStatChipInThisMonth": {
+        "description": "Stat chip label: current month total income"
+    },
+    "overviewStatChipNextCharge": "Next charge · {day}",
+    "@overviewStatChipNextCharge": {
+        "description": "Stat chip label: upcoming charge cycle day",
+        "placeholders": {
+            "day": {
+                "type": "String",
+                "example": "10th"
+            }
+        }
+    },
+    "overviewCarouselSectionTitle": "Your cards",
+    "@overviewCarouselSectionTitle": {
+        "description": "Section header above the horizontal card-face carousel"
+    },
+    "overviewCarouselUpcoming": "UPCOMING",
+    "@overviewCarouselUpcoming": {
+        "description": "Label on each card face in the carousel above the upcoming charge amount"
     }
 }

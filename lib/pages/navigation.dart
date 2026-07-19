@@ -7,6 +7,8 @@ import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/pages/home.dart';
 import 'package:waterflyiii/pages/settings.dart';
 import 'package:waterflyiii/pages/transactions_page.dart';
+import 'package:waterflyiii/settings.dart';
+import 'package:waterflyiii/widgets/ai_bubble.dart';
 import 'package:waterflyiii/widgets/vault_bottom_nav.dart';
 
 final Logger log = Logger("Pages.Navigation");
@@ -283,6 +285,12 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
                             : 16 + MediaQuery.viewPaddingOf(context).bottom,
                         child: fab,
                       ),
+                    // Floating "Ask AI" bubble – topmost, home tabs only.
+                    if (screenIndex == 0 &&
+                        context.select(
+                          (SettingsProvider s) => s.aiBubbleVisible,
+                        ))
+                      const AiBubble(),
                   ],
                 );
               },

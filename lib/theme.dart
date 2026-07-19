@@ -11,6 +11,8 @@ class MoneyColors extends ThemeExtension<MoneyColors> {
     required this.goldDeep,
     required this.cardGradients,
     required this.heroGradient,
+    required this.heroForeground,
+    required this.cardFaceForeground,
   });
 
   /// Emerald – money-in, positive balance
@@ -29,6 +31,13 @@ class MoneyColors extends ThemeExtension<MoneyColors> {
   /// Gold hero gradient [start, mid, end]
   final List<Color> heroGradient;
 
+  /// Espresso dark – always dark regardless of theme, for text on the gold
+  /// hero card (onPrimary flips between themes; this stays espresso always).
+  final Color heroForeground;
+
+  /// Cream light – always light, for text on dark card faces in the carousel.
+  final Color cardFaceForeground;
+
   // ---- ThemeExtension boilerplate ----------------------------------------
 
   @override
@@ -38,6 +47,8 @@ class MoneyColors extends ThemeExtension<MoneyColors> {
     Color? goldDeep,
     List<List<Color>>? cardGradients,
     List<Color>? heroGradient,
+    Color? heroForeground,
+    Color? cardFaceForeground,
   }) {
     return MoneyColors(
       positive: positive ?? this.positive,
@@ -45,6 +56,8 @@ class MoneyColors extends ThemeExtension<MoneyColors> {
       goldDeep: goldDeep ?? this.goldDeep,
       cardGradients: cardGradients ?? this.cardGradients,
       heroGradient: heroGradient ?? this.heroGradient,
+      heroForeground: heroForeground ?? this.heroForeground,
+      cardFaceForeground: cardFaceForeground ?? this.cardFaceForeground,
     );
   }
 
@@ -75,6 +88,8 @@ class MoneyColors extends ThemeExtension<MoneyColors> {
           t,
         )!,
       ),
+      heroForeground: Color.lerp(heroForeground, other.heroForeground, t)!,
+      cardFaceForeground: Color.lerp(cardFaceForeground, other.cardFaceForeground, t)!,
     );
   }
 }
@@ -97,6 +112,10 @@ const MoneyColors _darkMoneyColors = MoneyColors(
   goldDeep: Color(0xFFC97F2C),
   cardGradients: _cardGradients,
   heroGradient: <Color>[Color(0xFFC97F2C), Color(0xFFE7B04A), Color(0xFF8A531D)],
+  // Espresso dark – stays espresso in both themes for text on the gold hero.
+  heroForeground: Color(0xFF2A1B0B),
+  // Warm cream – stays cream in both themes for text on dark card faces.
+  cardFaceForeground: Color(0xFFF6EEDD),
 );
 
 // ---------------------------------------------------------------------------
@@ -108,6 +127,11 @@ const MoneyColors _lightMoneyColors = MoneyColors(
   goldDeep: Color(0xFFA9631E),
   cardGradients: _cardGradients,
   heroGradient: <Color>[Color(0xFFC97F2C), Color(0xFFE7B04A), Color(0xFF8A531D)],
+  // Espresso dark – same as dark theme; onPrimary in light is cream so we
+  // cannot rely on it for text on the gold hero card.
+  heroForeground: Color(0xFF2A1B0B),
+  // Warm cream – same in both themes.
+  cardFaceForeground: Color(0xFFF6EEDD),
 );
 
 // ---------------------------------------------------------------------------

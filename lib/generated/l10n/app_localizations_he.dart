@@ -9,6 +9,12 @@ class SHe extends S {
   SHe([String locale = 'he']) : super(locale);
 
   @override
+  String get aiBubbleTag => 'שאל AI';
+
+  @override
+  String get settingsShowAiBubble => 'הצג עוזר AI';
+
+  @override
   String get accountRoleAssetCashWallet => 'ארנק מזומן';
 
   @override
@@ -1155,4 +1161,26 @@ class SHe extends S {
   String overviewCategorySheetCard(String last4) {
     return '•••• $last4';
   }
+
+  @override
+  String get overviewHeroTotalAvailable => 'סה\"כ זמין';
+
+  @override
+  String overviewHeroAcrossAccounts(int n) {
+    return 'על פני $n חשבונות בנק';
+  }
+
+  @override
+  String get overviewStatChipInThisMonth => 'החודש';
+
+  @override
+  String overviewStatChipNextCharge(String day) {
+    return 'חיוב הבא · $day';
+  }
+
+  @override
+  String get overviewCarouselSectionTitle => 'הכרטיסים שלי';
+
+  @override
+  String get overviewCarouselUpcoming => 'חיוב קרוב';
 }
