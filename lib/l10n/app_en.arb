@@ -767,6 +767,34 @@
     "@homeTabLabelAnalyze": {
         "description": "Tab Label: Analyze page (AI insights)"
     },
+    "homeTabLabelOverview": "Overview",
+    "@homeTabLabelOverview": {
+        "description": "Tab Label: Overview (home dashboard)"
+    },
+    "homeTabLabelBanks": "Banks",
+    "@homeTabLabelBanks": {
+        "description": "Tab Label: Banks"
+    },
+    "homeTabLabelCards": "Cards",
+    "@homeTabLabelCards": {
+        "description": "Tab Label: Cards"
+    },
+    "homeTabLabelSavings": "Savings",
+    "@homeTabLabelSavings": {
+        "description": "Tab Label: Savings"
+    },
+    "homeTabLabelMortgage": "Mortgage",
+    "@homeTabLabelMortgage": {
+        "description": "Tab Label: Mortgage"
+    },
+    "comingSoonTitle": "Coming soon",
+    "@comingSoonTitle": {
+        "description": "Placeholder title for screens not yet implemented"
+    },
+    "comingSoonSubtitle": "This screen is under construction",
+    "@comingSoonSubtitle": {
+        "description": "Placeholder subtitle for screens not yet implemented"
+    },
     "analyzeAddGeminiKeyInSettings": "Add Gemini API key in Settings to use Analyze.",
     "@analyzeAddGeminiKeyInSettings": {
         "description": "Message when Analyze tab is used without Gemini key"

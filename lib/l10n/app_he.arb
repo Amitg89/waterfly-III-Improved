@@ -763,6 +763,34 @@
     "@homeTabLabelTransactions": {
         "description": "Tab Label: Transactions page"
     },
+    "homeTabLabelOverview": "סקירה",
+    "@homeTabLabelOverview": {
+        "description": "Tab Label: Overview (home dashboard)"
+    },
+    "homeTabLabelBanks": "בנקים",
+    "@homeTabLabelBanks": {
+        "description": "Tab Label: Banks"
+    },
+    "homeTabLabelCards": "כרטיסים",
+    "@homeTabLabelCards": {
+        "description": "Tab Label: Cards"
+    },
+    "homeTabLabelSavings": "חסכונות",
+    "@homeTabLabelSavings": {
+        "description": "Tab Label: Savings"
+    },
+    "homeTabLabelMortgage": "משכנתא",
+    "@homeTabLabelMortgage": {
+        "description": "Tab Label: Mortgage"
+    },
+    "comingSoonTitle": "בקרוב",
+    "@comingSoonTitle": {
+        "description": "Placeholder title for screens not yet implemented"
+    },
+    "comingSoonSubtitle": "מסך זה בבנייה",
+    "@comingSoonSubtitle": {
+        "description": "Placeholder subtitle for screens not yet implemented"
+    },
     "homeTransactionsActionFilter": "Filter List",
     "@homeTransactionsActionFilter": {
         "description": "Action Button Label: Filter list."

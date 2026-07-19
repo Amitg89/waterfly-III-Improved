@@ -4,11 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:waterflyiii/animations.dart';
 import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
-import 'package:waterflyiii/pages/accounts.dart';
-import 'package:waterflyiii/pages/bills.dart';
-import 'package:waterflyiii/pages/categories.dart';
 import 'package:waterflyiii/pages/home.dart';
 import 'package:waterflyiii/pages/settings.dart';
+import 'package:waterflyiii/pages/transactions_page.dart';
 
 final Logger log = Logger("Pages.Navigation");
 
@@ -105,22 +103,10 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
         const Icon(Icons.dashboard),
       ),
       NavDestination(
-        S.of(context).navigationAccounts,
-        const AccountsPage(),
-        const Icon(Icons.account_balance_outlined),
-        const Icon(Icons.account_balance),
-      ),
-      NavDestination(
-        S.of(context).navigationCategories,
-        const CategoriesPage(),
-        const Icon(Icons.assignment_outlined),
-        const Icon(Icons.assignment),
-      ),
-      NavDestination(
-        S.of(context).navigationBills,
-        const BillsPage(),
-        const Icon(Icons.receipt_outlined),
-        const Icon(Icons.receipt),
+        S.of(context).homeTabLabelTransactions,
+        const TransactionsPage(),
+        const Icon(Icons.list_alt_outlined),
+        const Icon(Icons.list_alt),
       ),
       NavDestination(
         S.of(context).generalSettings,

@@ -594,6 +594,27 @@ class SPt extends S {
   String get homeTabLabelAnalyze => 'Analyze';
 
   @override
+  String get homeTabLabelOverview => 'Overview';
+
+  @override
+  String get homeTabLabelBanks => 'Banks';
+
+  @override
+  String get homeTabLabelCards => 'Cards';
+
+  @override
+  String get homeTabLabelSavings => 'Savings';
+
+  @override
+  String get homeTabLabelMortgage => 'Mortgage';
+
+  @override
+  String get comingSoonTitle => 'Coming soon';
+
+  @override
+  String get comingSoonSubtitle => 'This screen is under construction';
+
+  @override
   String get analyzeAddGeminiKeyInSettings =>
       'Add Gemini API key in Settings to use Analyze.';
 

@@ -1004,6 +1004,48 @@ abstract class S {
   /// **'Analyze'**
   String get homeTabLabelAnalyze;
 
+  /// Tab Label: Overview (home dashboard)
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get homeTabLabelOverview;
+
+  /// Tab Label: Banks
+  ///
+  /// In en, this message translates to:
+  /// **'Banks'**
+  String get homeTabLabelBanks;
+
+  /// Tab Label: Cards
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get homeTabLabelCards;
+
+  /// Tab Label: Savings
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get homeTabLabelSavings;
+
+  /// Tab Label: Mortgage
+  ///
+  /// In en, this message translates to:
+  /// **'Mortgage'**
+  String get homeTabLabelMortgage;
+
+  /// Placeholder title for screens not yet implemented
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoonTitle;
+
+  /// Placeholder subtitle for screens not yet implemented
+  ///
+  /// In en, this message translates to:
+  /// **'This screen is under construction'**
+  String get comingSoonSubtitle;
+
   /// Message when Analyze tab is used without Gemini key
   ///
   /// In en, this message translates to:

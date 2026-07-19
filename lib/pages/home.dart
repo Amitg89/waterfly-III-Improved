@@ -4,10 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/pages/home/analyze.dart';
-import 'package:waterflyiii/pages/home/balance.dart';
+import 'package:waterflyiii/pages/home/banks.dart';
+import 'package:waterflyiii/pages/home/cards.dart';
 import 'package:waterflyiii/pages/home/main.dart';
-import 'package:waterflyiii/pages/home/piggybank.dart';
-import 'package:waterflyiii/pages/home/transactions.dart';
+import 'package:waterflyiii/pages/home/mortgage.dart';
+import 'package:waterflyiii/pages/home/savings.dart';
 import 'package:waterflyiii/pages/navigation.dart';
 import 'package:waterflyiii/widgets/fabs.dart';
 
@@ -46,11 +47,14 @@ class HomePageState extends State<HomePage>
 
   final PageActions _actions = PageActions();
 
+  // AI tab is at index 5
+  static const int _aiTabIndex = 5;
+
   @override
   void initState() {
     super.initState();
 
-    _tabController = TabController(vsync: this, length: 5);
+    _tabController = TabController(vsync: this, length: 6);
     _tabController.addListener(_handleTabChange);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -74,8 +78,9 @@ class HomePageState extends State<HomePage>
     if (!_tabController.indexIsChanging) {
       log.finer(() => "_handleTabChange(${_tabController.index})");
       final bool hasGeminiKey = context.read<FireflyService>().hasGeminiKey;
-      if (_tabController.index == 3 && !hasGeminiKey) {
-        _tabController.animateTo(2);
+      if (_tabController.index == _aiTabIndex && !hasGeminiKey) {
+        final int previous = _tabController.previousIndex;
+        _tabController.animateTo(previous == _aiTabIndex ? 0 : previous);
         ScaffoldMessenger.maybeOf(context)?.showSnackBar(
           SnackBar(
             content: Text(S.of(context).analyzeAddGeminiKeyInSettings),
@@ -83,8 +88,9 @@ class HomePageState extends State<HomePage>
           ),
         );
       }
+      // FAB only on Overview tab (index 0)
       context.read<NavPageElements>().fab =
-          (_tabController.index < 2) ? _newTransactionFab : null;
+          (_tabController.index == 0) ? _newTransactionFab : null;
       context.read<NavPageElements>().appBarActions = _actions.get(
         tabPages[_tabController.index].key ?? const Key(''),
       );
@@ -95,10 +101,11 @@ class HomePageState extends State<HomePage>
 
   static const List<Widget> tabPages = <Widget>[
     HomeMain(key: Key("HomeMain")),
-    HomeTransactions(key: Key("HomeTransactions")),
-    HomeBalance(key: Key("HomeBalance")),
+    HomeBanks(key: Key("HomeBanks")),
+    HomeCards(key: Key("HomeCards")),
+    HomeSavings(key: Key("HomeSavings")),
+    HomeMortgage(key: Key("HomeMortgage")),
     HomeAnalyze(key: Key("HomeAnalyze")),
-    HomePiggybank(key: Key("HomePiggybanks")),
   ];
 
   @override
@@ -110,9 +117,11 @@ class HomePageState extends State<HomePage>
       isScrollable: true,
       controller: _tabController,
       tabs: <Tab>[
-        Tab(text: l10n.homeTabLabelMain),
-        Tab(text: l10n.homeTabLabelTransactions),
-        Tab(text: l10n.homeTabLabelBalance),
+        Tab(text: l10n.homeTabLabelOverview),
+        Tab(text: l10n.homeTabLabelBanks),
+        Tab(text: l10n.homeTabLabelCards),
+        Tab(text: l10n.homeTabLabelSavings),
+        Tab(text: l10n.homeTabLabelMortgage),
         Tab(
           child: hasGeminiKey
               ? Row(
@@ -149,7 +158,6 @@ class HomePageState extends State<HomePage>
                   ),
                 ),
         ),
-        Tab(text: l10n.homeTabLabelPiggybanks),
       ],
       tabAlignment: TabAlignment.start,
     );

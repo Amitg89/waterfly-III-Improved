@@ -594,6 +594,27 @@ class SHe extends S {
   String get homeTabLabelAnalyze => 'Analyze';
 
   @override
+  String get homeTabLabelOverview => 'סקירה';
+
+  @override
+  String get homeTabLabelBanks => 'בנקים';
+
+  @override
+  String get homeTabLabelCards => 'כרטיסים';
+
+  @override
+  String get homeTabLabelSavings => 'חסכונות';
+
+  @override
+  String get homeTabLabelMortgage => 'משכנתא';
+
+  @override
+  String get comingSoonTitle => 'בקרוב';
+
+  @override
+  String get comingSoonSubtitle => 'מסך זה בבנייה';
+
+  @override
   String get analyzeAddGeminiKeyInSettings =>
       'Add Gemini API key in Settings to use Analyze.';
 
