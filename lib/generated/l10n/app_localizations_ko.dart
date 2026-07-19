@@ -588,6 +588,41 @@ class SKo extends S {
   String get homeTabLabelTransactions => '거래';
 
   @override
+  String get homeTabLabelAnalyze => 'Analyze';
+
+  @override
+  String get analyzeAddGeminiKeyInSettings =>
+      'Add Gemini API key in Settings to use Analyze.';
+
+  @override
+  String get analyzeButtonRun => 'Analyze';
+
+  @override
+  String get analyzeDialogTitle => 'Analyze period';
+
+  @override
+  String get analyzePromptHint =>
+      'e.g. Summarize spending and suggest one improvement.';
+
+  @override
+  String get analyzePromptLabel => 'Custom prompt (optional)';
+
+  @override
+  String get analyzeSelectRangeButton => 'Select date range and analyze';
+
+  @override
+  String get analyzeLoading => 'Loading transactions and getting insights…';
+
+  @override
+  String get analyzeErrorNoTransactions => 'No transactions in this period.';
+
+  @override
+  String get analyzeErrorApi => 'Analysis failed. Please try again.';
+
+  @override
+  String get analyzeAgain => 'Analyze again';
+
+  @override
   String get homeTransactionsActionFilter => '필터 목록';
 
   @override
@@ -666,6 +701,10 @@ class SKo extends S {
 
   @override
   String get loginFormLabelHost => '호스트 URL';
+
+  @override
+  String get loginFormLabelGeminiApiKey =>
+      'Gemini API key (optional, for Analyze)';
 
   @override
   String get loginWelcome => 'Waterfly III에 오신 것을 환영합니다';
@@ -755,6 +794,22 @@ class SKo extends S {
 
   @override
   String get settingsLockscreenInitial => '잠금 화면을 활성화하려면 인증을 해주세요.';
+
+  @override
+  String get settingsGeminiApiKey => 'Gemini API key';
+
+  @override
+  String get settingsGeminiApiKeySubtitle =>
+      'Add or change key for AI insights';
+
+  @override
+  String get settingsGeminiApiKeyDialogTitle => 'Set Gemini API key';
+
+  @override
+  String get settingsGeminiApiKeyDialogLabel => 'API key';
+
+  @override
+  String get settingsGeminiApiKeyDialogSave => 'Save';
 
   @override
   String get settingsNLAppAccount => '기본 계정';

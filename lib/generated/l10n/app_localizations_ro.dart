@@ -591,6 +591,41 @@ class SRo extends S {
   String get homeTabLabelTransactions => 'Tranzacții';
 
   @override
+  String get homeTabLabelAnalyze => 'Analyze';
+
+  @override
+  String get analyzeAddGeminiKeyInSettings =>
+      'Add Gemini API key in Settings to use Analyze.';
+
+  @override
+  String get analyzeButtonRun => 'Analyze';
+
+  @override
+  String get analyzeDialogTitle => 'Analyze period';
+
+  @override
+  String get analyzePromptHint =>
+      'e.g. Summarize spending and suggest one improvement.';
+
+  @override
+  String get analyzePromptLabel => 'Custom prompt (optional)';
+
+  @override
+  String get analyzeSelectRangeButton => 'Select date range and analyze';
+
+  @override
+  String get analyzeLoading => 'Loading transactions and getting insights…';
+
+  @override
+  String get analyzeErrorNoTransactions => 'No transactions in this period.';
+
+  @override
+  String get analyzeErrorApi => 'Analysis failed. Please try again.';
+
+  @override
+  String get analyzeAgain => 'Analyze again';
+
+  @override
   String get homeTransactionsActionFilter => 'Lista de filtre';
 
   @override
@@ -672,6 +707,10 @@ class SRo extends S {
 
   @override
   String get loginFormLabelHost => 'URL Host';
+
+  @override
+  String get loginFormLabelGeminiApiKey =>
+      'Gemini API key (optional, for Analyze)';
 
   @override
   String get loginWelcome => 'Bine ai venit la Waterfly III';
@@ -764,6 +803,22 @@ class SRo extends S {
   @override
   String get settingsLockscreenInitial =>
       'Vă rugăm să vă autentificați pentru a activa ecranul de blocare.';
+
+  @override
+  String get settingsGeminiApiKey => 'Gemini API key';
+
+  @override
+  String get settingsGeminiApiKeySubtitle =>
+      'Add or change key for AI insights';
+
+  @override
+  String get settingsGeminiApiKeyDialogTitle => 'Set Gemini API key';
+
+  @override
+  String get settingsGeminiApiKeyDialogLabel => 'API key';
+
+  @override
+  String get settingsGeminiApiKeyDialogSave => 'Save';
 
   @override
   String get settingsNLAppAccount => 'Cont implicit';

@@ -38,6 +38,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final TextEditingController _hostTextController = TextEditingController();
   final TextEditingController _keyTextController = TextEditingController();
+  final TextEditingController _geminiKeyTextController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String _uriScheme = UriScheme.https;
@@ -60,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _hostTextController.dispose();
     _keyTextController.dispose();
+    _geminiKeyTextController.dispose();
     _hostFocusNode.dispose();
 
     super.dispose();
@@ -266,6 +268,15 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _geminiKeyTextController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      labelText: S.of(context).loginFormLabelGeminiApiKey,
+                    ),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 12),
                   OverflowBar(
                     alignment: MainAxisAlignment.end,
                     spacing: 12,
@@ -293,6 +304,8 @@ class _LoginPageState extends State<LoginPage> {
                               (_hostError != null && _hostError!.isNotEmpty)) {
                             return;
                           }
+                          final String geminiKey =
+                              _geminiKeyTextController.text.trim();
                           Navigator.push(
                             context,
                             MaterialPageRoute<Widget>(
@@ -300,6 +313,9 @@ class _LoginPageState extends State<LoginPage> {
                                   (BuildContext context) => SplashPage(
                                     host: _hostTextController.text,
                                     apiKey: _keyTextController.text,
+                                    geminiApiKey: geminiKey.isEmpty
+                                        ? null
+                                        : geminiKey,
                                   ),
                             ),
                           );

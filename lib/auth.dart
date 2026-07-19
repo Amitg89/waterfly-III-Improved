@@ -223,6 +223,9 @@ class FireflyService with ChangeNotifier {
   TransStock? _transStock;
   TransStock? get transStock => _transStock;
 
+  bool _hasGeminiKey = false;
+  bool get hasGeminiKey => _hasGeminiKey;
+
   bool get hasApi => (_currentUser?.api != null) ? true : false;
   FireflyIii get api {
     if (_currentUser?.api == null) {
@@ -282,6 +285,7 @@ class FireflyService with ChangeNotifier {
     _currentUser = null;
     _signedIn = false;
     _storageSignInException = null;
+    _hasGeminiKey = false;
     await storage.deleteAll();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
@@ -290,7 +294,19 @@ class FireflyService with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> signIn(String host, String apiKey) async {
+  Future<String?> getGeminiApiKey() =>
+      storage.read(key: 'gemini_api_key');
+
+  Future<void> setGeminiApiKey(String key) async {
+    final String trimmed = key.strip();
+    if (trimmed.isEmpty) return;
+    await storage.write(key: 'gemini_api_key', value: trimmed);
+    _hasGeminiKey = true;
+    log.finest(() => "notify FireflyService->setGeminiApiKey");
+    notifyListeners();
+  }
+
+  Future<bool> signIn(String host, String apiKey, {String? geminiApiKey}) async {
     log.config("FireflyService->signIn($host)");
     host = host.strip().rightStrip('/');
     apiKey = apiKey.strip();
@@ -346,6 +362,13 @@ class FireflyService with ChangeNotifier {
 
     await storage.write(key: 'api_host', value: host);
     await storage.write(key: 'api_key', value: apiKey);
+    if (geminiApiKey != null && geminiApiKey.strip().isNotEmpty) {
+      await storage.write(key: 'gemini_api_key', value: geminiApiKey.strip());
+      _hasGeminiKey = true;
+    } else {
+      final String? stored = await storage.read(key: 'gemini_api_key');
+      _hasGeminiKey = stored != null && stored.isNotEmpty;
+    }
 
     return true;
   }

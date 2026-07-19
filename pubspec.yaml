@@ -77,6 +77,8 @@ flutter:
 
   assets:
     - assets/images/logo.svg
+    - assets/images/ai_tab_icon.png
+    - assets/animations/
 
 flutter_native_splash:
   android: true

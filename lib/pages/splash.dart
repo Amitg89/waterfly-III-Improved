@@ -10,10 +10,11 @@ import 'package:waterflyiii/widgets/logo.dart';
 final Logger log = Logger("Pages.Splash");
 
 class SplashPage extends StatefulWidget {
-  const SplashPage({super.key, this.host, this.apiKey});
+  const SplashPage({super.key, this.host, this.apiKey, this.geminiApiKey});
 
   final String? host;
   final String? apiKey;
+  final String? geminiApiKey;
 
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -24,7 +25,7 @@ class _SplashPageState extends State<SplashPage> {
 
   Object? _loginError;
 
-  Future<void> _login(String? host, String? apiKey) async {
+  Future<void> _login(String? host, String? apiKey, String? geminiApiKey) async {
     log.fine(() => "SplashPage->_login()");
 
     bool success = false;
@@ -38,7 +39,9 @@ class _SplashPageState extends State<SplashPage> {
           () =>
               "SplashPage->_login() with credentials: $host, apiKey ${apiKey.isEmpty ? "unset" : "set"}",
         );
-        success = await context.read<FireflyService>().signIn(host, apiKey);
+        success = await context
+            .read<FireflyService>()
+            .signIn(host, apiKey, geminiApiKey: geminiApiKey);
       }
     } catch (e, stackTrace) {
       log.warning(
@@ -63,7 +66,7 @@ class _SplashPageState extends State<SplashPage> {
     if (widget.host != null && widget.apiKey != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         log.finest(() => "initState() scheduling login");
-        _login(widget.host, widget.apiKey);
+        _login(widget.host, widget.apiKey, widget.geminiApiKey);
       });
     }
   }
@@ -188,7 +191,7 @@ class _SplashPageState extends State<SplashPage> {
                     setState(() {
                       _loginError = null;
                     });
-                    _login(widget.host, widget.apiKey);
+                    _login(widget.host, widget.apiKey, widget.geminiApiKey);
                   },
                   child: Text(S.of(context).formButtonTryAgain),
                 ),

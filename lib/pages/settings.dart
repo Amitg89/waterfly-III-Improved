@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:logging/logging.dart';
 import 'package:material_color_utilities/material_color_utilities.dart'
@@ -226,6 +227,23 @@ class SettingsPageState extends State<SettingsPage>
         ),
         const Divider(),
         ListTile(
+          title: Text(S.of(context).settingsGeminiApiKey),
+          subtitle: Text(S.of(context).settingsGeminiApiKeySubtitle),
+          leading: const CircleAvatar(child: Icon(Icons.psychology)),
+          onTap: () => showDialog<void>(
+            context: context,
+            builder: (BuildContext context) => _GeminiApiKeyDialog(
+              onSave: (String key) async {
+                await context.read<FireflyService>().setGeminiApiKey(key);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ),
+        ),
+        const Divider(),
+        ListTile(
           title: Text(S.of(context).settingsFAQ),
           subtitle: Text(S.of(context).settingsFAQHelp),
           leading: const CircleAvatar(child: Icon(Icons.question_answer)),
@@ -334,6 +352,97 @@ class ThemeDialog extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GeminiApiKeyDialog extends StatefulWidget {
+  const _GeminiApiKeyDialog({required this.onSave});
+
+  final Future<void> Function(String key) onSave;
+
+  @override
+  State<_GeminiApiKeyDialog> createState() => _GeminiApiKeyDialogState();
+}
+
+class _GeminiApiKeyDialogState extends State<_GeminiApiKeyDialog> {
+  final TextEditingController _controller = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _obscureKey = true;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pasteFromClipboard() async {
+    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    final String? text = data?.text;
+    if (text != null && text.isNotEmpty && mounted) {
+      setState(() {
+        _controller.text = text;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final S l10n = S.of(context);
+    return AlertDialog(
+      title: Text(l10n.settingsGeminiApiKeyDialogTitle),
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _controller,
+          decoration: InputDecoration(
+            labelText: l10n.settingsGeminiApiKeyDialogLabel,
+            filled: true,
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.content_paste),
+                  onPressed: _pasteFromClipboard,
+                  tooltip: MaterialLocalizations.of(context).pasteButtonLabel,
+                ),
+                IconButton(
+                  icon: Icon(
+                    _obscureKey ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureKey = !_obscureKey;
+                    });
+                  },
+                  tooltip: _obscureKey ? 'Show key' : 'Hide key',
+                ),
+              ],
+            ),
+          ),
+          obscureText: _obscureKey,
+          enableInteractiveSelection: true,
+          validator: (String? value) {
+            if (value == null || value.trim().isEmpty) {
+              return l10n.errorFieldRequired;
+            }
+            return null;
+          },
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+        ),
+        FilledButton(
+          onPressed: () async {
+            if (!_formKey.currentState!.validate()) return;
+            await widget.onSave(_controller.text.trim());
+          },
+          child: Text(l10n.settingsGeminiApiKeyDialogSave),
         ),
       ],
     );

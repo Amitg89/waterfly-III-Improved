@@ -998,6 +998,72 @@ abstract class S {
   /// **'Transactions'**
   String get homeTabLabelTransactions;
 
+  /// Tab Label: Analyze page (AI insights)
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze'**
+  String get homeTabLabelAnalyze;
+
+  /// Message when Analyze tab is used without Gemini key
+  ///
+  /// In en, this message translates to:
+  /// **'Add Gemini API key in Settings to use Analyze.'**
+  String get analyzeAddGeminiKeyInSettings;
+
+  /// Button to run analysis
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze'**
+  String get analyzeButtonRun;
+
+  /// Dialog title for date range and prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze period'**
+  String get analyzeDialogTitle;
+
+  /// Placeholder for optional prompt field
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Summarize spending and suggest one improvement.'**
+  String get analyzePromptHint;
+
+  /// Label for prompt field in analyze dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Custom prompt (optional)'**
+  String get analyzePromptLabel;
+
+  /// Button to open analyze dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Select date range and analyze'**
+  String get analyzeSelectRangeButton;
+
+  /// Loading message while fetching and calling Gemini
+  ///
+  /// In en, this message translates to:
+  /// **'Loading transactions and getting insights…'**
+  String get analyzeLoading;
+
+  /// Message when date range has no transactions
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions in this period.'**
+  String get analyzeErrorNoTransactions;
+
+  /// Generic error when Gemini or Firefly request fails
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis failed. Please try again.'**
+  String get analyzeErrorApi;
+
+  /// Button to run analysis again
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze again'**
+  String get analyzeAgain;
+
   /// Action Button Label: Filter list.
   ///
   /// In en, this message translates to:
@@ -1148,6 +1214,12 @@ abstract class S {
   /// **'Host URL'**
   String get loginFormLabelHost;
 
+  /// Login Form: Label for optional Gemini API key field
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini API key (optional, for Analyze)'**
+  String get loginFormLabelGeminiApiKey;
+
   /// Login screen welcome banner
   ///
   /// In en, this message translates to:
@@ -1285,6 +1357,36 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Please authenticate to enable the lock screen.'**
   String get settingsLockscreenInitial;
+
+  /// Settings tile title for Gemini API key
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini API key'**
+  String get settingsGeminiApiKey;
+
+  /// Settings tile subtitle for Gemini API key
+  ///
+  /// In en, this message translates to:
+  /// **'Add or change key for AI insights'**
+  String get settingsGeminiApiKeySubtitle;
+
+  /// Dialog title when setting Gemini key from Settings
+  ///
+  /// In en, this message translates to:
+  /// **'Set Gemini API key'**
+  String get settingsGeminiApiKeyDialogTitle;
+
+  /// Label for API key field in dialog
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get settingsGeminiApiKeyDialogLabel;
+
+  /// Save button in Gemini key dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get settingsGeminiApiKeyDialogSave;
 
   /// Default account which will be used for the transaction.
   ///

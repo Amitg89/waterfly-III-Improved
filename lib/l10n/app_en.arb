@@ -763,6 +763,50 @@
     "@homeTabLabelTransactions": {
         "description": "Tab Label: Transactions page"
     },
+    "homeTabLabelAnalyze": "Analyze",
+    "@homeTabLabelAnalyze": {
+        "description": "Tab Label: Analyze page (AI insights)"
+    },
+    "analyzeAddGeminiKeyInSettings": "Add Gemini API key in Settings to use Analyze.",
+    "@analyzeAddGeminiKeyInSettings": {
+        "description": "Message when Analyze tab is used without Gemini key"
+    },
+    "analyzeButtonRun": "Analyze",
+    "@analyzeButtonRun": {
+        "description": "Button to run analysis"
+    },
+    "analyzeDialogTitle": "Analyze period",
+    "@analyzeDialogTitle": {
+        "description": "Dialog title for date range and prompt"
+    },
+    "analyzePromptHint": "e.g. Summarize spending and suggest one improvement.",
+    "@analyzePromptHint": {
+        "description": "Placeholder for optional prompt field"
+    },
+    "analyzePromptLabel": "Custom prompt (optional)",
+    "@analyzePromptLabel": {
+        "description": "Label for prompt field in analyze dialog"
+    },
+    "analyzeSelectRangeButton": "Select date range and analyze",
+    "@analyzeSelectRangeButton": {
+        "description": "Button to open analyze dialog"
+    },
+    "analyzeLoading": "Loading transactions and getting insights…",
+    "@analyzeLoading": {
+        "description": "Loading message while fetching and calling Gemini"
+    },
+    "analyzeErrorNoTransactions": "No transactions in this period.",
+    "@analyzeErrorNoTransactions": {
+        "description": "Message when date range has no transactions"
+    },
+    "analyzeErrorApi": "Analysis failed. Please try again.",
+    "@analyzeErrorApi": {
+        "description": "Generic error when Gemini or Firefly request fails"
+    },
+    "analyzeAgain": "Analyze again",
+    "@analyzeAgain": {
+        "description": "Button to run analysis again"
+    },
     "homeTransactionsActionFilter": "Filter List",
     "@homeTransactionsActionFilter": {
         "description": "Action Button Label: Filter list."
@@ -868,6 +912,10 @@
     "loginFormLabelHost": "Host URL",
     "@loginFormLabelHost": {
         "description": "Login Form: Label for Host field"
+    },
+    "loginFormLabelGeminiApiKey": "Gemini API key (optional, for Analyze)",
+    "@loginFormLabelGeminiApiKey": {
+        "description": "Login Form: Label for optional Gemini API key field"
     },
     "loginWelcome": "Welcome to Waterfly III",
     "@loginWelcome": {
@@ -981,6 +1029,26 @@
     "settingsLockscreenInitial": "Please authenticate to enable the lock screen.",
     "@settingsLockscreenInitial": {
         "description": "Prompt to authenticate once to set up the lockscreen"
+    },
+    "settingsGeminiApiKey": "Gemini API key",
+    "@settingsGeminiApiKey": {
+        "description": "Settings tile title for Gemini API key"
+    },
+    "settingsGeminiApiKeySubtitle": "Add or change key for AI insights",
+    "@settingsGeminiApiKeySubtitle": {
+        "description": "Settings tile subtitle for Gemini API key"
+    },
+    "settingsGeminiApiKeyDialogTitle": "Set Gemini API key",
+    "@settingsGeminiApiKeyDialogTitle": {
+        "description": "Dialog title when setting Gemini key from Settings"
+    },
+    "settingsGeminiApiKeyDialogLabel": "API key",
+    "@settingsGeminiApiKeyDialogLabel": {
+        "description": "Label for API key field in dialog"
+    },
+    "settingsGeminiApiKeyDialogSave": "Save",
+    "@settingsGeminiApiKeyDialogSave": {
+        "description": "Save button in Gemini key dialog"
     },
     "settingsNLAppAccount": "Default Account",
     "@settingsNLAppAccount": {
