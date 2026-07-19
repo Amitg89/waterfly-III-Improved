@@ -49,6 +49,12 @@ class SUk extends S {
   }
 
   @override
+  String get banksCurrentBalance => 'Current balance';
+
+  @override
+  String get banksNoAccounts => 'No bank accounts found.';
+
+  @override
   String billsAmountAndFrequency(
     String minValue,
     String maxvalue,
@@ -217,6 +223,25 @@ class SUk extends S {
       'Shows only those subscriptions that are expected (or paid) this month.';
 
   @override
+  String cardsBilledOn(String date) {
+    return 'Billed $date';
+  }
+
+  @override
+  String cardsChargeOn(String date) {
+    return 'Charge on $date';
+  }
+
+  @override
+  String get cardsNoCards => 'No credit cards found.';
+
+  @override
+  String get cardsTotalForPeriod => 'Total for period';
+
+  @override
+  String get cardsUpcomingCharge => 'Upcoming charge';
+
+  @override
   String get categoryDeleteConfirm =>
       'Ви впевнені, що хочете видалити цю категорію? Операції не будуть видалені, але більше не будуть мати категорій.';
 
@@ -349,6 +374,9 @@ class SUk extends S {
   String get generalDateRangeCustom => 'Custom range';
 
   @override
+  String get generalClearFilter => 'Clear filter';
+
+  @override
   String get generalDefault => 'default';
 
   @override
@@ -383,6 +411,9 @@ class SUk extends S {
 
   @override
   String get generalReset => 'Reset';
+
+  @override
+  String get generalRetry => 'Retry';
 
   @override
   String get generalSourceAccount => 'Source Account';
@@ -777,6 +808,17 @@ class SUk extends S {
     final String percString = percNumberFormat.format(perc);
 
     return '$percString of $of';
+  }
+
+  @override
+  String get settingsCreditCardCycleDay => 'Credit card cycle day';
+
+  @override
+  String get settingsCreditCardCycleDayDialogTitle => 'Select cycle day';
+
+  @override
+  String settingsCreditCardCycleDaySubtitle(int day) {
+    return 'Day $day of each month';
   }
 
   @override

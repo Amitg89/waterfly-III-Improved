@@ -51,6 +51,14 @@
             }
         }
     },
+    "banksCurrentBalance": "יתרה נוכחית",
+    "@banksCurrentBalance": {
+        "description": "Label for the current balance of a bank account"
+    },
+    "banksNoAccounts": "לא נמצאו חשבונות בנק.",
+    "@banksNoAccounts": {
+        "description": "Message shown when no bank accounts exist"
+    },
     "billsAmountAndFrequency": "Subscription matches transactions between {minValue} and {maxvalue}. Repeats {frequency, select, weekly{weekly} monthly{monthly} quarterly{quarterly} halfyear{half-yearly} yearly{yearly} other{unknown}}{skip, plural, =0{} other{, skips over {skip}}}.",
     "@billsAmountAndFrequency": {
         "description": "Subscription match for min and max amounts, and frequency",
@@ -228,6 +236,38 @@
     "billsSettingsShowOnlyExpectedDesc": "Shows only those subscriptions that are expected (or paid) this month.",
     "@billsSettingsShowOnlyExpectedDesc": {
         "description": "Text for show only expected subscriptions settings item description"
+    },
+    "cardsBilledOn": "חויב ב-{date}",
+    "@cardsBilledOn": {
+        "description": "Caption showing the billing (process) date of a credit card transaction",
+        "placeholders": {
+            "date": {
+                "type": "String",
+                "example": "1/10/2026"
+            }
+        }
+    },
+    "cardsChargeOn": "יחויב ב-{date}",
+    "@cardsChargeOn": {
+        "description": "Caption showing the date the upcoming credit card charge will hit the bank account",
+        "placeholders": {
+            "date": {
+                "type": "String",
+                "example": "1/10/2026"
+            }
+        }
+    },
+    "cardsNoCards": "לא נמצאו כרטיסי אשראי.",
+    "@cardsNoCards": {
+        "description": "Message shown when no credit card accounts exist"
+    },
+    "cardsTotalForPeriod": "סה\"כ לתקופה",
+    "@cardsTotalForPeriod": {
+        "description": "Header label for the transaction total of a user-picked date range on a credit card"
+    },
+    "cardsUpcomingCharge": "חיוב קרוב",
+    "@cardsUpcomingCharge": {
+        "description": "Header label for the upcoming monthly charge of a credit card"
     },
     "categoryDeleteConfirm": "Are you sure you want to delete this category? The transactions will not be deleted, but will not have a category anymore.",
     "@categoryDeleteConfirm": {
@@ -413,6 +453,10 @@
     "@generalDateRangeCustom": {
         "description": "Date Range: Custom start/end dates"
     },
+    "generalClearFilter": "נקה סינון",
+    "@generalClearFilter": {
+        "description": "Chip/button label to clear an active filter"
+    },
     "generalDefault": "default",
     "@generalDefault": {
         "description": "Indicates that something is the default choice"
@@ -460,6 +504,10 @@
     "generalReset": "איפוס",
     "@generalReset": {
         "description": "Reset something (i.e. set filters)"
+    },
+    "generalRetry": "נסה שוב",
+    "@generalRetry": {
+        "description": "Button label to retry a failed action"
     },
     "generalSourceAccount": "Source Account",
     "@generalSourceAccount": {
@@ -955,6 +1003,24 @@
             },
             "of": {
                 "type": "String"
+            }
+        }
+    },
+    "settingsCreditCardCycleDay": "יום חיוב כרטיס אשראי",
+    "@settingsCreditCardCycleDay": {
+        "description": "Settings item title: the day of month a credit card billing cycle is charged"
+    },
+    "settingsCreditCardCycleDayDialogTitle": "בחירת יום חיוב",
+    "@settingsCreditCardCycleDayDialogTitle": {
+        "description": "Dialog title: select credit card cycle day"
+    },
+    "settingsCreditCardCycleDaySubtitle": "יום {day} בכל חודש",
+    "@settingsCreditCardCycleDaySubtitle": {
+        "description": "Settings item subtitle showing the currently selected credit card cycle day",
+        "placeholders": {
+            "day": {
+                "type": "int",
+                "example": "10"
             }
         }
     },

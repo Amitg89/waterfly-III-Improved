@@ -49,6 +49,12 @@ class SFr extends S {
   }
 
   @override
+  String get banksCurrentBalance => 'Current balance';
+
+  @override
+  String get banksNoAccounts => 'No bank accounts found.';
+
+  @override
   String billsAmountAndFrequency(
     String minValue,
     String maxvalue,
@@ -220,6 +226,25 @@ class SFr extends S {
       'Affiche uniquement les abonnements prévus (ou payés) ce mois-ci.';
 
   @override
+  String cardsBilledOn(String date) {
+    return 'Billed $date';
+  }
+
+  @override
+  String cardsChargeOn(String date) {
+    return 'Charge on $date';
+  }
+
+  @override
+  String get cardsNoCards => 'No credit cards found.';
+
+  @override
+  String get cardsTotalForPeriod => 'Total for period';
+
+  @override
+  String get cardsUpcomingCharge => 'Upcoming charge';
+
+  @override
   String get categoryDeleteConfirm =>
       'Êtes-vous sûr de vouloir supprimer cette catégorie ? Les transactions ne seront pas supprimées, mais n\'auront plus de catégorie.';
 
@@ -352,6 +377,9 @@ class SFr extends S {
   String get generalDateRangeCustom => 'Custom range';
 
   @override
+  String get generalClearFilter => 'Clear filter';
+
+  @override
   String get generalDefault => 'par défaut';
 
   @override
@@ -386,6 +414,9 @@ class SFr extends S {
 
   @override
   String get generalReset => 'Réinitialiser';
+
+  @override
+  String get generalRetry => 'Retry';
 
   @override
   String get generalSourceAccount => 'Compte source';
@@ -786,6 +817,17 @@ class SFr extends S {
     final String percString = percNumberFormat.format(perc);
 
     return '$percString sur $of';
+  }
+
+  @override
+  String get settingsCreditCardCycleDay => 'Credit card cycle day';
+
+  @override
+  String get settingsCreditCardCycleDayDialogTitle => 'Select cycle day';
+
+  @override
+  String settingsCreditCardCycleDaySubtitle(int day) {
+    return 'Day $day of each month';
   }
 
   @override

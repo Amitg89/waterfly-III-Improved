@@ -201,6 +201,18 @@ abstract class S {
   /// **'{interest}% interest per {period, select, weekly{week} monthly{month} quarterly{quarter} halfyear{half-year} yearly{year} other{unknown}}'**
   String accountsLiabilitiesInterest(double interest, String period);
 
+  /// Label for the current balance of a bank account
+  ///
+  /// In en, this message translates to:
+  /// **'Current balance'**
+  String get banksCurrentBalance;
+
+  /// Message shown when no bank accounts exist
+  ///
+  /// In en, this message translates to:
+  /// **'No bank accounts found.'**
+  String get banksNoAccounts;
+
   /// Subscription match for min and max amounts, and frequency
   ///
   /// In en, this message translates to:
@@ -379,6 +391,36 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Shows only those subscriptions that are expected (or paid) this month.'**
   String get billsSettingsShowOnlyExpectedDesc;
+
+  /// Caption showing the billing (process) date of a credit card transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Billed {date}'**
+  String cardsBilledOn(String date);
+
+  /// Caption showing the date the upcoming credit card charge will hit the bank account
+  ///
+  /// In en, this message translates to:
+  /// **'Charge on {date}'**
+  String cardsChargeOn(String date);
+
+  /// Message shown when no credit card accounts exist
+  ///
+  /// In en, this message translates to:
+  /// **'No credit cards found.'**
+  String get cardsNoCards;
+
+  /// Header label for the transaction total of a user-picked date range on a credit card
+  ///
+  /// In en, this message translates to:
+  /// **'Total for period'**
+  String get cardsTotalForPeriod;
+
+  /// Header label for the upcoming monthly charge of a credit card
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming charge'**
+  String get cardsUpcomingCharge;
 
   /// Confirmation text to delete category
   ///
@@ -620,6 +662,12 @@ abstract class S {
   /// **'Custom range'**
   String get generalDateRangeCustom;
 
+  /// Chip/button label to clear an active filter
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filter'**
+  String get generalClearFilter;
+
   /// Indicates that something is the default choice
   ///
   /// In en, this message translates to:
@@ -691,6 +739,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Reset'**
   String get generalReset;
+
+  /// Button label to retry a failed action
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get generalRetry;
 
   /// Source Account (of transaction)
   ///
@@ -1321,6 +1375,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{perc} of {of}'**
   String numPercentOf(double perc, String of);
+
+  /// Settings item title: the day of month a credit card billing cycle is charged
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card cycle day'**
+  String get settingsCreditCardCycleDay;
+
+  /// Dialog title: select credit card cycle day
+  ///
+  /// In en, this message translates to:
+  /// **'Select cycle day'**
+  String get settingsCreditCardCycleDayDialogTitle;
+
+  /// Settings item subtitle showing the currently selected credit card cycle day
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day} of each month'**
+  String settingsCreditCardCycleDaySubtitle(int day);
 
   /// Information about debug logs and their impact.
   ///

@@ -49,6 +49,12 @@ class SSl extends S {
   }
 
   @override
+  String get banksCurrentBalance => 'Current balance';
+
+  @override
+  String get banksNoAccounts => 'No bank accounts found.';
+
+  @override
   String billsAmountAndFrequency(
     String minValue,
     String maxvalue,
@@ -217,6 +223,25 @@ class SSl extends S {
       'Prikazuje samo tiste naročnine, ki so pričakovane (ali plačane) ta mesec.';
 
   @override
+  String cardsBilledOn(String date) {
+    return 'Billed $date';
+  }
+
+  @override
+  String cardsChargeOn(String date) {
+    return 'Charge on $date';
+  }
+
+  @override
+  String get cardsNoCards => 'No credit cards found.';
+
+  @override
+  String get cardsTotalForPeriod => 'Total for period';
+
+  @override
+  String get cardsUpcomingCharge => 'Upcoming charge';
+
+  @override
   String get categoryDeleteConfirm =>
       'Ali ste prepričani, da želite izbrisati to kategorijo? Transakcije ne bodo izbrisane, vendar ne bodo imele več kategorije.';
 
@@ -349,6 +374,9 @@ class SSl extends S {
   String get generalDateRangeCustom => 'Custom range';
 
   @override
+  String get generalClearFilter => 'Clear filter';
+
+  @override
   String get generalDefault => 'privzeto';
 
   @override
@@ -383,6 +411,9 @@ class SSl extends S {
 
   @override
   String get generalReset => 'Ponastavi';
+
+  @override
+  String get generalRetry => 'Retry';
 
   @override
   String get generalSourceAccount => 'Izvorni račun';
@@ -780,6 +811,17 @@ class SSl extends S {
     final String percString = percNumberFormat.format(perc);
 
     return '$percString od $of';
+  }
+
+  @override
+  String get settingsCreditCardCycleDay => 'Credit card cycle day';
+
+  @override
+  String get settingsCreditCardCycleDayDialogTitle => 'Select cycle day';
+
+  @override
+  String settingsCreditCardCycleDaySubtitle(int day) {
+    return 'Day $day of each month';
   }
 
   @override

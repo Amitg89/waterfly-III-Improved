@@ -162,6 +162,9 @@ class SettingsProvider with ChangeNotifier {
       "DASHBOARD_DATE_RANGE_START";
   static const String settingDashboardDateRangeEnd = "DASHBOARD_DATE_RANGE_END";
   static const String settingDashboardAccountIds = "DASHBOARD_ACCOUNT_IDS";
+  static const String settingCreditCardCycleDay = "CC_CYCLE_DAY";
+
+  static const int defaultCreditCardCycleDay = 10;
 
   bool get debug => _loaded ? _boolSettings[BoolSettings.debug] : false;
   bool get lock => _loaded ? _boolSettings[BoolSettings.lock] : false;
@@ -228,7 +231,12 @@ class SettingsProvider with ChangeNotifier {
   DashboardDateRange get dashboardDateRange => _dashboardDateRange;
   DateTime? get dashboardDateRangeStart => _dashboardDateRangeStart;
   DateTime? get dashboardDateRangeEnd => _dashboardDateRangeEnd;
-  List<String> get dashboardAccountIds => List<String>.unmodifiable(_dashboardAccountIds);
+
+  // Day of month (1-28) an Israeli credit card billing cycle is charged.
+  int _creditCardCycleDay = defaultCreditCardCycleDay;
+  int get creditCardCycleDay => _creditCardCycleDay;
+  List<String> get dashboardAccountIds =>
+      List<String>.unmodifiable(_dashboardAccountIds);
 
   Future<void> migrateLegacy(SharedPreferencesAsync prefs) async {
     log.config("trying to migrate old prefs");
@@ -437,20 +445,23 @@ class SettingsProvider with ChangeNotifier {
       }
     }
 
-    final int? dashboardDateRangeIndex =
-        await prefs.getInt(settingDashboardDateRange);
+    final int? dashboardDateRangeIndex = await prefs.getInt(
+      settingDashboardDateRange,
+    );
     _dashboardDateRange =
         dashboardDateRangeIndex == null
             ? DashboardDateRange.last3Months
             : (dashboardDateRangeIndex >= 0 &&
-                    dashboardDateRangeIndex < DashboardDateRange.values.length)
-                ? DashboardDateRange.values[dashboardDateRangeIndex]
-                : DashboardDateRange.last3Months;
+                dashboardDateRangeIndex < DashboardDateRange.values.length)
+            ? DashboardDateRange.values[dashboardDateRangeIndex]
+            : DashboardDateRange.last3Months;
 
-    final String? dashboardRangeStartStr =
-        await prefs.getString(settingDashboardDateRangeStart);
-    final String? dashboardRangeEndStr =
-        await prefs.getString(settingDashboardDateRangeEnd);
+    final String? dashboardRangeStartStr = await prefs.getString(
+      settingDashboardDateRangeStart,
+    );
+    final String? dashboardRangeEndStr = await prefs.getString(
+      settingDashboardDateRangeEnd,
+    );
     if (dashboardRangeStartStr != null && dashboardRangeEndStr != null) {
       try {
         _dashboardDateRangeStart = DateTime.parse(dashboardRangeStartStr);
@@ -467,6 +478,16 @@ class SettingsProvider with ChangeNotifier {
     _dashboardAccountIds =
         await prefs.getStringList(settingDashboardAccountIds) ?? <String>[];
 
+    final int? creditCardCycleDay = await prefs.getInt(
+      settingCreditCardCycleDay,
+    );
+    _creditCardCycleDay =
+        (creditCardCycleDay != null &&
+                creditCardCycleDay >= 1 &&
+                creditCardCycleDay <= 28)
+            ? creditCardCycleDay
+            : defaultCreditCardCycleDay;
+
     // Load new transaction date filter setting
     final int? txDateFilterIndex = await prefs.getInt(
       settingTransactionDateFilter,
@@ -474,13 +495,18 @@ class SettingsProvider with ChangeNotifier {
     _transactionDateFilter =
         txDateFilterIndex == null
             ? TransactionDateFilter.all
-            : (txDateFilterIndex >= 0 && txDateFilterIndex < TransactionDateFilter.values.length)
-                ? TransactionDateFilter.values[txDateFilterIndex]
-                : TransactionDateFilter.all;
+            : (txDateFilterIndex >= 0 &&
+                txDateFilterIndex < TransactionDateFilter.values.length)
+            ? TransactionDateFilter.values[txDateFilterIndex]
+            : TransactionDateFilter.all;
 
     // Load custom date range when filter is custom
-    final String? rangeStartStr = await prefs.getString(settingTransactionDateRangeStart);
-    final String? rangeEndStr = await prefs.getString(settingTransactionDateRangeEnd);
+    final String? rangeStartStr = await prefs.getString(
+      settingTransactionDateRangeStart,
+    );
+    final String? rangeEndStr = await prefs.getString(
+      settingTransactionDateRangeEnd,
+    );
     if (rangeStartStr != null && rangeEndStr != null) {
       try {
         _transactionDateRangeStart = DateTime.parse(rangeStartStr);
@@ -856,7 +882,8 @@ class SettingsProvider with ChangeNotifier {
   }
 
   Future<void> setTransactionDateRange(DateTime start, DateTime end) async {
-    if (_transactionDateRangeStart == start && _transactionDateRangeEnd == end) {
+    if (_transactionDateRangeStart == start &&
+        _transactionDateRangeEnd == end) {
       return;
     }
 
@@ -903,6 +930,16 @@ class SettingsProvider with ChangeNotifier {
       DateFormat('yyyy-MM-dd').format(end),
     );
     log.finest(() => "notify SettingsProvider->setDashboardDateRangeCustom()");
+    notifyListeners();
+  }
+
+  Future<void> setCreditCardCycleDay(int day) async {
+    if (day < 1 || day > 28 || day == _creditCardCycleDay) {
+      return;
+    }
+    _creditCardCycleDay = day;
+    await SharedPreferencesAsync().setInt(settingCreditCardCycleDay, day);
+    log.finest(() => "notify SettingsProvider->setCreditCardCycleDay()");
     notifyListeners();
   }
 
@@ -955,8 +992,8 @@ class SettingsProvider with ChangeNotifier {
         end = now;
         break;
       case DashboardDateRange.custom:
-        start = _dashboardDateRangeStart ??
-            now.subtract(const Duration(days: 30));
+        start =
+            _dashboardDateRangeStart ?? now.subtract(const Duration(days: 30));
         end = _dashboardDateRangeEnd ?? now;
         break;
     }

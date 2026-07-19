@@ -49,6 +49,12 @@ class SFa extends S {
   }
 
   @override
+  String get banksCurrentBalance => 'Current balance';
+
+  @override
+  String get banksNoAccounts => 'No bank accounts found.';
+
+  @override
   String billsAmountAndFrequency(
     String minValue,
     String maxvalue,
@@ -214,6 +220,25 @@ class SFa extends S {
       'فقط آن اشتراک‌هایی را نمایش می‌دهد که در این ماه مورد انتظار (یا پرداخت شده) هستند.';
 
   @override
+  String cardsBilledOn(String date) {
+    return 'Billed $date';
+  }
+
+  @override
+  String cardsChargeOn(String date) {
+    return 'Charge on $date';
+  }
+
+  @override
+  String get cardsNoCards => 'No credit cards found.';
+
+  @override
+  String get cardsTotalForPeriod => 'Total for period';
+
+  @override
+  String get cardsUpcomingCharge => 'Upcoming charge';
+
+  @override
   String get categoryDeleteConfirm =>
       'آیا مطمئن هستید که می‌خواهید این دسته را حذف کنید؟ تراکنش ها حذف نمی شوند، اما دیگر دسته بندی نخواهند داشت.\n';
 
@@ -346,6 +371,9 @@ class SFa extends S {
   String get generalDateRangeCustom => 'Custom range';
 
   @override
+  String get generalClearFilter => 'Clear filter';
+
+  @override
   String get generalDefault => 'پیش فرض';
 
   @override
@@ -380,6 +408,9 @@ class SFa extends S {
 
   @override
   String get generalReset => 'تنظیم مجدد';
+
+  @override
+  String get generalRetry => 'Retry';
 
   @override
   String get generalSourceAccount => 'حساب مبدأ';
@@ -774,6 +805,17 @@ class SFa extends S {
     final String percString = percNumberFormat.format(perc);
 
     return '$percString از $of\n\n\n\n\n\n';
+  }
+
+  @override
+  String get settingsCreditCardCycleDay => 'Credit card cycle day';
+
+  @override
+  String get settingsCreditCardCycleDayDialogTitle => 'Select cycle day';
+
+  @override
+  String settingsCreditCardCycleDaySubtitle(int day) {
+    return 'Day $day of each month';
   }
 
   @override

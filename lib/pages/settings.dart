@@ -230,17 +230,44 @@ class SettingsPageState extends State<SettingsPage>
           title: Text(S.of(context).settingsGeminiApiKey),
           subtitle: Text(S.of(context).settingsGeminiApiKeySubtitle),
           leading: const CircleAvatar(child: Icon(Icons.psychology)),
-          onTap: () => showDialog<void>(
-            context: context,
-            builder: (BuildContext context) => _GeminiApiKeyDialog(
-              onSave: (String key) async {
-                await context.read<FireflyService>().setGeminiApiKey(key);
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
+          onTap:
+              () => showDialog<void>(
+                context: context,
+                builder:
+                    (BuildContext context) => _GeminiApiKeyDialog(
+                      onSave: (String key) async {
+                        await context.read<FireflyService>().setGeminiApiKey(
+                          key,
+                        );
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
+              ),
+        ),
+        ListTile(
+          title: Text(S.of(context).settingsCreditCardCycleDay),
+          subtitle: Text(
+            S
+                .of(context)
+                .settingsCreditCardCycleDaySubtitle(
+                  context.select((SettingsProvider s) => s.creditCardCycleDay),
+                ),
           ),
+          leading: const CircleAvatar(child: Icon(Icons.credit_card)),
+          onTap:
+              () => showDialog<int>(
+                context: context,
+                builder:
+                    (BuildContext context) =>
+                        CycleDayDialog(currentDay: settings.creditCardCycleDay),
+              ).then((int? day) {
+                if (day == null) {
+                  return;
+                }
+                settings.setCreditCardCycleDay(day);
+              }),
         ),
         const Divider(),
         ListTile(
@@ -352,6 +379,49 @@ class ThemeDialog extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class CycleDayDialog extends StatelessWidget {
+  const CycleDayDialog({super.key, required this.currentDay});
+
+  final int currentDay;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(S.of(context).settingsCreditCardCycleDayDialogTitle),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: GridView.count(
+          shrinkWrap: true,
+          crossAxisCount: 7,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
+          children: List<Widget>.generate(28, (int index) {
+            final int day = index + 1;
+            final Widget label = Text("$day");
+            return day == currentDay
+                ? FilledButton(
+                  style: FilledButton.styleFrom(padding: EdgeInsets.zero),
+                  onPressed: () => Navigator.of(context).pop(day),
+                  child: label,
+                )
+                : TextButton(
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  onPressed: () => Navigator.of(context).pop(day),
+                  child: label,
+                );
+          }),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
       ],
     );

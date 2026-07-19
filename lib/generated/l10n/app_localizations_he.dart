@@ -49,6 +49,12 @@ class SHe extends S {
   }
 
   @override
+  String get banksCurrentBalance => 'יתרה נוכחית';
+
+  @override
+  String get banksNoAccounts => 'לא נמצאו חשבונות בנק.';
+
+  @override
   String billsAmountAndFrequency(
     String minValue,
     String maxvalue,
@@ -217,6 +223,25 @@ class SHe extends S {
       'Shows only those subscriptions that are expected (or paid) this month.';
 
   @override
+  String cardsBilledOn(String date) {
+    return 'חויב ב-$date';
+  }
+
+  @override
+  String cardsChargeOn(String date) {
+    return 'יחויב ב-$date';
+  }
+
+  @override
+  String get cardsNoCards => 'לא נמצאו כרטיסי אשראי.';
+
+  @override
+  String get cardsTotalForPeriod => 'סה\"כ לתקופה';
+
+  @override
+  String get cardsUpcomingCharge => 'חיוב קרוב';
+
+  @override
   String get categoryDeleteConfirm =>
       'Are you sure you want to delete this category? The transactions will not be deleted, but will not have a category anymore.';
 
@@ -349,6 +374,9 @@ class SHe extends S {
   String get generalDateRangeCustom => 'טווח תאריכים מותאם';
 
   @override
+  String get generalClearFilter => 'נקה סינון';
+
+  @override
   String get generalDefault => 'default';
 
   @override
@@ -383,6 +411,9 @@ class SHe extends S {
 
   @override
   String get generalReset => 'איפוס';
+
+  @override
+  String get generalRetry => 'נסה שוב';
 
   @override
   String get generalSourceAccount => 'Source Account';
@@ -777,6 +808,17 @@ class SHe extends S {
     final String percString = percNumberFormat.format(perc);
 
     return '$percString of $of';
+  }
+
+  @override
+  String get settingsCreditCardCycleDay => 'יום חיוב כרטיס אשראי';
+
+  @override
+  String get settingsCreditCardCycleDayDialogTitle => 'בחירת יום חיוב';
+
+  @override
+  String settingsCreditCardCycleDaySubtitle(int day) {
+    return 'יום $day בכל חודש';
   }
 
   @override

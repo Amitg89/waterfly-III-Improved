@@ -49,6 +49,12 @@ class SZh extends S {
   }
 
   @override
+  String get banksCurrentBalance => 'Current balance';
+
+  @override
+  String get banksNoAccounts => 'No bank accounts found.';
+
+  @override
   String billsAmountAndFrequency(
     String minValue,
     String maxvalue,
@@ -213,6 +219,25 @@ class SZh extends S {
   String get billsSettingsShowOnlyExpectedDesc => '仅显示本月预期（或已支付）的订阅。';
 
   @override
+  String cardsBilledOn(String date) {
+    return 'Billed $date';
+  }
+
+  @override
+  String cardsChargeOn(String date) {
+    return 'Charge on $date';
+  }
+
+  @override
+  String get cardsNoCards => 'No credit cards found.';
+
+  @override
+  String get cardsTotalForPeriod => 'Total for period';
+
+  @override
+  String get cardsUpcomingCharge => 'Upcoming charge';
+
+  @override
   String get categoryDeleteConfirm => '您确定要删除这个分类吗？与该分类关联的账单不会被删除，但该分类将彻底删除。';
 
   @override
@@ -344,6 +369,9 @@ class SZh extends S {
   String get generalDateRangeCustom => 'Custom range';
 
   @override
+  String get generalClearFilter => 'Clear filter';
+
+  @override
   String get generalDefault => '默认';
 
   @override
@@ -378,6 +406,9 @@ class SZh extends S {
 
   @override
   String get generalReset => '重置';
+
+  @override
+  String get generalRetry => 'Retry';
 
   @override
   String get generalSourceAccount => '源账户';
@@ -769,6 +800,17 @@ class SZh extends S {
     final String percString = percNumberFormat.format(perc);
 
     return '$of 中的 $percString';
+  }
+
+  @override
+  String get settingsCreditCardCycleDay => 'Credit card cycle day';
+
+  @override
+  String get settingsCreditCardCycleDayDialogTitle => 'Select cycle day';
+
+  @override
+  String settingsCreditCardCycleDaySubtitle(int day) {
+    return 'Day $day of each month';
   }
 
   @override
