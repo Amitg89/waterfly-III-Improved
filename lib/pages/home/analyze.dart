@@ -8,6 +8,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
+import 'package:waterflyiii/israeli/gemini.dart';
 import 'package:waterflyiii/stock.dart';
 import 'dart:math' as math;
 
@@ -265,9 +266,7 @@ class _HomeAnalyzeState extends State<HomeAnalyze> {
           'Transactions:\n$dataText\n\n'
           'User request: $userPrompt';
 
-      final Uri uri = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-      );
+      final Uri uri = Uri.parse(geminiEndpoint(geminiChatModel));
       final http.Response geminiResp = await http.post(
         uri,
         headers: <String, String>{

@@ -4,14 +4,14 @@ import 'package:waterflyiii/theme.dart';
 
 /// Custom raised bottom navigation bar for the Home destination.
 ///
-/// Visual order left→right: Banks · Cards · [RAISED CENTER = Overview] · Savings · Mortgage
+/// Visual order left→right: Banks · Cards · [RAISED CENTER = Overview] · Savings · Budget
 ///
 /// Index mapping (matches [HomePageState._index]):
 ///   0 = Overview (center raised button)
 ///   1 = Banks
 ///   2 = Cards
 ///   3 = Savings
-///   4 = Mortgage
+///   4 = Budget
 class VaultBottomNav extends StatelessWidget {
   const VaultBottomNav({
     super.key,
@@ -108,9 +108,9 @@ class VaultBottomNav extends StatelessWidget {
                           onTap: () => onSelect(3),
                         ),
                         _SideNavItem(
-                          icon: Icons.home_outlined,
-                          selectedIcon: Icons.home,
-                          label: l10n.homeTabLabelMortgage,
+                          icon: Icons.pie_chart_outline,
+                          selectedIcon: Icons.pie_chart,
+                          label: l10n.homeTabLabelBudget,
                           selected: currentIndex == 4,
                           onTap: () => onSelect(4),
                         ),

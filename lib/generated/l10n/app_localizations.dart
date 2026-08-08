@@ -2071,6 +2071,276 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Good evening'**
   String get greetingEvening;
+
+  /// Drawer entry and title of the screen that encrypts a bank password for the importer config
+  ///
+  /// In en, this message translates to:
+  /// **'Password Encryptor'**
+  String get passwordEncryptorTitle;
+
+  /// Explanation shown at the top of the password encryptor screen
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt a new bank or card password with your master password, then copy the result into the importer\'s config file on Home Assistant.'**
+  String get passwordEncryptorIntro;
+
+  /// Label of the field holding the plaintext password to encrypt
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get passwordEncryptorNewPasswordLabel;
+
+  /// Label of the field holding the importer master password
+  ///
+  /// In en, this message translates to:
+  /// **'Master password'**
+  String get passwordEncryptorMasterPasswordLabel;
+
+  /// Switch that stores the master password in secure storage behind the device lock
+  ///
+  /// In en, this message translates to:
+  /// **'Remember master password'**
+  String get passwordEncryptorRememberMaster;
+
+  /// Subtitle of the remember master password switch
+  ///
+  /// In en, this message translates to:
+  /// **'Stored on this device only, protected by your device lock.'**
+  String get passwordEncryptorRememberMasterHelp;
+
+  /// Reason shown in the device biometric/PIN prompt for the master password
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock your stored master password'**
+  String get passwordEncryptorUnlockReason;
+
+  /// Button that performs the encryption
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt'**
+  String get passwordEncryptorEncryptButton;
+
+  /// Title of the card showing the encrypted result
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted value'**
+  String get passwordEncryptorResultTitle;
+
+  /// Hint below the encrypted result explaining where to paste it
+  ///
+  /// In en, this message translates to:
+  /// **'Paste this whole value (including the encrypted:v1: prefix) over the matching password field in config.encrypted.yaml.'**
+  String get passwordEncryptorResultHint;
+
+  /// Button that copies the encrypted value to the clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get passwordEncryptorCopy;
+
+  /// Snackbar shown after copying the encrypted value
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get passwordEncryptorCopied;
+
+  /// Error shown when one of the two fields is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Enter both the new password and the master password.'**
+  String get passwordEncryptorErrorEmpty;
+
+  /// Error shown when encryption throws
+  ///
+  /// In en, this message translates to:
+  /// **'Encryption failed. Please try again.'**
+  String get passwordEncryptorErrorFailed;
+
+  /// Error shown when the master password cannot be saved because the device has no lock configured
+  ///
+  /// In en, this message translates to:
+  /// **'Set a screen lock (PIN, pattern or biometrics) on this device to save the master password.'**
+  String get passwordEncryptorErrorNoDeviceLock;
+
+  /// Error shown when the device lock prompt fails for any other reason
+  ///
+  /// In en, this message translates to:
+  /// **'Device authentication failed. The master password was not saved.'**
+  String get passwordEncryptorErrorAuthFailed;
+
+  /// Tab Label: Budget
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get homeTabLabelBudget;
+
+  /// Label above the base income figure at the top of the Budget tab
+  ///
+  /// In en, this message translates to:
+  /// **'Base monthly income'**
+  String get budgetIncomeLabel;
+
+  /// Caption under the base income showing the window, excluded one-off income and the spread
+  ///
+  /// In en, this message translates to:
+  /// **'{months} full months · {bonuses, plural, =0{no extra pay excluded} =1{1 extra payment excluded} other{{bonuses} extra payments excluded}} · ±{spread}'**
+  String budgetIncomeSubtitle(int months, int bonuses, String spread);
+
+  /// Explanation at the top of the income sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your regular salary over the last {months} complete months. Bonuses and extra pay are set aside.'**
+  String budgetIncomeSheetSubtitle(int months);
+
+  /// Header above the list of salary payments excluded from the baseline
+  ///
+  /// In en, this message translates to:
+  /// **'EXCLUDED AS EXTRA PAY'**
+  String get budgetExcludedTitle;
+
+  /// Shown when no salary payment was flagged as extra
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing excluded — every salary payment looked like normal pay.'**
+  String get budgetExcludedNone;
+
+  /// Section header above the category progress bars
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed monthly expenses'**
+  String get budgetFixedExpensesTitle;
+
+  /// Shown when the analysis found no recurring charges
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring charges were found in the window.'**
+  String get budgetNoFixedExpenses;
+
+  /// Label for the remaining budget, in the donut centre and as its slice name
+  ///
+  /// In en, this message translates to:
+  /// **'Left to spend'**
+  String get budgetLeftToSpend;
+
+  /// Caption under the remaining amount in the donut centre
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of income'**
+  String budgetPercentOfIncome(String percent);
+
+  /// Caption under the category name in the detail sheet
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recurring charge} other{{count} recurring charges}} · {percent}% of income'**
+  String budgetCategorySubtitle(int count, String percent);
+
+  /// Confidence caption under each recurring charge
+  ///
+  /// In en, this message translates to:
+  /// **'seen {seen}/{total} months'**
+  String budgetChargeSeen(int seen, int total);
+
+  /// Button that re-runs the AI analysis
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculate'**
+  String get budgetRecalculate;
+
+  /// Label above the correction text field
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the AI what to fix'**
+  String get budgetRecalculateTitle;
+
+  /// Placeholder in the income correction field
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore the March bonus'**
+  String get budgetRecalculateIncomeHint;
+
+  /// Placeholder in the category correction field
+  ///
+  /// In en, this message translates to:
+  /// **'Pet insurance ended in May, drop it'**
+  String get budgetRecalculateCategoryHint;
+
+  /// Count of standing corrections replayed into every analysis
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 saved rule} other{{count} saved rules}}'**
+  String budgetSavedRules(int count);
+
+  /// Title of the Budget tab empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No budget analysis yet'**
+  String get budgetEmptyTitle;
+
+  /// Body of the Budget tab empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Analyses the last {months} complete months of salary and spending to work out your regular income and fixed costs.'**
+  String budgetEmptyBody(int months);
+
+  /// Button in the empty state that starts the first analysis
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze now'**
+  String get budgetAnalyzeNow;
+
+  /// Fallback error when the analysis throws an unexpected error
+  ///
+  /// In en, this message translates to:
+  /// **'The budget analysis failed. Please try again.'**
+  String get budgetErrorGeneric;
+
+  /// Budget category covering water, electricity, gas and municipal tax
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get budgetCategoryHousehold;
+
+  /// Budget category: insurance premiums
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get budgetCategoryInsurance;
+
+  /// Budget category: car and transport
+  ///
+  /// In en, this message translates to:
+  /// **'Car and transport'**
+  String get budgetCategoryCar;
+
+  /// Budget category: streaming, apps and other subscriptions
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get budgetCategorySubscriptions;
+
+  /// Budget category: loan repayments, rent or mortgage
+  ///
+  /// In en, this message translates to:
+  /// **'Loans and commitments'**
+  String get budgetCategoryLoans;
+
+  /// Budget category: phone, internet and TV
+  ///
+  /// In en, this message translates to:
+  /// **'Communications'**
+  String get budgetCategoryCommunications;
+
+  /// Budget category: regular health and education payments
+  ///
+  /// In en, this message translates to:
+  /// **'Health and education'**
+  String get budgetCategoryHealth;
+
+  /// Budget category: recurring charges that fit nowhere else
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get budgetCategoryOther;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

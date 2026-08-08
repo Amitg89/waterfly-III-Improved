@@ -8,7 +8,7 @@ import 'package:waterflyiii/generated/swagger_fireflyiii_api/firefly_iii.swagger
 import 'package:waterflyiii/pages/home/banks.dart';
 import 'package:waterflyiii/pages/home/cards.dart';
 import 'package:waterflyiii/pages/home/overview.dart';
-import 'package:waterflyiii/pages/home/mortgage.dart';
+import 'package:waterflyiii/pages/home/budget.dart';
 import 'package:waterflyiii/pages/home/savings.dart';
 import 'package:waterflyiii/pages/navigation.dart';
 import 'package:waterflyiii/settings.dart';
@@ -56,7 +56,7 @@ class HomePageState extends State<HomePage> {
   static const Key _keyBanks = Key("HomeBanks");
   static const Key _keyCards = Key("HomeCards");
   static const Key _keySavings = Key("HomeSavings");
-  static const Key _keyMortgage = Key("HomeMortgage");
+  static const Key _keyBudget = Key("HomeBudget");
 
   late final List<Widget> _pages;
 
@@ -72,7 +72,7 @@ class HomePageState extends State<HomePage> {
       const HomeBanks(key: _keyBanks),
       const HomeCards(key: _keyCards),
       const HomeSavings(key: _keySavings),
-      const HomeMortgage(key: _keyMortgage),
+      const HomeBudget(key: _keyBudget),
     ];
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

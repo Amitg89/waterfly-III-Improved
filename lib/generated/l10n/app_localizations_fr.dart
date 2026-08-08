@@ -1214,4 +1214,184 @@ class SFr extends S {
 
   @override
   String get greetingEvening => 'Good evening';
+
+  @override
+  String get passwordEncryptorTitle => 'Password Encryptor';
+
+  @override
+  String get passwordEncryptorIntro =>
+      'Encrypt a new bank or card password with your master password, then copy the result into the importer\'s config file on Home Assistant.';
+
+  @override
+  String get passwordEncryptorNewPasswordLabel => 'New password';
+
+  @override
+  String get passwordEncryptorMasterPasswordLabel => 'Master password';
+
+  @override
+  String get passwordEncryptorRememberMaster => 'Remember master password';
+
+  @override
+  String get passwordEncryptorRememberMasterHelp =>
+      'Stored on this device only, protected by your device lock.';
+
+  @override
+  String get passwordEncryptorUnlockReason =>
+      'Unlock your stored master password';
+
+  @override
+  String get passwordEncryptorEncryptButton => 'Encrypt';
+
+  @override
+  String get passwordEncryptorResultTitle => 'Encrypted value';
+
+  @override
+  String get passwordEncryptorResultHint =>
+      'Paste this whole value (including the encrypted:v1: prefix) over the matching password field in config.encrypted.yaml.';
+
+  @override
+  String get passwordEncryptorCopy => 'Copy';
+
+  @override
+  String get passwordEncryptorCopied => 'Copied to clipboard';
+
+  @override
+  String get passwordEncryptorErrorEmpty =>
+      'Enter both the new password and the master password.';
+
+  @override
+  String get passwordEncryptorErrorFailed =>
+      'Encryption failed. Please try again.';
+
+  @override
+  String get passwordEncryptorErrorNoDeviceLock =>
+      'Set a screen lock (PIN, pattern or biometrics) on this device to save the master password.';
+
+  @override
+  String get passwordEncryptorErrorAuthFailed =>
+      'Device authentication failed. The master password was not saved.';
+
+  @override
+  String get homeTabLabelBudget => 'Budget';
+
+  @override
+  String get budgetIncomeLabel => 'Base monthly income';
+
+  @override
+  String budgetIncomeSubtitle(int months, int bonuses, String spread) {
+    String _temp0 = intl.Intl.pluralLogic(
+      bonuses,
+      locale: localeName,
+      other: '$bonuses extra payments excluded',
+      one: '1 extra payment excluded',
+      zero: 'no extra pay excluded',
+    );
+    return '$months full months · $_temp0 · ±$spread';
+  }
+
+  @override
+  String budgetIncomeSheetSubtitle(int months) {
+    return 'Based on your regular salary over the last $months complete months. Bonuses and extra pay are set aside.';
+  }
+
+  @override
+  String get budgetExcludedTitle => 'EXCLUDED AS EXTRA PAY';
+
+  @override
+  String get budgetExcludedNone =>
+      'Nothing excluded — every salary payment looked like normal pay.';
+
+  @override
+  String get budgetFixedExpensesTitle => 'Fixed monthly expenses';
+
+  @override
+  String get budgetNoFixedExpenses =>
+      'No recurring charges were found in the window.';
+
+  @override
+  String get budgetLeftToSpend => 'Left to spend';
+
+  @override
+  String budgetPercentOfIncome(String percent) {
+    return '$percent% of income';
+  }
+
+  @override
+  String budgetCategorySubtitle(int count, String percent) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recurring charges',
+      one: '1 recurring charge',
+    );
+    return '$_temp0 · $percent% of income';
+  }
+
+  @override
+  String budgetChargeSeen(int seen, int total) {
+    return 'seen $seen/$total months';
+  }
+
+  @override
+  String get budgetRecalculate => 'Recalculate';
+
+  @override
+  String get budgetRecalculateTitle => 'Tell the AI what to fix';
+
+  @override
+  String get budgetRecalculateIncomeHint => 'Ignore the March bonus';
+
+  @override
+  String get budgetRecalculateCategoryHint =>
+      'Pet insurance ended in May, drop it';
+
+  @override
+  String budgetSavedRules(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count saved rules',
+      one: '1 saved rule',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get budgetEmptyTitle => 'No budget analysis yet';
+
+  @override
+  String budgetEmptyBody(int months) {
+    return 'Analyses the last $months complete months of salary and spending to work out your regular income and fixed costs.';
+  }
+
+  @override
+  String get budgetAnalyzeNow => 'Analyze now';
+
+  @override
+  String get budgetErrorGeneric =>
+      'The budget analysis failed. Please try again.';
+
+  @override
+  String get budgetCategoryHousehold => 'Household';
+
+  @override
+  String get budgetCategoryInsurance => 'Insurance';
+
+  @override
+  String get budgetCategoryCar => 'Car and transport';
+
+  @override
+  String get budgetCategorySubscriptions => 'Subscriptions';
+
+  @override
+  String get budgetCategoryLoans => 'Loans and commitments';
+
+  @override
+  String get budgetCategoryCommunications => 'Communications';
+
+  @override
+  String get budgetCategoryHealth => 'Health and education';
+
+  @override
+  String get budgetCategoryOther => 'Other';
 }

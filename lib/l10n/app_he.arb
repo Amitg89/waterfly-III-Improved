@@ -1502,5 +1502,208 @@
     "greetingEvening": "ערב טוב",
     "@greetingEvening": {
         "description": "Greeting shown in the home app bar from 17:00 onwards"
+    },
+    "passwordEncryptorTitle": "מצפין סיסמאות",
+    "@passwordEncryptorTitle": {
+        "description": "Drawer entry and title of the screen that encrypts a bank password for the importer config"
+    },
+    "passwordEncryptorIntro": "הצפן סיסמה חדשה של בנק או כרטיס בעזרת סיסמת המאסטר, ואז העתק את התוצאה לקובץ ההגדרות של המייבא ב-Home Assistant.",
+    "@passwordEncryptorIntro": {
+        "description": "Explanation shown at the top of the password encryptor screen"
+    },
+    "passwordEncryptorNewPasswordLabel": "סיסמה חדשה",
+    "@passwordEncryptorNewPasswordLabel": {
+        "description": "Label of the field holding the plaintext password to encrypt"
+    },
+    "passwordEncryptorMasterPasswordLabel": "סיסמת מאסטר",
+    "@passwordEncryptorMasterPasswordLabel": {
+        "description": "Label of the field holding the importer master password"
+    },
+    "passwordEncryptorRememberMaster": "זכור את סיסמת המאסטר",
+    "@passwordEncryptorRememberMaster": {
+        "description": "Switch that stores the master password in secure storage behind the device lock"
+    },
+    "passwordEncryptorRememberMasterHelp": "נשמרת במכשיר הזה בלבד, מוגנת בנעילת המכשיר.",
+    "@passwordEncryptorRememberMasterHelp": {
+        "description": "Subtitle of the remember master password switch"
+    },
+    "passwordEncryptorUnlockReason": "פתח את סיסמת המאסטר השמורה",
+    "@passwordEncryptorUnlockReason": {
+        "description": "Reason shown in the device biometric/PIN prompt for the master password"
+    },
+    "passwordEncryptorEncryptButton": "הצפן",
+    "@passwordEncryptorEncryptButton": {
+        "description": "Button that performs the encryption"
+    },
+    "passwordEncryptorResultTitle": "ערך מוצפן",
+    "@passwordEncryptorResultTitle": {
+        "description": "Title of the card showing the encrypted result"
+    },
+    "passwordEncryptorResultHint": "העתק את כל הערך (כולל הקידומת encrypted:v1:) אל שדה הסיסמה המתאים בקובץ config.encrypted.yaml.",
+    "@passwordEncryptorResultHint": {
+        "description": "Hint below the encrypted result explaining where to paste it"
+    },
+    "passwordEncryptorCopy": "העתק",
+    "@passwordEncryptorCopy": {
+        "description": "Button that copies the encrypted value to the clipboard"
+    },
+    "passwordEncryptorCopied": "הועתק ללוח",
+    "@passwordEncryptorCopied": {
+        "description": "Snackbar shown after copying the encrypted value"
+    },
+    "passwordEncryptorErrorEmpty": "יש להזין גם סיסמה חדשה וגם סיסמת מאסטר.",
+    "@passwordEncryptorErrorEmpty": {
+        "description": "Error shown when one of the two fields is empty"
+    },
+    "passwordEncryptorErrorFailed": "ההצפנה נכשלה. נסה שוב.",
+    "@passwordEncryptorErrorFailed": {
+        "description": "Error shown when encryption throws"
+    },
+    "passwordEncryptorErrorNoDeviceLock": "יש להגדיר נעילת מסך (קוד, תבנית או ביומטריה) במכשיר כדי לשמור את סיסמת המאסטר.",
+    "@passwordEncryptorErrorNoDeviceLock": {
+        "description": "Error shown when the master password cannot be saved because the device has no lock configured"
+    },
+    "passwordEncryptorErrorAuthFailed": "אימות המכשיר נכשל. סיסמת המאסטר לא נשמרה.",
+    "@passwordEncryptorErrorAuthFailed": {
+        "description": "Error shown when the device lock prompt fails for any other reason"
+    },
+    "homeTabLabelBudget": "תקציב",
+    "@homeTabLabelBudget": {
+        "description": "Tab Label: Budget"
+    },
+    "budgetIncomeLabel": "הכנסה חודשית בסיסית",
+    "@budgetIncomeLabel": {
+        "description": "Label above the base income figure at the top of the Budget tab"
+    },
+    "budgetIncomeSubtitle": "{months} חודשים מלאים · {bonuses, plural, =0{ללא תשלומים חריגים} =1{תשלום חריג אחד הוחרג} other{{bonuses} תשלומים חריגים הוחרגו}} · ±{spread}",
+    "@budgetIncomeSubtitle": {
+        "description": "Caption under the base income showing the window, excluded one-off income and the spread",
+        "placeholders": {
+            "months": { "type": "int" },
+            "bonuses": { "type": "int" },
+            "spread": { "type": "String" }
+        }
+    },
+    "budgetIncomeSheetSubtitle": "מבוסס על המשכורת הקבועה ב-{months} החודשים המלאים האחרונים. בונוסים ותשלומים חריגים לא נכללים.",
+    "@budgetIncomeSheetSubtitle": {
+        "description": "Explanation at the top of the income sheet",
+        "placeholders": { "months": { "type": "int" } }
+    },
+    "budgetExcludedTitle": "הוחרג כתשלום חריג",
+    "@budgetExcludedTitle": {
+        "description": "Header above the list of salary payments excluded from the baseline"
+    },
+    "budgetExcludedNone": "לא הוחרג דבר — כל המשכורות נראו כתשלום רגיל.",
+    "@budgetExcludedNone": {
+        "description": "Shown when no salary payment was flagged as extra"
+    },
+    "budgetFixedExpensesTitle": "הוצאות קבועות חודשיות",
+    "@budgetFixedExpensesTitle": {
+        "description": "Section header above the category progress bars"
+    },
+    "budgetNoFixedExpenses": "לא נמצאו חיובים קבועים בטווח הנבדק.",
+    "@budgetNoFixedExpenses": {
+        "description": "Shown when the analysis found no recurring charges"
+    },
+    "budgetLeftToSpend": "נשאר לתקציב",
+    "@budgetLeftToSpend": {
+        "description": "Label for the remaining budget, in the donut centre and as its slice name"
+    },
+    "budgetPercentOfIncome": "{percent}% מההכנסה",
+    "@budgetPercentOfIncome": {
+        "description": "Caption under the remaining amount in the donut centre",
+        "placeholders": {
+            "percent": { "type": "String" }
+        }
+    },
+    "budgetCategorySubtitle": "{count, plural, =1{חיוב קבוע אחד} other{{count} חיובים קבועים}} · {percent}% מההכנסה",
+    "@budgetCategorySubtitle": {
+        "description": "Caption under the category name in the detail sheet",
+        "placeholders": {
+            "count": { "type": "int" },
+            "percent": { "type": "String" }
+        }
+    },
+    "budgetChargeSeen": "נצפה ב-{seen}/{total} חודשים",
+    "@budgetChargeSeen": {
+        "description": "Confidence caption under each recurring charge",
+        "placeholders": {
+            "seen": { "type": "int" },
+            "total": { "type": "int" }
+        }
+    },
+    "budgetRecalculate": "חשב מחדש",
+    "@budgetRecalculate": {
+        "description": "Button that re-runs the AI analysis"
+    },
+    "budgetRecalculateTitle": "ספר ל-AI מה לתקן",
+    "@budgetRecalculateTitle": {
+        "description": "Label above the correction text field"
+    },
+    "budgetRecalculateIncomeHint": "התעלם מהבונוס של מרץ",
+    "@budgetRecalculateIncomeHint": {
+        "description": "Placeholder in the income correction field"
+    },
+    "budgetRecalculateCategoryHint": "ביטוח החיות הסתיים במאי, הסר אותו",
+    "@budgetRecalculateCategoryHint": {
+        "description": "Placeholder in the category correction field"
+    },
+    "budgetSavedRules": "{count, plural, =1{כלל שמור אחד} other{{count} כללים שמורים}}",
+    "@budgetSavedRules": {
+        "description": "Count of standing corrections replayed into every analysis",
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "budgetEmptyTitle": "עדיין אין ניתוח תקציב",
+    "@budgetEmptyTitle": {
+        "description": "Title of the Budget tab empty state"
+    },
+    "budgetEmptyBody": "מנתח את {months} החודשים המלאים האחרונים של המשכורות וההוצאות כדי לחשב את ההכנסה הקבועה וההוצאות הקבועות.",
+    "@budgetEmptyBody": {
+        "description": "Body of the Budget tab empty state",
+        "placeholders": {
+            "months": { "type": "int" }
+        }
+    },
+    "budgetAnalyzeNow": "נתח עכשיו",
+    "@budgetAnalyzeNow": {
+        "description": "Button in the empty state that starts the first analysis"
+    },
+    "budgetErrorGeneric": "ניתוח התקציב נכשל. נסה שוב.",
+    "@budgetErrorGeneric": {
+        "description": "Fallback error when the analysis throws an unexpected error"
+    },
+    "budgetCategoryHousehold": "משק בית",
+    "@budgetCategoryHousehold": {
+        "description": "Budget category covering water, electricity, gas and municipal tax"
+    },
+    "budgetCategoryInsurance": "ביטוחים",
+    "@budgetCategoryInsurance": {
+        "description": "Budget category: insurance premiums"
+    },
+    "budgetCategoryCar": "רכב ותחבורה",
+    "@budgetCategoryCar": {
+        "description": "Budget category: car and transport"
+    },
+    "budgetCategorySubscriptions": "מנויים",
+    "@budgetCategorySubscriptions": {
+        "description": "Budget category: streaming, apps and other subscriptions"
+    },
+    "budgetCategoryLoans": "הלוואות והתחייבויות",
+    "@budgetCategoryLoans": {
+        "description": "Budget category: loan repayments, rent or mortgage"
+    },
+    "budgetCategoryCommunications": "תקשורת",
+    "@budgetCategoryCommunications": {
+        "description": "Budget category: phone, internet and TV"
+    },
+    "budgetCategoryHealth": "בריאות וחינוך",
+    "@budgetCategoryHealth": {
+        "description": "Budget category: regular health and education payments"
+    },
+    "budgetCategoryOther": "אחר",
+    "@budgetCategoryOther": {
+        "description": "Budget category: recurring charges that fit nowhere else"
     }
 }

@@ -1198,4 +1198,180 @@ class SHe extends S {
 
   @override
   String get greetingEvening => 'ערב טוב';
+
+  @override
+  String get passwordEncryptorTitle => 'מצפין סיסמאות';
+
+  @override
+  String get passwordEncryptorIntro =>
+      'הצפן סיסמה חדשה של בנק או כרטיס בעזרת סיסמת המאסטר, ואז העתק את התוצאה לקובץ ההגדרות של המייבא ב-Home Assistant.';
+
+  @override
+  String get passwordEncryptorNewPasswordLabel => 'סיסמה חדשה';
+
+  @override
+  String get passwordEncryptorMasterPasswordLabel => 'סיסמת מאסטר';
+
+  @override
+  String get passwordEncryptorRememberMaster => 'זכור את סיסמת המאסטר';
+
+  @override
+  String get passwordEncryptorRememberMasterHelp =>
+      'נשמרת במכשיר הזה בלבד, מוגנת בנעילת המכשיר.';
+
+  @override
+  String get passwordEncryptorUnlockReason => 'פתח את סיסמת המאסטר השמורה';
+
+  @override
+  String get passwordEncryptorEncryptButton => 'הצפן';
+
+  @override
+  String get passwordEncryptorResultTitle => 'ערך מוצפן';
+
+  @override
+  String get passwordEncryptorResultHint =>
+      'העתק את כל הערך (כולל הקידומת encrypted:v1:) אל שדה הסיסמה המתאים בקובץ config.encrypted.yaml.';
+
+  @override
+  String get passwordEncryptorCopy => 'העתק';
+
+  @override
+  String get passwordEncryptorCopied => 'הועתק ללוח';
+
+  @override
+  String get passwordEncryptorErrorEmpty =>
+      'יש להזין גם סיסמה חדשה וגם סיסמת מאסטר.';
+
+  @override
+  String get passwordEncryptorErrorFailed => 'ההצפנה נכשלה. נסה שוב.';
+
+  @override
+  String get passwordEncryptorErrorNoDeviceLock =>
+      'יש להגדיר נעילת מסך (קוד, תבנית או ביומטריה) במכשיר כדי לשמור את סיסמת המאסטר.';
+
+  @override
+  String get passwordEncryptorErrorAuthFailed =>
+      'אימות המכשיר נכשל. סיסמת המאסטר לא נשמרה.';
+
+  @override
+  String get homeTabLabelBudget => 'תקציב';
+
+  @override
+  String get budgetIncomeLabel => 'הכנסה חודשית בסיסית';
+
+  @override
+  String budgetIncomeSubtitle(int months, int bonuses, String spread) {
+    String _temp0 = intl.Intl.pluralLogic(
+      bonuses,
+      locale: localeName,
+      other: '$bonuses תשלומים חריגים הוחרגו',
+      one: 'תשלום חריג אחד הוחרג',
+      zero: 'ללא תשלומים חריגים',
+    );
+    return '$months חודשים מלאים · $_temp0 · ±$spread';
+  }
+
+  @override
+  String budgetIncomeSheetSubtitle(int months) {
+    return 'מבוסס על המשכורת הקבועה ב-$months החודשים המלאים האחרונים. בונוסים ותשלומים חריגים לא נכללים.';
+  }
+
+  @override
+  String get budgetExcludedTitle => 'הוחרג כתשלום חריג';
+
+  @override
+  String get budgetExcludedNone =>
+      'לא הוחרג דבר — כל המשכורות נראו כתשלום רגיל.';
+
+  @override
+  String get budgetFixedExpensesTitle => 'הוצאות קבועות חודשיות';
+
+  @override
+  String get budgetNoFixedExpenses => 'לא נמצאו חיובים קבועים בטווח הנבדק.';
+
+  @override
+  String get budgetLeftToSpend => 'נשאר לתקציב';
+
+  @override
+  String budgetPercentOfIncome(String percent) {
+    return '$percent% מההכנסה';
+  }
+
+  @override
+  String budgetCategorySubtitle(int count, String percent) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count חיובים קבועים',
+      one: 'חיוב קבוע אחד',
+    );
+    return '$_temp0 · $percent% מההכנסה';
+  }
+
+  @override
+  String budgetChargeSeen(int seen, int total) {
+    return 'נצפה ב-$seen/$total חודשים';
+  }
+
+  @override
+  String get budgetRecalculate => 'חשב מחדש';
+
+  @override
+  String get budgetRecalculateTitle => 'ספר ל-AI מה לתקן';
+
+  @override
+  String get budgetRecalculateIncomeHint => 'התעלם מהבונוס של מרץ';
+
+  @override
+  String get budgetRecalculateCategoryHint =>
+      'ביטוח החיות הסתיים במאי, הסר אותו';
+
+  @override
+  String budgetSavedRules(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count כללים שמורים',
+      one: 'כלל שמור אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get budgetEmptyTitle => 'עדיין אין ניתוח תקציב';
+
+  @override
+  String budgetEmptyBody(int months) {
+    return 'מנתח את $months החודשים המלאים האחרונים של המשכורות וההוצאות כדי לחשב את ההכנסה הקבועה וההוצאות הקבועות.';
+  }
+
+  @override
+  String get budgetAnalyzeNow => 'נתח עכשיו';
+
+  @override
+  String get budgetErrorGeneric => 'ניתוח התקציב נכשל. נסה שוב.';
+
+  @override
+  String get budgetCategoryHousehold => 'משק בית';
+
+  @override
+  String get budgetCategoryInsurance => 'ביטוחים';
+
+  @override
+  String get budgetCategoryCar => 'רכב ותחבורה';
+
+  @override
+  String get budgetCategorySubscriptions => 'מנויים';
+
+  @override
+  String get budgetCategoryLoans => 'הלוואות והתחייבויות';
+
+  @override
+  String get budgetCategoryCommunications => 'תקשורת';
+
+  @override
+  String get budgetCategoryHealth => 'בריאות וחינוך';
+
+  @override
+  String get budgetCategoryOther => 'אחר';
 }

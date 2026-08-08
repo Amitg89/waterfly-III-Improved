@@ -6,6 +6,7 @@ import 'package:waterflyiii/auth.dart';
 import 'package:waterflyiii/generated/l10n/app_localizations.dart';
 import 'package:waterflyiii/pages/home.dart';
 import 'package:waterflyiii/pages/settings.dart';
+import 'package:waterflyiii/pages/settings/password_encryptor.dart';
 import 'package:waterflyiii/pages/transactions_page.dart';
 import 'package:waterflyiii/settings.dart';
 import 'package:waterflyiii/widgets/ai_bubble.dart';
@@ -206,6 +207,27 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
                   );
                 }),
                 const Divider(indent: 28, endIndent: 28),
+                ListTile(
+                  leading: const Icon(Icons.enhanced_encryption_outlined),
+                  title: Text(S.of(context).passwordEncryptorTitle),
+                  contentPadding: const EdgeInsetsDirectional.only(
+                    start: 28,
+                    end: 28,
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => Scaffold(
+                          appBar: AppBar(
+                            title: Text(S.of(context).passwordEncryptorTitle),
+                          ),
+                          body: const PasswordEncryptorPage(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
                 SwitchListTile(
                   secondary: const Icon(Icons.auto_awesome),
                   title: Text(S.of(context).settingsShowAiBubble),

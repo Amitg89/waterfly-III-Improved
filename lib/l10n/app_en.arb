@@ -1570,5 +1570,208 @@
     "greetingEvening": "Good evening",
     "@greetingEvening": {
         "description": "Greeting shown in the home app bar from 17:00 onwards"
+    },
+    "passwordEncryptorTitle": "Password Encryptor",
+    "@passwordEncryptorTitle": {
+        "description": "Drawer entry and title of the screen that encrypts a bank password for the importer config"
+    },
+    "passwordEncryptorIntro": "Encrypt a new bank or card password with your master password, then copy the result into the importer's config file on Home Assistant.",
+    "@passwordEncryptorIntro": {
+        "description": "Explanation shown at the top of the password encryptor screen"
+    },
+    "passwordEncryptorNewPasswordLabel": "New password",
+    "@passwordEncryptorNewPasswordLabel": {
+        "description": "Label of the field holding the plaintext password to encrypt"
+    },
+    "passwordEncryptorMasterPasswordLabel": "Master password",
+    "@passwordEncryptorMasterPasswordLabel": {
+        "description": "Label of the field holding the importer master password"
+    },
+    "passwordEncryptorRememberMaster": "Remember master password",
+    "@passwordEncryptorRememberMaster": {
+        "description": "Switch that stores the master password in secure storage behind the device lock"
+    },
+    "passwordEncryptorRememberMasterHelp": "Stored on this device only, protected by your device lock.",
+    "@passwordEncryptorRememberMasterHelp": {
+        "description": "Subtitle of the remember master password switch"
+    },
+    "passwordEncryptorUnlockReason": "Unlock your stored master password",
+    "@passwordEncryptorUnlockReason": {
+        "description": "Reason shown in the device biometric/PIN prompt for the master password"
+    },
+    "passwordEncryptorEncryptButton": "Encrypt",
+    "@passwordEncryptorEncryptButton": {
+        "description": "Button that performs the encryption"
+    },
+    "passwordEncryptorResultTitle": "Encrypted value",
+    "@passwordEncryptorResultTitle": {
+        "description": "Title of the card showing the encrypted result"
+    },
+    "passwordEncryptorResultHint": "Paste this whole value (including the encrypted:v1: prefix) over the matching password field in config.encrypted.yaml.",
+    "@passwordEncryptorResultHint": {
+        "description": "Hint below the encrypted result explaining where to paste it"
+    },
+    "passwordEncryptorCopy": "Copy",
+    "@passwordEncryptorCopy": {
+        "description": "Button that copies the encrypted value to the clipboard"
+    },
+    "passwordEncryptorCopied": "Copied to clipboard",
+    "@passwordEncryptorCopied": {
+        "description": "Snackbar shown after copying the encrypted value"
+    },
+    "passwordEncryptorErrorEmpty": "Enter both the new password and the master password.",
+    "@passwordEncryptorErrorEmpty": {
+        "description": "Error shown when one of the two fields is empty"
+    },
+    "passwordEncryptorErrorFailed": "Encryption failed. Please try again.",
+    "@passwordEncryptorErrorFailed": {
+        "description": "Error shown when encryption throws"
+    },
+    "passwordEncryptorErrorNoDeviceLock": "Set a screen lock (PIN, pattern or biometrics) on this device to save the master password.",
+    "@passwordEncryptorErrorNoDeviceLock": {
+        "description": "Error shown when the master password cannot be saved because the device has no lock configured"
+    },
+    "passwordEncryptorErrorAuthFailed": "Device authentication failed. The master password was not saved.",
+    "@passwordEncryptorErrorAuthFailed": {
+        "description": "Error shown when the device lock prompt fails for any other reason"
+    },
+    "homeTabLabelBudget": "Budget",
+    "@homeTabLabelBudget": {
+        "description": "Tab Label: Budget"
+    },
+    "budgetIncomeLabel": "Base monthly income",
+    "@budgetIncomeLabel": {
+        "description": "Label above the base income figure at the top of the Budget tab"
+    },
+    "budgetIncomeSubtitle": "{months} full months · {bonuses, plural, =0{no extra pay excluded} =1{1 extra payment excluded} other{{bonuses} extra payments excluded}} · ±{spread}",
+    "@budgetIncomeSubtitle": {
+        "description": "Caption under the base income showing the window, excluded one-off income and the spread",
+        "placeholders": {
+            "months": { "type": "int" },
+            "bonuses": { "type": "int" },
+            "spread": { "type": "String" }
+        }
+    },
+    "budgetIncomeSheetSubtitle": "Based on your regular salary over the last {months} complete months. Bonuses and extra pay are set aside.",
+    "@budgetIncomeSheetSubtitle": {
+        "description": "Explanation at the top of the income sheet",
+        "placeholders": { "months": { "type": "int" } }
+    },
+    "budgetExcludedTitle": "EXCLUDED AS EXTRA PAY",
+    "@budgetExcludedTitle": {
+        "description": "Header above the list of salary payments excluded from the baseline"
+    },
+    "budgetExcludedNone": "Nothing excluded — every salary payment looked like normal pay.",
+    "@budgetExcludedNone": {
+        "description": "Shown when no salary payment was flagged as extra"
+    },
+    "budgetFixedExpensesTitle": "Fixed monthly expenses",
+    "@budgetFixedExpensesTitle": {
+        "description": "Section header above the category progress bars"
+    },
+    "budgetNoFixedExpenses": "No recurring charges were found in the window.",
+    "@budgetNoFixedExpenses": {
+        "description": "Shown when the analysis found no recurring charges"
+    },
+    "budgetLeftToSpend": "Left to spend",
+    "@budgetLeftToSpend": {
+        "description": "Label for the remaining budget, in the donut centre and as its slice name"
+    },
+    "budgetPercentOfIncome": "{percent}% of income",
+    "@budgetPercentOfIncome": {
+        "description": "Caption under the remaining amount in the donut centre",
+        "placeholders": {
+            "percent": { "type": "String" }
+        }
+    },
+    "budgetCategorySubtitle": "{count, plural, =1{1 recurring charge} other{{count} recurring charges}} · {percent}% of income",
+    "@budgetCategorySubtitle": {
+        "description": "Caption under the category name in the detail sheet",
+        "placeholders": {
+            "count": { "type": "int" },
+            "percent": { "type": "String" }
+        }
+    },
+    "budgetChargeSeen": "seen {seen}/{total} months",
+    "@budgetChargeSeen": {
+        "description": "Confidence caption under each recurring charge",
+        "placeholders": {
+            "seen": { "type": "int" },
+            "total": { "type": "int" }
+        }
+    },
+    "budgetRecalculate": "Recalculate",
+    "@budgetRecalculate": {
+        "description": "Button that re-runs the AI analysis"
+    },
+    "budgetRecalculateTitle": "Tell the AI what to fix",
+    "@budgetRecalculateTitle": {
+        "description": "Label above the correction text field"
+    },
+    "budgetRecalculateIncomeHint": "Ignore the March bonus",
+    "@budgetRecalculateIncomeHint": {
+        "description": "Placeholder in the income correction field"
+    },
+    "budgetRecalculateCategoryHint": "Pet insurance ended in May, drop it",
+    "@budgetRecalculateCategoryHint": {
+        "description": "Placeholder in the category correction field"
+    },
+    "budgetSavedRules": "{count, plural, =1{1 saved rule} other{{count} saved rules}}",
+    "@budgetSavedRules": {
+        "description": "Count of standing corrections replayed into every analysis",
+        "placeholders": {
+            "count": { "type": "int" }
+        }
+    },
+    "budgetEmptyTitle": "No budget analysis yet",
+    "@budgetEmptyTitle": {
+        "description": "Title of the Budget tab empty state"
+    },
+    "budgetEmptyBody": "Analyses the last {months} complete months of salary and spending to work out your regular income and fixed costs.",
+    "@budgetEmptyBody": {
+        "description": "Body of the Budget tab empty state",
+        "placeholders": {
+            "months": { "type": "int" }
+        }
+    },
+    "budgetAnalyzeNow": "Analyze now",
+    "@budgetAnalyzeNow": {
+        "description": "Button in the empty state that starts the first analysis"
+    },
+    "budgetErrorGeneric": "The budget analysis failed. Please try again.",
+    "@budgetErrorGeneric": {
+        "description": "Fallback error when the analysis throws an unexpected error"
+    },
+    "budgetCategoryHousehold": "Household",
+    "@budgetCategoryHousehold": {
+        "description": "Budget category covering water, electricity, gas and municipal tax"
+    },
+    "budgetCategoryInsurance": "Insurance",
+    "@budgetCategoryInsurance": {
+        "description": "Budget category: insurance premiums"
+    },
+    "budgetCategoryCar": "Car and transport",
+    "@budgetCategoryCar": {
+        "description": "Budget category: car and transport"
+    },
+    "budgetCategorySubscriptions": "Subscriptions",
+    "@budgetCategorySubscriptions": {
+        "description": "Budget category: streaming, apps and other subscriptions"
+    },
+    "budgetCategoryLoans": "Loans and commitments",
+    "@budgetCategoryLoans": {
+        "description": "Budget category: loan repayments, rent or mortgage"
+    },
+    "budgetCategoryCommunications": "Communications",
+    "@budgetCategoryCommunications": {
+        "description": "Budget category: phone, internet and TV"
+    },
+    "budgetCategoryHealth": "Health and education",
+    "@budgetCategoryHealth": {
+        "description": "Budget category: regular health and education payments"
+    },
+    "budgetCategoryOther": "Other",
+    "@budgetCategoryOther": {
+        "description": "Budget category: recurring charges that fit nowhere else"
     }
 }
